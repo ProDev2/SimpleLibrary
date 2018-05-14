@@ -86,6 +86,14 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
+    public void clear() {
+        try {
+            list.clear();
+            notifyDataSetChanged();
+        } catch (Exception e) {
+        }
+    }
+
     public int getListSize() {
         return list.size();
     }
