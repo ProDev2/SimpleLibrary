@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="transparent">#00000000</color>
+	<color name="colorPrimary">#293243</color>
+    <color name="colorPrimaryDark">#292932</color>
+	<color name="colorAccent">#ffffff</color>
+	<color name="textColor">#ffffff</color>
+	<color name="toolbarTextColorPrimary">#ffffff</color>
+	<color name="toolbarTextColorSecondary">#ffffff</color>
+	
+	<color name="colorDefault">#ffffff</color>
+	<color name="colorHighlight">#E91E63</color>
+	
+	<color name="refresh_color">@color/colorPrimary</color>
+</resources>
+
