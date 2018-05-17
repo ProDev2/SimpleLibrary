@@ -65,6 +65,38 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
+    public V get(int pos) {
+        if (pos >= 0 && pos < list.size())
+            return list.get(pos);
+        else
+            return null;
+    }
+
+    public V getAtAdapterPos(int pos) {
+        if (pos >= 0 && pos < list.size())
+            return list.get(pos);
+        else
+            return null;
+    }
+
+    public int getItemPos(V value) {
+        return list.indexOf(value);
+    }
+
+    public void move(int posFrom, int posTo) {
+        try {
+            if (posFrom >= 0 && posTo >= 0 && posFrom < list.size() && posTo < list.size()) {
+                swapList(list, posFrom, posTo);
+                notifyItemMoved(posFrom, posTo);
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public boolean contains(V value) {
+        return list.contains(value);
+    }
+
     public void remove(V value) {
         try {
             if (list.contains(value)) {

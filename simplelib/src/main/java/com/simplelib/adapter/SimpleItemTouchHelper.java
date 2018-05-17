@@ -69,14 +69,17 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
         fetch();
 
-        if (adapter != null) {
-            try {
-                if (adapter.getList() != null && adapter.getListSize() > 0)
-                    adapter.swapList(adapter.getList(), viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        if (adapter == null) return true;
 
-                adapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-            } catch (Exception e) {
-            }
+        int from = adapter.getItemPos(adapter.getAtAdapterPos(viewHolder.getAdapterPosition()));
+        int to = adapter.getItemPos(adapter.getAtAdapterPos(target.getAdapterPosition()));
+
+        if (from < 0 || to < 0 || from >= adapter.getListSize() || to >= adapter.getListSize()) return true;
+
+        try {
+            if (adapter.getList() != null && adapter.getListSize() > 0)
+                adapter.move(from, to);
+        } catch (Exception e) {
         }
 
         onMoveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
@@ -87,13 +90,17 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         fetch();
 
-        onSwipeItem(viewHolder.getAdapterPosition(), direction);
+        if (adapter == null) return;
 
-        if (settings.deleteItemOnSwipe() && adapter != null) {
+        int pos = adapter.getItemPos(adapter.getAtAdapterPos(viewHolder.getAdapterPosition()));
+        if (pos < 0 || pos >= adapter.getListSize()) return;
+
+        onSwipeItem(pos, direction);
+
+        if (settings.deleteItemOnSwipe()) {
             try {
-                if (adapter.getList() != null && adapter.getListSize() > 0) {
-                    adapter.remove(viewHolder.getAdapterPosition());
-                }
+                if (adapter.getList() != null && adapter.getListSize() > 0)
+                    adapter.remove(pos);
             } catch (Exception e) {
             }
 

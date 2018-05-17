@@ -74,6 +74,51 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
+    public V get(int pos) {
+        if (pos >= 0 && pos < unfilteredList.size())
+            return unfilteredList.get(pos);
+        else
+            return null;
+    }
+
+    @Override
+    public V getAtAdapterPos(int pos) {
+        if (pos >= 0 && pos < filteredList.size())
+            return filteredList.get(pos);
+        else
+            return null;
+    }
+
+    @Override
+    public int getItemPos(V value) {
+        return unfilteredList.indexOf(value);
+    }
+
+    @Override
+    public void move(int posFrom, int posTo) {
+        try {
+            if (posFrom >= 0 && posTo >= 0 && posFrom < unfilteredList.size() && posTo < unfilteredList.size()) {
+                V valueFrom = unfilteredList.get(posFrom);
+                V valueTo = unfilteredList.get(posTo);
+
+                swapList(unfilteredList, posFrom, posTo);
+
+                int indexFrom = filteredList.indexOf(valueFrom);
+                int indexTo = filteredList.indexOf(valueTo);
+
+                if (indexFrom >= 0 && indexTo >= 0 && indexFrom < filteredList.size() && indexTo < filteredList.size())
+                    super.move(indexFrom, indexTo);
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public boolean contains(V value) {
+        return unfilteredList.contains(value);
+    }
+
+    @Override
     public void remove(int pos) {
         if (pos >= 0 && pos < unfilteredList.size())
             unfilteredList.remove(pos);
@@ -119,8 +164,10 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
             if (add && !filteredList.contains(item))
                 addItemToList(item);
-            else if (!add)
+            else if (!add && filteredList.contains(item))
                 removeItemFromList(item);
+            else if (filteredList.contains(item))
+                moveItemInList(item);
         }
 
         ArrayList<V> removeList = new ArrayList<>();
@@ -169,6 +216,30 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
                 super.remove(item);
         } catch (Exception e) {
             super.remove(item);
+        }
+    }
+
+    private void moveItemInList(V item) {
+        if (filteredList.contains(item)) {
+            V insertAfter = null;
+
+            boolean found = false;
+            for (V checkItem : unfilteredList) {
+                if (!found && filteredList.contains(checkItem) && !item.equals(checkItem))
+                    insertAfter = checkItem;
+                else if (!found && item.equals(checkItem))
+                    found = true;
+            }
+
+            try {
+                if (insertAfter == null)
+                    super.move(filteredList.indexOf(item), 0);
+                else if (insertAfter != null && filteredList.contains(insertAfter)) {
+                    int index = filteredList.indexOf(insertAfter) + 1;
+                    super.move(filteredList.indexOf(item), index);
+                }
+            } catch (Exception e) {
+            }
         }
     }
 
