@@ -7,10 +7,11 @@ import android.widget.TextView;
 import com.prodev.simple.R;
 import com.prodev.simple.container.Item;
 import com.simplelib.adapter.SimpleRecyclerAdapter;
+import com.simplelib.adapter.SimpleRecyclerFilterAdapter;
 
 import java.util.ArrayList;
 
-public class MainAdapter extends SimpleRecyclerAdapter<Item> {
+public class MainAdapter extends SimpleRecyclerFilterAdapter<Item> {
     public MainAdapter() {
     }
 
@@ -24,7 +25,7 @@ public class MainAdapter extends SimpleRecyclerAdapter<Item> {
     }
 
     @Override
-    public void bindHolder(ViewHolder holder, Item value, int pos) {
+    public void bindHolder(ViewHolder holder, final Item value, int pos) {
         ((TextView) holder.findViewById(R.id.main_item_text)).setText(value.getText());
     }
 }

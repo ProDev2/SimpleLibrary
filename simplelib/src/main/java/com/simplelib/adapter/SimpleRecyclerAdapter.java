@@ -32,7 +32,8 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     }
 
     public void setList(ArrayList<V> list) {
-        setList(list, true);
+        if (list != null)
+            this.list = list;
     }
 
     public void setList(ArrayList<V> list, boolean update) {
@@ -108,8 +109,16 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
 
     public void smoothScrollToPosition(int pos) {
         try {
-            if (recyclerView != null)
+            if (recyclerView != null && pos >= 0 && pos < list.size())
                 recyclerView.smoothScrollToPosition(pos);
+        } catch (Exception e) {
+        }
+    }
+
+    public void smoothScrollToPosition(V item) {
+        try {
+            if (recyclerView != null && list.contains(item))
+                recyclerView.smoothScrollToPosition(list.indexOf(item));
         } catch (Exception e) {
         }
     }
@@ -158,9 +167,10 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     @Override
     public void onBindViewHolder(SimpleRecyclerAdapter.ViewHolder holder, int position) {
         try {
-            bindHolder(holder, list.get(holder.getAdapterPosition()), position);
+            int posInList = holder.getAdapterPosition();
+            if (posInList >= 0 && posInList < list.size())
+                bindHolder(holder, list.get(posInList), position);
         } catch (Exception e) {
-            bindHolder(holder, null, position);
         }
     }
 
