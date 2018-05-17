@@ -125,6 +125,22 @@ simpleItemTouchHelper.getSettings().setDragFlags(SimpleSettings.DRAG);
 * Time tools
 * Simple popup menus
 
+## Installation
+Add this to your build.gradle:
+```
+allprojects {
+    repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Add the dependency:
+```
+implementation 'com.github.ProDev2:SimpleLibrary:-SNAPSHOT'
+```
+
 ## Details
 #License Copyright (C) by Pascal Gerner
 ```
