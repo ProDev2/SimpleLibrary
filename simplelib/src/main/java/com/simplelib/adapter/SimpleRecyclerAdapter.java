@@ -139,6 +139,14 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         return recyclerView;
     }
 
+    public void scrollUp() {
+        if (list.size() > 0) smoothScrollToPosition(0);
+    }
+
+    public void scrollDown() {
+        if (list.size() > 0) smoothScrollToPosition(list.size() - 1);
+    }
+
     public void smoothScrollToPosition(int pos) {
         try {
             if (recyclerView != null && pos >= 0 && pos < list.size())
