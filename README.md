@@ -61,10 +61,10 @@ public class TestAdapter extends SimpleRecyclerFilterAdapter<String> {
     }
     
     @Override
-    public SimpleFilter<Item> applyFilter() {
-        return new SimpleFilter<Item>() {
+    public SimpleFilter<String> applyFilter() {
+        return new SimpleFilter<String>() {
             @Override
-            public boolean filter(Item value) {
+            public boolean filter(String value) {
                 //Enable / disable list item by returning true or false
                 return false;
             }
