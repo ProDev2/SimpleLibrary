@@ -250,7 +250,8 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     public void setFilter(SimpleFilter<V> filter) {
         this.filter = filter;
-        this.filter.setAdapter(this);
+        if (this.filter != null)
+            this.filter.setAdapter(this);
         updateFilter();
     }
 }
