@@ -276,6 +276,30 @@ public class Vector4 {
         return inX && inY;
     }
 
+    public Vector4 getFullRect() {
+        if (getRotation() != 0) {
+            Vector2[] posList = new Vector2[] {
+                    getAbsolutePos(new Vector2(0, 0)),
+                    getAbsolutePos(new Vector2(getWidth(), 0)),
+                    getAbsolutePos(new Vector2(0, getHeight())),
+                    getAbsolutePos(new Vector2(getWidth(), getHeight()))
+            };
+
+            Vector2 outStart = getAbsolutePos(getCenter());
+            Vector2 outEnd = outStart.copy();
+            for (Vector2 pos : posList) {
+                outStart.setX(Math.min(outStart.getX(), pos.getX()));
+                outStart.setY(Math.min(outStart.getY(), pos.getY()));
+
+                outEnd.setX(Math.max(outEnd.getX(), pos.getX()));
+                outEnd.setY(Math.max(outEnd.getY(), pos.getY()));
+            }
+
+            return new Vector4(outStart, outEnd.subtract(outStart));
+        }
+        return copy();
+    }
+
     public Matrix getAsMatix() {
         Matrix matrix = new Matrix();
         matrix.reset();

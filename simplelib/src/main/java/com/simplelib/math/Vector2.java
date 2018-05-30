@@ -100,6 +100,18 @@ public class Vector2 {
         return this;
     }
 
+    public Vector2 moveTo(Vector2 pos) {
+        this.x = pos.getX();
+        this.y = pos.getY();
+        return this;
+    }
+
+    public Vector2 moveBy(Vector2 distance) {
+        this.x += distance.getX();
+        this.y += distance.getY();
+        return this;
+    }
+
     public Vector2 moveTo(float x, float y) {
         this.x = x;
         this.y = y;
