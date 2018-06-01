@@ -130,6 +130,22 @@ public class Line {
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
+    public Line setLength(float length) {
+        float oldLength = getLength();
+        float resizeBy = length / oldLength;
+
+        end.subtract(start);
+        end.multiply(new Vector2(resizeBy, resizeBy));
+        end.add(start);
+        return this;
+    }
+
+    public Line rotateBy(float angle) {
+        PointRotator pointRotator = new PointRotator(end, start);
+        pointRotator.rotate(angle).applyTo(end);
+        return this;
+    }
+
     public float getAngle() {
         return (float) Math.toDegrees(Math.atan2(getEndY() - getStartY(), getEndX() - getStartX()));
     }

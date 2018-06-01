@@ -35,13 +35,13 @@ public class TouchHelper implements View.OnTouchListener {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (!pressed) {
-                    pressed = true;
-                    onPress(view);
-                }
-
                 touchX = event.getX();
                 touchY = event.getY();
+
+                if (!pressed) {
+                    pressed = true;
+                    onPress(view, touchX, touchY);
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -53,7 +53,7 @@ public class TouchHelper implements View.OnTouchListener {
 
                 if (moveX >= maxMovementInDp || moveX <= -maxMovementInDp || moveY >= maxMovementInDp || moveY <= -maxMovementInDp) {
                     if (!moved)
-                        onStartMoving(view);
+                        onStartMoving(view, touchX, touchY);
                     moved = true;
                 }
 
@@ -63,14 +63,17 @@ public class TouchHelper implements View.OnTouchListener {
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                touchX = event.getX();
+                touchY = event.getY();
+
                 if (pressed) {
                     pressed = false;
-                    onRelease(view);
+                    onRelease(view, touchX, touchY);
 
                     if (moved)
-                        onStopMoving(view);
+                        onStopMoving(view, touchX, touchY);
                     else
-                        onClick(view, event.getX(), event.getY());
+                        onClick(view, touchX, touchY);
                     moved = false;
                 }
                 break;
@@ -78,16 +81,16 @@ public class TouchHelper implements View.OnTouchListener {
         return true;
     }
 
-    public void onPress(View view) {
+    public void onPress(View view, float x, float y) {
     }
 
-    public void onRelease(View view) {
+    public void onRelease(View view, float x, float y) {
     }
 
-    public void onStartMoving(View view) {
+    public void onStartMoving(View view, float x, float y) {
     }
 
-    public void onStopMoving(View view) {
+    public void onStopMoving(View view, float x, float y) {
     }
 
     public void onClick(View view, float x, float y) {
