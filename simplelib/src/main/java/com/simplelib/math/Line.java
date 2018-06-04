@@ -166,11 +166,11 @@ public class Line {
         double dY = (pos.getY() - getStartY()) * delta.getY();
         double relPos = (dX + dY) / (Math.pow(delta.getX(), 2) + Math.pow(delta.getY(), 2));
 
-        if (relPos < 0)
+        if (relPos < 0) {
             return start.copy();
-        else if (relPos > 1)
+        } else if (relPos > 1) {
             return end.copy();
-        else {
+        } else {
             float relPosX = delta.getX() * (float) relPos;
             float relPosY = delta.getY() * (float) relPos;
             return start.copy().add(new Vector2(relPosX, relPosY));
