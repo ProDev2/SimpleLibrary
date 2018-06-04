@@ -154,6 +154,29 @@ public class Line {
         return new Vector2((getStartX() + getEndX()) / 2, (getStartY() + getEndY()) / 2);
     }
 
+    public Vector2 getDelta() {
+        return end.copy().subtract(start);
+    }
+
+    public Vector2 closestPointTo(Vector2 pos) {
+        Vector2 delta = getDelta();
+        if (delta.getX() == 0 && delta.getY() == 0) return null;
+
+        double dX = (pos.getX() - getStartX()) * delta.getX();
+        double dY = (pos.getY() - getStartY()) * delta.getY();
+        double relPos = (dX + dY) / (Math.pow(delta.getX(), 2) + Math.pow(delta.getY(), 2));
+
+        if (relPos < 0)
+            return start.copy();
+        else if (relPos > 1)
+            return end.copy();
+        else {
+            float relPosX = delta.getX() * (float) relPos;
+            float relPosY = delta.getY() * (float) relPos;
+            return start.copy().add(new Vector2(relPosX, relPosY));
+        }
+    }
+
     public Vector2 intersectsAt(Line line) {
         if (!intersects(line)) return null;
 
