@@ -114,6 +114,20 @@ public class Line {
         return start.getY() == end.getY();
     }
 
+    public Line moveBy(float dX, float dY) {
+        start.moveBy(dX, dY);
+        end.moveBy(dX, dY);
+        return this;
+    }
+
+    public Line moveBy(Vector2 distance) {
+        if (distance != null) {
+            start.moveBy(distance);
+            end.moveBy(distance);
+        }
+        return this;
+    }
+
     public Line reverse() {
         Vector2 startTemp = start;
         Vector2 endTemp = end;
