@@ -227,12 +227,15 @@ public class Vector4 {
         return getCenter().getYAsInt();
     }
 
-    public void applyTo(Vector4 vector) {
-        vector.pos = pos.copy();
-        vector.size = size.copy();
+    public Vector4 applyTo(Vector4 vector) {
+        if (vector != null) {
+            vector.pos = pos.copy();
+            vector.size = size.copy();
 
-        vector.rotation = rotation;
-        vector.rotationPoint = rotationPoint.copy();
+            vector.rotation = rotation;
+            vector.rotationPoint = rotationPoint.copy();
+        }
+        return this;
     }
 
     public Vector4 copy() {

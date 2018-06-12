@@ -141,12 +141,11 @@ public class Line {
     public float getLength() {
         double dx = getStartX() - getEndX();
         double dy = getStartY() - getEndY();
-        return (float) Math.sqrt(dx * dx + dy * dy);
+        return (float) Math.sqrt((dx * dx) + (dy * dy));
     }
 
     public Line setLength(float length) {
-        float oldLength = getLength();
-        float resizeBy = length / oldLength;
+        float resizeBy = length / getLength();
 
         end.subtract(start);
         end.multiply(new Vector2(resizeBy, resizeBy));
@@ -160,8 +159,40 @@ public class Line {
         return this;
     }
 
+    public Line rotateTo(float angle) {
+        float rotBy = angle - getAngle();
+        if (rotBy != 0) rotateBy(rotBy);
+        return this;
+    }
+
     public float getAngle() {
         return (float) Math.toDegrees(Math.atan2(getEndY() - getStartY(), getEndX() - getStartX()));
+    }
+
+    public float getSmallestAngle(Line line) {
+        float angle1 = getAngle();
+        float angle2 = line.getAngle();
+
+        while (angle1 < angle2) angle1 += 360;
+        while (angle1 > angle2) angle1 -= 360;
+
+        float d1 = angle2 - angle1;
+        float d2 = angle1 + 360 - angle2;
+
+        return Math.min(d1, d2);
+    }
+
+    public float getLargestAngle(Line line) {
+        float angle1 = getAngle();
+        float angle2 = line.getAngle();
+
+        while (angle1 < angle2) angle1 += 360;
+        while (angle1 > angle2) angle1 -= 360;
+
+        float d1 = angle2 - angle1;
+        float d2 = angle1 + 360 - angle2;
+
+        return Math.max(d1, d2);
     }
 
     public Vector2 getCenter() {
