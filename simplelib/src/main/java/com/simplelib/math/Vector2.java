@@ -72,6 +72,18 @@ public class Vector2 {
         return Math.max(d1, d2);
     }
 
+    public Vector2 set(float x, float y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
+    public Vector2 set(int x, int y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
     public float getX() {
         return x;
     }

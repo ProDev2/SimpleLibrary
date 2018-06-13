@@ -53,4 +53,23 @@ public class MathTools {
     public static boolean isNegative(float n) {
         return n < 0;
     }
+
+    public static float increase(float value, float increase) {
+        if (value > 0)
+            value += increase;
+        else if (value < 0)
+            value -= increase;
+        return value;
+    }
+
+    public static float decrease(float value, float decrease) {
+        if (value > 0) {
+            value -= decrease;
+            if (value < 0) value = 0;
+        } else if (value < 0) {
+            value += decrease;
+            if (value > 0) value = 0;
+        }
+        return value;
+    }
 }

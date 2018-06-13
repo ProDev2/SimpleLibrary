@@ -203,6 +203,14 @@ public class Line {
         return end.copy().subtract(start);
     }
 
+    public Line closestLineFrom(Vector2 pos) {
+        return new Line(pos, closestPointTo(pos));
+    }
+
+    public Line closestLineTo(Vector2 pos) {
+        return new Line(closestPointTo(pos), pos);
+    }
+
     public Vector2 closestPointTo(Vector2 pos) {
         Vector2 delta = getDelta();
         if (delta.getX() == 0 && delta.getY() == 0) return null;
