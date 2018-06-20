@@ -165,37 +165,50 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         super.smoothScrollToPosition(item);
     }
 
-    public void update() {
-        notifyDataSetChanged();
-        updateFilter();
+    public void updateFilter() {
+        updateFilter(true);
     }
 
-    public void updateFilter() {
-        try {
+    public void updateFilter(boolean animate) {
+        if (animate) {
+            try {
+                for (V item : unfilteredList) {
+                    boolean add = true;
+                    if (filter != null) add = filter.filter(item);
+
+                    if (add && !filteredList.contains(item))
+                        addItemToList(item);
+                    else if (!add && filteredList.contains(item))
+                        removeItemFromList(item);
+                    else if (filteredList.contains(item))
+                        moveItemInList(item);
+                }
+            } catch (Exception e) {
+            }
+
+            try {
+                ArrayList<V> removeList = new ArrayList<>();
+                for (V item : filteredList) {
+                    if (!unfilteredList.contains(item))
+                        removeList.add(item);
+                }
+                for (V removeItem : removeList)
+                    super.remove(removeItem);
+                removeList.clear();
+            } catch (Exception e) {
+            }
+        } else {
+            filteredList.clear();
+
             for (V item : unfilteredList) {
                 boolean add = true;
                 if (filter != null) add = filter.filter(item);
 
-                if (add && !filteredList.contains(item))
-                    addItemToList(item);
-                else if (!add && filteredList.contains(item))
-                    removeItemFromList(item);
-                else if (filteredList.contains(item))
-                    moveItemInList(item);
+                if (add)
+                    filteredList.add(item);
             }
-        } catch (Exception e) {
-        }
 
-        try {
-            ArrayList<V> removeList = new ArrayList<>();
-            for (V item : filteredList) {
-                if (!unfilteredList.contains(item))
-                    removeList.add(item);
-            }
-            for (V removeItem : removeList)
-                super.remove(removeItem);
-            removeList.clear();
-        } catch (Exception e) {
+            notifyDataSetChanged();
         }
     }
 
