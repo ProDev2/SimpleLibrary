@@ -79,6 +79,10 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
             return null;
     }
 
+    public int getAdapterItemPos(V value) {
+        return list.indexOf(value);
+    }
+
     public int getItemPos(V value) {
         return list.indexOf(value);
     }

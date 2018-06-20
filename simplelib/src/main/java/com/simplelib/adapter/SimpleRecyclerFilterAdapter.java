@@ -90,6 +90,14 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
+    public int getAdapterItemPos(V value) {
+        if (filteredList.contains(value))
+            return filteredList.indexOf(value);
+        else
+            return -1;
+    }
+
+    @Override
     public int getItemPos(V value) {
         return unfilteredList.indexOf(value);
     }
@@ -157,27 +165,38 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         super.smoothScrollToPosition(item);
     }
 
+    public void update() {
+        notifyDataSetChanged();
+        updateFilter();
+    }
+
     public void updateFilter() {
-        for (V item : unfilteredList) {
-            boolean add = true;
-            if (filter != null) add = filter.filter(item);
+        try {
+            for (V item : unfilteredList) {
+                boolean add = true;
+                if (filter != null) add = filter.filter(item);
 
-            if (add && !filteredList.contains(item))
-                addItemToList(item);
-            else if (!add && filteredList.contains(item))
-                removeItemFromList(item);
-            else if (filteredList.contains(item))
-                moveItemInList(item);
+                if (add && !filteredList.contains(item))
+                    addItemToList(item);
+                else if (!add && filteredList.contains(item))
+                    removeItemFromList(item);
+                else if (filteredList.contains(item))
+                    moveItemInList(item);
+            }
+        } catch (Exception e) {
         }
 
-        ArrayList<V> removeList = new ArrayList<>();
-        for (V item : filteredList) {
-            if (!unfilteredList.contains(item))
-                removeList.add(item);
+        try {
+            ArrayList<V> removeList = new ArrayList<>();
+            for (V item : filteredList) {
+                if (!unfilteredList.contains(item))
+                    removeList.add(item);
+            }
+            for (V removeItem : removeList)
+                super.remove(removeItem);
+            removeList.clear();
+        } catch (Exception e) {
         }
-        for (V removeItem : removeList)
-            super.remove(removeItem);
-        removeList.clear();
     }
 
     private void addItemToList(V item) {
