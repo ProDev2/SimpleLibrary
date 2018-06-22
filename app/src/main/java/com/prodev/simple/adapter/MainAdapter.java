@@ -6,7 +6,6 @@ import android.widget.TextView;
 
 import com.prodev.simple.R;
 import com.prodev.simple.container.Item;
-import com.simplelib.adapter.SimpleRecyclerAdapter;
 import com.simplelib.adapter.SimpleRecyclerFilterAdapter;
 
 import java.util.ArrayList;

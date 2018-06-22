@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -164,6 +165,20 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
             if (recyclerView != null && list.contains(item))
                 recyclerView.smoothScrollToPosition(list.indexOf(item));
         } catch (Exception e) {
+        }
+    }
+
+    public void runAfterUpdate(final Runnable runnable) {
+        try {
+            recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    runnable.run();
+                }
+            });
+        } catch (Exception e) {
+            runnable.run();
         }
     }
 

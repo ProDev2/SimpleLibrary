@@ -146,6 +146,18 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         updateFilter();
     }
 
+    public void reload() {
+        filteredList.clear();
+        notifyDataSetChanged();
+
+        runAfterUpdate(new Runnable() {
+            @Override
+            public void run() {
+                updateFilter();
+            }
+        });
+    }
+
     @Override
     public int getListSize() {
         return unfilteredList.size();
@@ -199,6 +211,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
             }
         } else {
             filteredList.clear();
+            notifyDataSetChanged();
 
             for (V item : unfilteredList) {
                 boolean add = true;
