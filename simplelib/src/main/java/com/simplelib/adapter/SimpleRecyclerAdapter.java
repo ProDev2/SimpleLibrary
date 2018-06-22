@@ -136,6 +136,10 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         return list.size();
     }
 
+    public void reload() {
+        notifyDataSetChanged();
+    }
+
     public Context getContext() {
         return context;
     }

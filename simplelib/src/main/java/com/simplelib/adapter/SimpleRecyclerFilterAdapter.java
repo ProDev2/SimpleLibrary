@@ -146,6 +146,12 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         updateFilter();
     }
 
+    @Override
+    public int getListSize() {
+        return unfilteredList.size();
+    }
+
+    @Override
     public void reload() {
         filteredList.clear();
         notifyDataSetChanged();
@@ -153,14 +159,9 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         runAfterUpdate(new Runnable() {
             @Override
             public void run() {
-                updateFilter();
+                updateFilter(false);
             }
         });
-    }
-
-    @Override
-    public int getListSize() {
-        return unfilteredList.size();
     }
 
     @Override
