@@ -11,9 +11,19 @@ import android.view.View;
 import java.util.List;
 
 public class SimpleActivity extends AppCompatActivity {
+    private boolean sendBackEvent;
+
+    public SimpleActivity() {
+        this.sendBackEvent = true;
+    }
+
+    public void setSendBackEvent(boolean sendBackEvent) {
+        this.sendBackEvent = sendBackEvent;
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && sendBackEvent) {
             try {
                 Fragment fragment = getVisibleFragment();
                 if (fragment instanceof SimpleFragment) {
