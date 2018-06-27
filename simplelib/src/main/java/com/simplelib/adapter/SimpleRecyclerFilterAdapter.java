@@ -153,15 +153,18 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     @Override
     public void reload() {
-        filteredList.clear();
-        notifyDataSetChanged();
+        try {
+            filteredList.clear();
+            notifyDataSetChanged();
 
-        runAfterUpdate(new Runnable() {
-            @Override
-            public void run() {
-                updateFilter(false);
-            }
-        });
+            runAfterUpdate(new Runnable() {
+                @Override
+                public void run() {
+                    updateFilter(false);
+                }
+            });
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -211,18 +214,21 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
             } catch (Exception e) {
             }
         } else {
-            filteredList.clear();
-            notifyDataSetChanged();
+            try {
+                filteredList.clear();
+                notifyDataSetChanged();
 
-            for (V item : unfilteredList) {
-                boolean add = true;
-                if (filter != null) add = filter.filter(item);
+                for (V item : unfilteredList) {
+                    boolean add = true;
+                    if (filter != null) add = filter.filter(item);
 
-                if (add)
-                    filteredList.add(item);
+                    if (add)
+                        filteredList.add(item);
+                }
+
+                notifyDataSetChanged();
+            } catch (Exception e) {
             }
-
-            notifyDataSetChanged();
         }
     }
 
