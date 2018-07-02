@@ -111,6 +111,26 @@ public class ImageTools {
         return output;
     }
 
+    private static Bitmap createImage(int width, int height, int color, Paint textPaint, String text) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(color);
+
+        Rect rect = new Rect();
+        canvas.getClipBounds(rect);
+        int cHeight = rect.height();
+        int cWidth = rect.width();
+
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        textPaint.getTextBounds(text, 0, text.length(), rect);
+
+        float x = cWidth / 2f - rect.width() / 2f - rect.left;
+        float y = cHeight / 2f + rect.height() / 2f - rect.bottom;
+        canvas.drawText(text, x, y, textPaint);
+
+        return bitmap;
+    }
+
     public static Bitmap addRoundBackground(Bitmap bitmap, int color, int borderWidth) {
         bitmap = cropBitmap(bitmap);
 

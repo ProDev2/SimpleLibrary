@@ -3,33 +3,12 @@ package com.simplelib.container;
 import android.graphics.Bitmap;
 
 public class SimpleMenuItem {
-    private String text;
-    private Bitmap image;
-
-    private Runnable onClickListener;
-
-    public SimpleMenuItem(String text) {
-        this.text = text;
-    }
-
-    public SimpleMenuItem(String text, Bitmap image) {
-        this.text = text;
-        this.image = image;
-    }
-
-    public SimpleMenuItem(String text, Runnable onClickListener) {
-        this.text = text;
-        this.onClickListener = onClickListener;
-    }
-
-    public SimpleMenuItem(String text, Bitmap image, Runnable onClickListener) {
-        this.text = text;
-        this.image = image;
-        this.onClickListener = onClickListener;
-    }
-
     public static SimpleMenuItem create(String text) {
         return new SimpleMenuItem(text);
+    }
+
+    public static SimpleMenuItem create(String text, int imageId) {
+        return new SimpleMenuItem(text, imageId);
     }
 
     public static SimpleMenuItem create(String text, Bitmap image) {
@@ -40,8 +19,52 @@ public class SimpleMenuItem {
         return new SimpleMenuItem(text, onClickListener);
     }
 
+    public static SimpleMenuItem create(String text, int imageId, Runnable onClickListener) {
+        return new SimpleMenuItem(text, imageId, onClickListener);
+    }
+
     public static SimpleMenuItem create(String text, Bitmap image, Runnable onClickListener) {
         return new SimpleMenuItem(text, image, onClickListener);
+    }
+
+    private String text;
+
+    private int imageId;
+    private Bitmap image;
+
+    private Runnable onClickListener;
+
+    public SimpleMenuItem(String text) {
+        this.text = text;
+    }
+
+    public SimpleMenuItem(String text, int imageId) {
+        this.text = text;
+        this.imageId = imageId;
+    }
+
+    public SimpleMenuItem(String text, Bitmap image) {
+        this.text = text;
+        this.imageId = -1;
+        this.image = image;
+    }
+
+    public SimpleMenuItem(String text, Runnable onClickListener) {
+        this.text = text;
+        this.onClickListener = onClickListener;
+    }
+
+    public SimpleMenuItem(String text, int imageId, Runnable onClickListener) {
+        this.text = text;
+        this.imageId = imageId;
+        this.onClickListener = onClickListener;
+    }
+
+    public SimpleMenuItem(String text, Bitmap image, Runnable onClickListener) {
+        this.text = text;
+        this.imageId = -1;
+        this.image = image;
+        this.onClickListener = onClickListener;
     }
 
     public String getText() {
@@ -53,8 +76,21 @@ public class SimpleMenuItem {
         return this;
     }
 
+    public boolean hasImageId() {
+        return imageId != -1;
+    }
+
     public boolean hasImage() {
         return image != null;
+    }
+
+    public int getImageId() {
+        return imageId;
+    }
+
+    public SimpleMenuItem setImageId(int imageId) {
+        this.imageId = imageId;
+        return this;
     }
 
     public Bitmap getImage() {
