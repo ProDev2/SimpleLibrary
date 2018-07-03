@@ -8,23 +8,6 @@ import java.util.ArrayList;
 public class ImageLoader {
     private static final int DEFAULT_CAPACITY = 100;
 
-    //Statics
-    private static ImageLoader loader;
-    //Loader
-    private ArrayList<Loader> loaderList;
-    private ArrayList<ImageRequest> imageList;
-    private int capacity;
-
-    public ImageLoader() {
-        this.loaderList = new ArrayList<>();
-
-        this.imageList = new ArrayList<>();
-        this.capacity = DEFAULT_CAPACITY;
-
-        if (loader == null)
-            loader = this;
-    }
-
     public static void init() {
         if (loader == null)
             loader = new ImageLoader();
@@ -45,6 +28,24 @@ public class ImageLoader {
         loader.request(requests);
     }
 
+    //Statics
+    private static ImageLoader loader;
+
+    //Loader
+    private ArrayList<Loader> loaderList;
+    private ArrayList<ImageRequest> imageList;
+    private int capacity;
+
+    public ImageLoader() {
+        this.loaderList = new ArrayList<>();
+
+        this.imageList = new ArrayList<>();
+        this.capacity = DEFAULT_CAPACITY;
+
+        if (loader == null)
+            loader = this;
+    }
+
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
@@ -62,10 +63,9 @@ public class ImageLoader {
                 if (request == null)
                     continue;
                 try {
-                    boolean filled = fillRequest(request);
-                    if (filled)
+                    if (fillRequest(request))
                         request.onFinish(request.image);
-                    else
+                    else if (!mergeRequest(request))
                         requestList.add(request);
                 } catch (Exception e) {
                 }
@@ -89,6 +89,18 @@ public class ImageLoader {
                         return true;
                     }
                 }
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean mergeRequest(ImageRequest request) {
+        try {
+            if (request != null) {
+                for (Loader loader : loaderList)
+                    if (loader.addMergeRequest(request))
+                        return true;
             }
         } catch (Exception e) {
         }
@@ -206,12 +218,23 @@ public class ImageLoader {
             return false;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ImageRequest)
+                return isEqualRequest((ImageRequest) obj);
+            return false;
+        }
+
         public String getId() {
             return id;
         }
 
         public boolean hasId() {
             return id != null;
+        }
+
+        public boolean isId(String id) {
+            return this.id.equals(id);
         }
 
         public int getResultCode() {
@@ -241,6 +264,7 @@ public class ImageLoader {
 
     private class Loader extends AsyncTask<Void, Void, Bitmap> {
         private ArrayList<ImageRequest> requests;
+        private ArrayList<ImageRequest> mergeRequests;
 
         public Loader(ArrayList<ImageRequest> requests) {
             if (loaderList != null)
@@ -250,6 +274,7 @@ public class ImageLoader {
                 this.requests = requests;
             else
                 this.requests = new ArrayList<>();
+            this.mergeRequests = new ArrayList<>();
         }
 
         public void start() {
@@ -269,6 +294,36 @@ public class ImageLoader {
                     cancel(true);
             } catch (Exception e) {
             }
+            dispatch();
+        }
+
+        public boolean hasRequest(String id) {
+            try {
+                for (ImageRequest imageRequest : requests)
+                    if (imageRequest.isId(id))
+                        return true;
+            } catch (Exception e) {
+            }
+            return false;
+        }
+
+        public ImageRequest getRequest(String id) {
+            try {
+                for (ImageRequest imageRequest : requests)
+                    if (imageRequest.isId(id))
+                        return imageRequest;
+            } catch (Exception e) {
+            }
+            return null;
+        }
+
+        public boolean addMergeRequest(ImageRequest mergeRequest) {
+            try {
+                if (mergeRequest != null && hasRequest(mergeRequest.id) && !mergeRequests.contains(mergeRequest))
+                    mergeRequests.add(mergeRequest);
+            } catch (Exception e) {
+            }
+            return false;
         }
 
         @Override
@@ -314,6 +369,37 @@ public class ImageLoader {
                     request.onFinish(request.image);
                 } catch (Exception e) {
                 }
+            }
+
+            for (ImageRequest mergeRequest : mergeRequests) {
+                try {
+                    ImageRequest request = getRequest(mergeRequest.id);
+                    if (request != null)
+                        request.applyTo(mergeRequest);
+                    mergeRequest.onFinish(mergeRequest.image);
+                } catch (Exception e) {
+                }
+            }
+            dispatch();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            dispatch();
+        }
+
+        @Override
+        protected void onCancelled(Bitmap bitmap) {
+            super.onCancelled(bitmap);
+            dispatch();
+        }
+
+        public void dispatch() {
+            try {
+                requests.clear();
+                mergeRequests.clear();
+            } catch (Exception e) {
             }
         }
     }
