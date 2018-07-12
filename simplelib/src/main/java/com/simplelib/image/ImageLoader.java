@@ -8,6 +8,9 @@ import java.util.ArrayList;
 public class ImageLoader {
     private static final int DEFAULT_CAPACITY = 100;
 
+    //Statics
+    private static ImageLoader loader;
+
     public static void init() {
         if (loader == null)
             loader = new ImageLoader();
@@ -28,9 +31,6 @@ public class ImageLoader {
         loader.request(requests);
     }
 
-    //Statics
-    private static ImageLoader loader;
-
     //Loader
     private ArrayList<Loader> loaderList;
     private ArrayList<ImageRequest> imageList;
@@ -41,9 +41,6 @@ public class ImageLoader {
 
         this.imageList = new ArrayList<>();
         this.capacity = DEFAULT_CAPACITY;
-
-        if (loader == null)
-            loader = this;
     }
 
     public void setCapacity(int capacity) {
@@ -173,7 +170,6 @@ public class ImageLoader {
     public void dispatch() {
         stopAll();
         clearAll();
-        loader = null;
     }
 
     public static abstract class ImageRequest {
