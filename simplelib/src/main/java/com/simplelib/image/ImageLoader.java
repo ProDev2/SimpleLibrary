@@ -109,8 +109,14 @@ public class ImageLoader {
     }
 
     public void removeRequest(ImageRequest request) {
-        if (request != null && imageList.contains(request))
-            imageList.remove(request);
+        try {
+            if (request != null && imageList.contains(request)) {
+                imageList.remove(request);
+                if (request.hasImage())
+                    request.image.recycle();
+            }
+        } catch (Exception e) {
+        }
     }
 
     public ImageRequest findRequestById(String id) {
