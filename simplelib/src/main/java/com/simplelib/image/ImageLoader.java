@@ -60,9 +60,9 @@ public class ImageLoader {
                 if (request == null)
                     continue;
                 try {
-                    if (fillRequest(request))
+                    if (fillRequest(request) && request.hasImage())
                         request.onFinish(request.image);
-                    else if (!mergeRequest(request))
+                    else if (!mergeRequest(request) || !request.hasImage())
                         requestList.add(request);
                 } catch (Exception e) {
                 }
@@ -102,6 +102,15 @@ public class ImageLoader {
         } catch (Exception e) {
         }
         return false;
+    }
+
+    public void removeRequest(String id) {
+        removeRequest(findRequestById(id));
+    }
+
+    public void removeRequest(ImageRequest request) {
+        if (request != null && imageList.contains(request))
+            imageList.remove(request);
     }
 
     public ImageRequest findRequestById(String id) {
