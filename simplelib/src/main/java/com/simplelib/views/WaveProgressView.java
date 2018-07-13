@@ -152,6 +152,7 @@ public class WaveProgressView extends View implements Runnable {
 
         try {
             waveImage.recycle();
+            waveImage = null;
         } catch (Exception e) {
         }
     }
@@ -298,7 +299,7 @@ public class WaveProgressView extends View implements Runnable {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        if (!(waveImage != null && waveCanvas != null && waveImage.getWidth() == width && waveImage.getHeight() == height)) {
+        if (!(waveImage != null && !waveImage.isRecycled() && waveCanvas != null && waveImage.getWidth() == width && waveImage.getHeight() == height)) {
             if (waveImage != null)
                 waveImage.recycle();
 
