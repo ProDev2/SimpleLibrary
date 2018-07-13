@@ -21,7 +21,7 @@ import android.view.View;
 
 public class WaveProgressView extends View implements Runnable {
     //Constants
-    private static final int DEFAULT_UPDATE_RATE = 10;
+    private static final int DEFAULT_FPS = 30;
 
     private static final float DEFAULT_WAVE_WIDTH_DP = 100f;
     private static final float DEFAULT_WAVE_HEIGHT_DP = 20f;
@@ -99,7 +99,7 @@ public class WaveProgressView extends View implements Runnable {
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         //Setup values
-        setUpdateRate(DEFAULT_UPDATE_RATE);
+        setFps(DEFAULT_FPS);
 
         setWaveSizeInDp(DEFAULT_WAVE_WIDTH_DP, DEFAULT_WAVE_HEIGHT_DP);
         setWaveSpeedInDp(DEFAULT_WAVE_SPEED_DP);
@@ -149,6 +149,11 @@ public class WaveProgressView extends View implements Runnable {
                 handler.removeCallbacks(this);
         } catch (Exception e) {
         }
+
+        try {
+            waveImage.recycle();
+        } catch (Exception e) {
+        }
     }
 
     public boolean isRunning() {
@@ -182,6 +187,10 @@ public class WaveProgressView extends View implements Runnable {
 
     public void setUpdateRate(int updateRate) {
         this.updateRate = updateRate;
+    }
+
+    public void setFps(int fps) {
+        this.updateRate = 1000 / fps;
     }
 
     public void setWaveSize(float waveWidth, float waveHeight) {
@@ -252,33 +261,36 @@ public class WaveProgressView extends View implements Runnable {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (image != null) {
-            int width = canvas.getWidth();
-            int height = canvas.getHeight();
+        try {
+            if (image != null) {
+                int width = canvas.getWidth();
+                int height = canvas.getHeight();
 
-            int imgWidth = image.getWidth();
-            int imgHeight = image.getHeight();
+                int imgWidth = image.getWidth();
+                int imgHeight = image.getHeight();
 
-            int oversize = getOversize(width, height, imgWidth, imgHeight);
-            imgWidth -= oversize;
-            imgHeight -= oversize;
+                int oversize = getOversize(width, height, imgWidth, imgHeight);
+                imgWidth -= oversize;
+                imgHeight -= oversize;
 
-            if (image.getWidth() != imgWidth && image.getHeight() != imgHeight) {
-                Bitmap previousImage = image;
-                image = Bitmap.createScaledBitmap(image, imgWidth, imgHeight, false);
+                if (image.getWidth() != imgWidth && image.getHeight() != imgHeight) {
+                    Bitmap previousImage = image;
+                    image = Bitmap.createScaledBitmap(image, imgWidth, imgHeight, false);
 
-                try {
-                    if (previousImage != null && image != null)
-                        previousImage.recycle();
-                } catch (Exception e) {
+                    try {
+                        if (previousImage != null && image != null)
+                            previousImage.recycle();
+                    } catch (Exception e) {
+                    }
                 }
+
+                Bitmap progressImage = createImage(image);
+
+                int imgPosX = (width / 2) - (image.getWidth() / 2);
+                int imgPosY = (height / 2) - (image.getHeight() / 2);
+                canvas.drawBitmap(progressImage, imgPosX, imgPosY, null);
             }
-
-            Bitmap progressImage = createImage(image);
-
-            int imgPosX = (width / 2) - (image.getWidth() / 2);
-            int imgPosY = (height / 2) - (image.getHeight() / 2);
-            canvas.drawBitmap(progressImage, imgPosX, imgPosY, null);
+        } catch (Exception e) {
         }
     }
 
