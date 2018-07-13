@@ -36,7 +36,7 @@ public class WaveProgressView extends View implements Runnable {
     private static final float DEFAULT_ANIMATION_SPEED = 0.2f;
 
     private static final int DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
-    private static final int DEFAULT_TEXT_SIZE = 41;
+    private static final int DEFAULT_TEXT_SIZE_SP = 20;
 
     //Values
     private Bitmap image;
@@ -116,7 +116,7 @@ public class WaveProgressView extends View implements Runnable {
         setPosAnimSpeed(DEFAULT_ANIMATION_SPEED);
 
         setTextColor(DEFAULT_TEXT_COLOR);
-        setTextSizeInSp(DEFAULT_TEXT_SIZE);
+        setTextSizeInSp(DEFAULT_TEXT_SIZE_SP);
     }
 
     public void start() {
