@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -248,6 +249,10 @@ public class WaveProgressView extends View implements Runnable {
             textPaint.setTextSize(spToPx(textSizeSp));
     }
 
+    public Paint getTextPaint() {
+        return textPaint;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -296,6 +301,7 @@ public class WaveProgressView extends View implements Runnable {
     }
 
     private Bitmap createImage(Bitmap image) {
+        //Draw waves
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -334,14 +340,27 @@ public class WaveProgressView extends View implements Runnable {
         wavePath.close();
         waveCanvas.drawPath(wavePath, wavePaint);
 
+        //Draw image
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
 
         waveCanvas.drawBitmap(image, 0, 0, paint);
 
-        if (text != null && text.length() > 0)
-            waveCanvas.drawText(text, width / 2, height / 2, textPaint);
+        //Draw text
+        if (text != null && text.length() > 0) {
+            Rect rect = new Rect();
+            waveCanvas.getClipBounds(rect);
+            int cHeight = rect.height();
+            int cWidth = rect.width();
+
+            textPaint.setTextAlign(Paint.Align.LEFT);
+            textPaint.getTextBounds(text, 0, text.length(), rect);
+
+            float x = cWidth / 2f - rect.width() / 2f - rect.left;
+            float y = cHeight / 2f + rect.height() / 2f - rect.bottom;
+            waveCanvas.drawText(text, x, y, textPaint);
+        }
 
         return waveImage;
     }
