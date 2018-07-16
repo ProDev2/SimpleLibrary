@@ -54,11 +54,67 @@ public class ImageTools {
         return output;
     }
 
-    public static Bitmap resizedBitmapInDp(Bitmap bitmap, int newWidthDp, int newHeightDp) {
-        return resizedBitmap(bitmap, dpToPx(newWidthDp), dpToPx(newHeightDp));
+    public static Bitmap getBitmap(Drawable drawable) {
+        if (drawable != null) {
+            if (drawable instanceof BitmapDrawable)
+                return ((BitmapDrawable) drawable).getBitmap();
+
+            try {
+                Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+
+                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                drawable.draw(canvas);
+
+                return bitmap;
+            } catch (Exception e) {
+            }
+        }
+        return null;
     }
 
-    public static Bitmap resizedBitmap(Bitmap bitmap, int newWidth, int newHeight) {
+    public static Bitmap getBitmap(Drawable drawable, int reqWidth, int reqHeight) {
+        return getBitmap(drawable, reqWidth, reqHeight, true);
+    }
+
+    public static Bitmap getBitmap(Drawable drawable, int reqWidth, int reqHeight, boolean filter) {
+        return fitImageIn(getBitmap(drawable), reqWidth, reqHeight, filter);
+    }
+
+    public static Bitmap fitImageIn(Bitmap image, int reqWidth, int reqHeight) {
+        return fitImageIn(image, reqWidth, reqHeight, true);
+    }
+
+    public static Bitmap fitImageIn(Bitmap image, int reqWidth, int reqHeight, boolean filter) {
+        if (image != null) {
+            int oversize = getOversize(image, reqWidth, reqHeight);
+            int width = image.getWidth() - oversize;
+            int height = image.getHeight() - oversize;
+
+            if (width > 0 && height > 0)
+                return Bitmap.createScaledBitmap(image, width, height, filter);
+        }
+        return image;
+    }
+
+    public static int getOversize(Bitmap image, int widthTo, int heightTo) {
+        if (image != null)
+            return getOversize(image.getWidth(), image.getHeight(), widthTo, heightTo);
+        return 0;
+    }
+
+    public static int getOversize(int width, int height, int widthTo, int heightTo) {
+        int oversizeX = widthTo - width;
+        int oversizeY = heightTo - height;
+
+        return Math.max(oversizeX, oversizeY);
+    }
+
+    public static Bitmap resizeBitmapInDp(Bitmap bitmap, int newWidthDp, int newHeightDp) {
+        return resizeBitmap(bitmap, dpToPx(newWidthDp), dpToPx(newHeightDp));
+    }
+
+    public static Bitmap resizeBitmap(Bitmap bitmap, int newWidth, int newHeight) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         float scaleWidth = ((float) newWidth) / width;
