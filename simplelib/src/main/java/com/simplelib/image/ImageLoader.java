@@ -156,30 +156,36 @@ public class ImageLoader {
     }
 
     public void stopAll() {
-        ArrayList<Loader> stopList = new ArrayList<>();
-        stopList.addAll(loaderList);
-        for (Loader loader : stopList) {
-            try {
-                loader.stop();
-            } catch (Exception e) {
+        try {
+            ArrayList<Loader> stopList = new ArrayList<>();
+            stopList.addAll(loaderList);
+            for (Loader loader : stopList) {
+                try {
+                    loader.stop();
+                } catch (Exception e) {
+                }
             }
+            stopList.clear();
+            loaderList.clear();
+        } catch (Exception e) {
         }
-        stopList.clear();
-        loaderList.clear();
     }
 
     public void clearAll() {
-        ArrayList<ImageRequest> clearList = new ArrayList<>();
-        clearList.addAll(imageList);
-        for (ImageRequest request : clearList) {
-            try {
-                if (request.hasImage())
-                    request.image.recycle();
-            } catch (Exception e) {
+        try {
+            ArrayList<ImageRequest> clearList = new ArrayList<>();
+            clearList.addAll(imageList);
+            for (ImageRequest request : clearList) {
+                try {
+                    if (request.hasImage())
+                        request.image.recycle();
+                } catch (Exception e) {
+                }
             }
+            clearList.clear();
+            imageList.clear();
+        } catch (Exception e) {
         }
-        clearList.clear();
-        imageList.clear();
     }
 
     public void dispatch() {
