@@ -2,6 +2,8 @@ package com.simplelib.container;
 
 import android.graphics.Bitmap;
 
+import java.util.HashMap;
+
 public class SimpleMenuItem {
     public static SimpleMenuItem create(String text) {
         return new SimpleMenuItem(text);
@@ -34,30 +36,37 @@ public class SimpleMenuItem {
 
     private Runnable onClickListener;
 
+    private HashMap<String, Object> args;
+
     public SimpleMenuItem(String text) {
         this.text = text;
+        init();
     }
 
     public SimpleMenuItem(String text, int imageId) {
         this.text = text;
         this.imageId = imageId;
+        init();
     }
 
     public SimpleMenuItem(String text, Bitmap image) {
         this.text = text;
         this.imageId = -1;
         this.image = image;
+        init();
     }
 
     public SimpleMenuItem(String text, Runnable onClickListener) {
         this.text = text;
         this.onClickListener = onClickListener;
+        init();
     }
 
     public SimpleMenuItem(String text, int imageId, Runnable onClickListener) {
         this.text = text;
         this.imageId = imageId;
         this.onClickListener = onClickListener;
+        init();
     }
 
     public SimpleMenuItem(String text, Bitmap image, Runnable onClickListener) {
@@ -65,6 +74,11 @@ public class SimpleMenuItem {
         this.imageId = -1;
         this.image = image;
         this.onClickListener = onClickListener;
+        init();
+    }
+
+    private void init() {
+        this.args = new HashMap<>();
     }
 
     public String getText() {
@@ -110,5 +124,25 @@ public class SimpleMenuItem {
     public SimpleMenuItem setOnClickListener(Runnable onClickListener) {
         this.onClickListener = onClickListener;
         return this;
+    }
+
+    public HashMap<String, Object> getArguments() {
+        return args;
+    }
+
+    public void putArgument(String key, Object obj) {
+        args.put(key, obj);
+    }
+
+    public Object getArgument(String key) {
+        return args.get(key);
+    }
+
+    public boolean containsArgument(String key) {
+        return args.containsKey(key);
+    }
+
+    public void removeArgument(String key) {
+        args.remove(key);
     }
 }
