@@ -155,6 +155,13 @@ public class SimpleMenuPopup extends SimplePopup {
             list.remove(item);
     }
 
+    public void clear() {
+        if (adapter != null)
+            adapter.clear();
+        else
+            list.clear();
+    }
+
     public ArrayList<SimpleMenuItem> getMenuItemList() {
         return list;
     }
@@ -246,6 +253,9 @@ public class SimpleMenuPopup extends SimplePopup {
                 if (menuItem.hasImage()) {
                     imageView.setVisibility(View.VISIBLE);
                     imageView.setImageBitmap(menuItem.getImage());
+                } else if (menuItem.hasImageDrawable()) {
+                    imageView.setVisibility(View.VISIBLE);
+                    imageView.setImageDrawable(menuItem.getImageDrawable());
                 } else if (menuItem.hasImageId()) {
                     imageView.setVisibility(View.VISIBLE);
                     imageView.setImageResource(menuItem.getImageId());

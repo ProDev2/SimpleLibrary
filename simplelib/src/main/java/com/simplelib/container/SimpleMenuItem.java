@@ -1,6 +1,7 @@
 package com.simplelib.container;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 
 import java.util.HashMap;
 
@@ -11,6 +12,10 @@ public class SimpleMenuItem {
 
     public static SimpleMenuItem create(String text, int imageId) {
         return new SimpleMenuItem(text, imageId);
+    }
+
+    public static SimpleMenuItem create(String text, Drawable drawable) {
+        return new SimpleMenuItem(text, drawable);
     }
 
     public static SimpleMenuItem create(String text, Bitmap image) {
@@ -25,6 +30,10 @@ public class SimpleMenuItem {
         return new SimpleMenuItem(text, imageId, onClickListener);
     }
 
+    public static SimpleMenuItem create(String text, Drawable drawable, Runnable onClickListener) {
+        return new SimpleMenuItem(text, drawable, onClickListener);
+    }
+
     public static SimpleMenuItem create(String text, Bitmap image, Runnable onClickListener) {
         return new SimpleMenuItem(text, image, onClickListener);
     }
@@ -32,6 +41,7 @@ public class SimpleMenuItem {
     private String text;
 
     private int imageId;
+    private Drawable drawable;
     private Bitmap image;
 
     private Runnable onClickListener;
@@ -46,6 +56,12 @@ public class SimpleMenuItem {
     public SimpleMenuItem(String text, int imageId) {
         this.text = text;
         this.imageId = imageId;
+        init();
+    }
+
+    public SimpleMenuItem(String text, Drawable drawable) {
+        this.text = text;
+        this.drawable = drawable;
         init();
     }
 
@@ -65,6 +81,13 @@ public class SimpleMenuItem {
     public SimpleMenuItem(String text, int imageId, Runnable onClickListener) {
         this.text = text;
         this.imageId = imageId;
+        this.onClickListener = onClickListener;
+        init();
+    }
+
+    public SimpleMenuItem(String text, Drawable drawable, Runnable onClickListener) {
+        this.text = text;
+        this.drawable = drawable;
         this.onClickListener = onClickListener;
         init();
     }
@@ -94,6 +117,10 @@ public class SimpleMenuItem {
         return imageId != -1;
     }
 
+    public boolean hasImageDrawable() {
+        return drawable != null;
+    }
+
     public boolean hasImage() {
         return image != null;
     }
@@ -104,6 +131,15 @@ public class SimpleMenuItem {
 
     public SimpleMenuItem setImageId(int imageId) {
         this.imageId = imageId;
+        return this;
+    }
+
+    public Drawable getImageDrawable() {
+        return drawable;
+    }
+
+    public SimpleMenuItem setImageDrawable(Drawable drawable) {
+        this.drawable = drawable;
         return this;
     }
 
