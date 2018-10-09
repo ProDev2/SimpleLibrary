@@ -1,5 +1,7 @@
 package com.simplelib.adapter;
 
+import android.support.v7.widget.RecyclerView;
+
 import com.simplelib.container.SimpleFilter;
 
 import java.util.ArrayList;
@@ -36,6 +38,17 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     public SimpleFilter<V> applyFilter() {
         return null;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        try {
+            if (recyclerView != null)
+                updateFilter(false);
+        } catch (Exception e) {
+        }
     }
 
     @Override
