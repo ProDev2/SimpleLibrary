@@ -46,18 +46,22 @@ public class SimpleMenuPopup extends SimplePopup {
     private boolean closeOnClick = DEFAULT_CLOSE_ON_CLICK;
 
     public SimpleMenuPopup(View parentView) {
-        this(parentView, new ArrayList<SimpleMenuItem>());
+        this(parentView, null);
     }
 
     public SimpleMenuPopup(View parentView, ArrayList<SimpleMenuItem> list) {
         super(parentView);
 
-        this.list = list;
-
-        if (list == null)
-            list = new ArrayList<>();
+        if (this.list == null)
+            this.list = new ArrayList<>();
+        if (list != null) {
+            this.list.clear();
+            this.list.addAll(list);
+        }
 
         setBackgroundColor(backgroundColor);
+
+        update();
     }
 
     @SuppressLint("ResourceType")
@@ -91,6 +95,9 @@ public class SimpleMenuPopup extends SimplePopup {
 
     @Override
     public void bindLayout(View view) {
+        if (list == null)
+            list = new ArrayList<>();
+
         card = (CardView) findViewById(0);
 
         recyclerView = (RecyclerView) findViewById(1);
