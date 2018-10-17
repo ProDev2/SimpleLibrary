@@ -1,6 +1,8 @@
 package com.simplelib.adapter;
 
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,7 @@ import android.view.ViewTreeObserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<SimpleRecyclerAdapter.ViewHolder> {
@@ -132,6 +135,16 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
+    public void sort(Comparator<? super V> comparator) {
+        try {
+            if (comparator != null) {
+                Collections.sort(list, comparator);
+                notifyDataSetChanged();
+            }
+        } catch (Exception e) {
+        }
+    }
+
     public int getListSize() {
         return list.size();
     }
@@ -149,14 +162,22 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     }
 
     public void scrollUp() {
-        if (list.size() > 0) smoothScrollToPosition(0);
+        if (list.size() > 0) scrollToPosition(0);
     }
 
     public void scrollDown() {
-        if (list.size() > 0) smoothScrollToPosition(list.size() - 1);
+        if (list.size() > 0) scrollToPosition(list.size() - 1);
     }
 
-    public void smoothScrollToPosition(int pos) {
+    public void scrollToPosition(int pos) {
+        scrollToPosition(pos, true);
+    }
+
+    public void scrollToPosition(V item) {
+        scrollToPosition(item, true);
+    }
+
+    public void scrollToPosition(int pos, boolean animate) {
         try {
             if (recyclerView != null && pos >= 0 && pos < list.size())
                 recyclerView.smoothScrollToPosition(pos);
@@ -164,7 +185,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
-    public void smoothScrollToPosition(V item) {
+    public void scrollToPosition(V item, boolean animate) {
         try {
             if (recyclerView != null && list.contains(item))
                 recyclerView.smoothScrollToPosition(list.indexOf(item));

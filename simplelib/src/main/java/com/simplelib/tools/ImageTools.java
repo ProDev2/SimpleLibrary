@@ -46,6 +46,15 @@ public class ImageTools {
         return resultBitmap;
     }
 
+    public static Drawable copyDrawable(Drawable drawable) {
+        try {
+            if (drawable != null)
+                return drawable.getConstantState().newDrawable().mutate();
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static Bitmap createImage(int width, int height, int color) {
         Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);

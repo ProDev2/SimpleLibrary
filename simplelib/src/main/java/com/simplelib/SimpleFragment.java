@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -85,6 +86,17 @@ public abstract class SimpleFragment extends Fragment {
             }
         } catch (Exception e) {
         }
+    }
+
+    public ActionBar getToolbar() {
+        try {
+            if (getActivity() instanceof SimpleActivity) {
+                SimpleActivity activity = (SimpleActivity) getActivity();
+                return activity.getSupportActionBar();
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     public void setTitle(String title) {

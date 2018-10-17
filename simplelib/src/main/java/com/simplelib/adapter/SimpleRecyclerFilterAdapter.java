@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import com.simplelib.container.SimpleFilter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapter<V> {
     private SimpleFilter<V> filter;
@@ -160,6 +162,17 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
+    public void sort(Comparator<? super V> comparator) {
+        try {
+            if (comparator != null) {
+                Collections.sort(unfilteredList, comparator);
+                updateFilter();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
     public int getListSize() {
         return unfilteredList.size();
     }
@@ -181,17 +194,20 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
-    public void smoothScrollToPosition(int pos) {
-        if (pos >= 0 && pos < unfilteredList.size()) {
-            V value = unfilteredList.get(pos);
-            if (filteredList.contains(value))
-                super.smoothScrollToPosition(filteredList.indexOf(value));
+    public void scrollToPosition(int pos, boolean animate) {
+        try {
+            if (pos >= 0 && pos < unfilteredList.size()) {
+                V value = unfilteredList.get(pos);
+                if (filteredList.contains(value))
+                    super.scrollToPosition(filteredList.indexOf(value), animate);
+            }
+        } catch (Exception e) {
         }
     }
 
     @Override
-    public void smoothScrollToPosition(V item) {
-        super.smoothScrollToPosition(item);
+    public void scrollToPosition(V item, boolean animate) {
+        super.scrollToPosition(item, animate);
     }
 
     public void updateFilter() {
