@@ -179,16 +179,24 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
 
     public void scrollToPosition(int pos, boolean animate) {
         try {
-            if (recyclerView != null && pos >= 0 && pos < list.size())
-                recyclerView.smoothScrollToPosition(pos);
+            if (recyclerView != null && pos >= 0 && pos < list.size()) {
+                if (animate)
+                    recyclerView.smoothScrollToPosition(pos);
+                else
+                    recyclerView.scrollToPosition(pos);
+            }
         } catch (Exception e) {
         }
     }
 
     public void scrollToPosition(V item, boolean animate) {
         try {
-            if (recyclerView != null && list.contains(item))
-                recyclerView.smoothScrollToPosition(list.indexOf(item));
+            if (recyclerView != null && list.contains(item)) {
+                if (animate)
+                    recyclerView.smoothScrollToPosition(list.indexOf(item));
+                else
+                    recyclerView.scrollToPosition(list.indexOf(item));
+            }
         } catch (Exception e) {
         }
     }
