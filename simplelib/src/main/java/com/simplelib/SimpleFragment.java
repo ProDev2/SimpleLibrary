@@ -35,6 +35,8 @@ public abstract class SimpleFragment extends Fragment {
         View view = inflater.inflate(id, container, false);
         this.contentView = view;
 
+        resetToolbar();
+
         create(view);
 
         return view;
