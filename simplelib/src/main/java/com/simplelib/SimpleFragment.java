@@ -18,19 +18,22 @@ public abstract class SimpleFragment extends Fragment {
     private int id;
     private View contentView;
 
+    private String title;
+    private boolean backButton;
+
     private int menuId;
     private Menu menu;
 
     public SimpleFragment(int id) {
         this.id = id;
+
+        resetToolbar();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(id, container, false);
         this.contentView = view;
-
-        resetToolbar();
 
         create(view);
 
@@ -59,6 +62,10 @@ public abstract class SimpleFragment extends Fragment {
         setBackButtonEnabled(false);
         disableOptionsMenu();
 
+        resetTitle();
+    }
+
+    public void resetTitle() {
         try {
             ActivityInfo activityInfo = getActivity().getPackageManager().getActivityInfo(getActivity().getComponentName(), PackageManager.GET_META_DATA);
             String title = activityInfo.loadLabel(getActivity().getPackageManager()).toString();
@@ -101,7 +108,8 @@ public abstract class SimpleFragment extends Fragment {
 
     public void setTitle(String title) {
         try {
-            if (getActivity() instanceof SimpleActivity) {
+            this.title = title;
+            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.getSupportActionBar().setTitle(title);
             }
@@ -111,7 +119,8 @@ public abstract class SimpleFragment extends Fragment {
 
     public void setBackButtonEnabled(boolean enabled) {
         try {
-            if (getActivity() instanceof SimpleActivity) {
+            this.backButton = backButton;
+            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
                 activity.getSupportActionBar().setDisplayShowHomeEnabled(enabled);
@@ -120,13 +129,44 @@ public abstract class SimpleFragment extends Fragment {
         }
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        try {
+            if (isVisibleToUser) {
+                if (menuId < 0)
+                    disableOptionsMenu();
+                else
+                    enableOptionsMenu(menuId);
+
+                if (title != null)
+                    setTitle(title);
+
+                setBackButtonEnabled(backButton);
+            }
+        } catch (Exception e) {
+        }
+
+        try {
+            if (isVisibleToUser)
+                onBecomeVisible();
+        } catch (Exception e) {
+        }
+    }
+
+    public void onBecomeVisible() {
+    }
+
     public void enableOptionsMenu(int menu) {
-        this.setHasOptionsMenu(true);
+        if (getActivity() != null)
+            this.setHasOptionsMenu(true);
         this.menuId = menu;
     }
 
     public void disableOptionsMenu() {
-        this.setHasOptionsMenu(false);
+        if (getActivity() != null)
+            this.setHasOptionsMenu(false);
         this.menuId = -1;
     }
 
