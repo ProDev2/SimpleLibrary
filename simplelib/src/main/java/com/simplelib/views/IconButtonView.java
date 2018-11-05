@@ -12,6 +12,7 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
     private ValueAnimator animator;
 
     private GestureDetector gestureDetector;
+    private ButtonGestureListener gestureListener;
 
     private boolean selected;
 
@@ -36,7 +37,8 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
         animator.setInterpolator(new OvershootInterpolator());
         animator.addUpdateListener(this);
 
-        gestureDetector = new GestureDetector(getContext(), new ButtonGestureListener());
+        gestureListener = new ButtonGestureListener();
+        gestureDetector = new GestureDetector(getContext(), gestureListener);
     }
 
     public ValueAnimator getAnimator() {
@@ -145,12 +147,6 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        gestureDetector.onTouchEvent(event);
-        return true;
-    }
-
     protected boolean onSelecting() {
         return false;
     }
@@ -165,34 +161,65 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
     protected void onUnselectedSideShown() {
     }
 
-    private final class ButtonGestureListener extends GestureDetector.SimpleOnGestureListener {
-        private boolean moved;
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        gestureDetector.onTouchEvent(event);
 
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            if (!moved)
-                performClick();
-            return true;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (gestureListener != null)
+                    gestureListener.onDown();
+                break;
+
+            case MotionEvent.ACTION_UP:
+                if (gestureListener != null)
+                    gestureListener.onUp();
+                break;
         }
+
+        return true;
+    }
+
+    private final class ButtonGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private boolean holding;
+        private boolean moved;
+        private boolean longClicked;
 
         @Override
         public void onLongPress(MotionEvent e) {
-            performLongClick();
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            moved = false;
-            toggle(true);
-            return true;
+            if (!longClicked) {
+                longClicked = true;
+                performLongClick();
+            }
         }
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            onMove();
+            return true;
+        }
+
+        public void onUp() {
+            if (holding) {
+                holding = false;
+                if (!moved && !longClicked)
+                    performClick();
+            }
+        }
+
+        public void onDown() {
+            if (!holding) {
+                holding = true;
+                moved = false;
+                longClicked = false;
+                toggle(true);
+            }
+        }
+
+        public void onMove() {
             if (!moved)
                 toggle(true);
             moved = true;
-            return true;
         }
     }
 }
