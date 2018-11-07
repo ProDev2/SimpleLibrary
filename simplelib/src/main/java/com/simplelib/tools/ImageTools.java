@@ -1,5 +1,6 @@
 package com.simplelib.tools;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -61,6 +62,14 @@ public class ImageTools {
         canvas.drawColor(color);
 
         return output;
+    }
+
+    public static Drawable getDrawable(Context context, Bitmap image) {
+        try {
+            return new BitmapDrawable(context.getResources(), image);
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     public static Bitmap getBitmap(Drawable drawable) {

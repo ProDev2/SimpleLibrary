@@ -1,7 +1,11 @@
 package com.simplelib.container;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+
+import com.simplelib.tools.ImageTools;
 
 import java.util.HashMap;
 
@@ -50,23 +54,31 @@ public class SimpleMenuItem {
 
     public SimpleMenuItem(String text) {
         this.text = text;
+        this.drawable = null;
+        this.imageId = -1;
+        this.image = null;
         init();
     }
 
     public SimpleMenuItem(String text, int imageId) {
         this.text = text;
+        this.drawable = null;
         this.imageId = imageId;
+        this.image = null;
         init();
     }
 
     public SimpleMenuItem(String text, Drawable drawable) {
         this.text = text;
         this.drawable = drawable;
+        this.imageId = -1;
+        this.image = null;
         init();
     }
 
     public SimpleMenuItem(String text, Bitmap image) {
         this.text = text;
+        this.drawable = null;
         this.imageId = -1;
         this.image = image;
         init();
@@ -74,13 +86,18 @@ public class SimpleMenuItem {
 
     public SimpleMenuItem(String text, Runnable onClickListener) {
         this.text = text;
+        this.drawable = null;
+        this.imageId = -1;
+        this.image = null;
         this.onClickListener = onClickListener;
         init();
     }
 
     public SimpleMenuItem(String text, int imageId, Runnable onClickListener) {
         this.text = text;
+        this.drawable = null;
         this.imageId = imageId;
+        this.image = null;
         this.onClickListener = onClickListener;
         init();
     }
@@ -88,12 +105,15 @@ public class SimpleMenuItem {
     public SimpleMenuItem(String text, Drawable drawable, Runnable onClickListener) {
         this.text = text;
         this.drawable = drawable;
+        this.imageId = -1;
+        this.image = null;
         this.onClickListener = onClickListener;
         init();
     }
 
     public SimpleMenuItem(String text, Bitmap image, Runnable onClickListener) {
         this.text = text;
+        this.drawable = null;
         this.imageId = -1;
         this.image = image;
         this.onClickListener = onClickListener;
@@ -150,6 +170,23 @@ public class SimpleMenuItem {
     public SimpleMenuItem setImage(Bitmap image) {
         this.image = image;
         return this;
+    }
+
+    public Drawable getImage(Context context) {
+        if (context == null) return null;
+        try {
+            if (hasImage()) {
+                Drawable drawable = ImageTools.getDrawable(context, getImage());
+                if (drawable != null)
+                    return drawable;
+            }
+            if (hasImageDrawable())
+                return getImageDrawable();
+            if (hasImageId())
+                return ContextCompat.getDrawable(context, getImageId());
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     public void click() {
