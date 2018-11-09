@@ -10,11 +10,14 @@ import android.view.animation.OvershootInterpolator;
 
 public class IconButtonView extends IconView implements ValueAnimator.AnimatorUpdateListener {
     private ValueAnimator animator;
+    private int currentPos;
 
     private GestureDetector gestureDetector;
     private ButtonGestureListener gestureListener;
 
     private boolean selected;
+
+    private boolean noFlip;
 
     public IconButtonView(Context context) {
         super(context);
@@ -73,14 +76,14 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
             }
 
             if (animate) {
-                animator.setIntValues((int) getRotY(), 180);
+                animator.setIntValues(currentPos, 180);
                 animator.start();
             } else {
                 try {
                     onSelectedSideShown();
                 } catch (Exception e) {
                 }
-                setRotY(180);
+                currentPos = 180;
                 redraw();
             }
         }
@@ -104,14 +107,14 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
             }
 
             if (animate) {
-                animator.setIntValues((int) getRotY(), 0);
+                animator.setIntValues(currentPos, 0);
                 animator.start();
             } else {
                 try {
                     onUnselectedSideShown();
                 } catch (Exception e) {
                 }
-                setRotY(0);
+                currentPos = 0;
                 redraw();
             }
         }
@@ -128,6 +131,11 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
             select(animate);
     }
 
+    public void setNoFlip(boolean noFlip) {
+        this.noFlip = noFlip;
+        redraw();
+    }
+
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
         try {
@@ -141,10 +149,24 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
             } catch (Exception e) {
             }
 
-            setRotY(value);
+            currentPos = value;
             redraw();
         } catch (Exception e) {
         }
+    }
+
+    @Override
+    public void redraw() {
+        if (!noFlip) {
+            setRotY(currentPos);
+        } else {
+            if (currentPos <= 90)
+                setRotY(currentPos);
+            else
+                setRotY(currentPos + 180);
+        }
+
+        super.redraw();
     }
 
     protected boolean onSelecting() {

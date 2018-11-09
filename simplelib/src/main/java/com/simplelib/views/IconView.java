@@ -182,7 +182,17 @@ public class IconView extends AppCompatImageView {
         }
         imageCanvas.drawColor(backgroundColor);
 
+        try {
+            onUnderDraw(imageCanvas);
+        } catch (Exception e) {
+        }
+
         super.onDraw(imageCanvas);
+
+        try {
+            onOverDraw(imageCanvas);
+        } catch (Exception e) {
+        }
 
         camera.save();
         camera.translate(transX, transY, transZ);
@@ -201,6 +211,12 @@ public class IconView extends AppCompatImageView {
         matrix.postTranslate(centerX, centerY);
 
         canvas.drawBitmap(image, matrix, paint);
+    }
+
+    protected void onUnderDraw(Canvas canvas) {
+    }
+
+    protected void onOverDraw(Canvas canvas) {
     }
 
     private PointF calculatePoint(float x, float y) {
