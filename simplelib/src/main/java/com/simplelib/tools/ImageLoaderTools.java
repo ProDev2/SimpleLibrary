@@ -1,7 +1,9 @@
 package com.simplelib.tools;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 
 import java.io.File;
 import java.io.InputStream;
@@ -20,19 +22,42 @@ public class ImageLoaderTools {
         return BitmapFactory.decodeFile(path.getAbsolutePath(), options);
     }
 
+    public static Bitmap loadInReqSize(Context context, Uri uri, int reqWidth, int reqHeight) {
+        if (context == null || uri == null) return null;
+
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            if (reqWidth >= 0 && reqHeight >= 0) {
+                options.inJustDecodeBounds = true;
+
+                InputStream stream = context.getContentResolver().openInputStream(uri);
+                BitmapFactory.decodeStream(stream, null, options);
+
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+                options.inJustDecodeBounds = false;
+            }
+
+            InputStream stream = context.getContentResolver().openInputStream(uri);
+            return BitmapFactory.decodeStream(stream, null, options);
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static Bitmap loadInReqSize(InputStream stream, int reqWidth, int reqHeight) {
         if (stream == null) return null;
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (reqWidth >= 0 && reqHeight >= 0) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(stream, null, options);
+        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+        Bitmap image = ImageTools.fitImageIn(bitmap, reqWidth, reqHeight);
 
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-            options.inJustDecodeBounds = false;
+        try {
+            if (!bitmap.isRecycled())
+                bitmap.recycle();
+        } catch (Exception e) {
         }
-        return BitmapFactory.decodeStream(stream, null, options);
+
+        return image;
     }
 
     public static Bitmap loadInReqSize(byte[] data, int reqWidth, int reqHeight) {
