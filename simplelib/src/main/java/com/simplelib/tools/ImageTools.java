@@ -3,6 +3,7 @@ package com.simplelib.tools;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -23,9 +24,42 @@ import android.view.View;
 import com.simplelib.interfaces.OnFinish;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class ImageTools {
+    public static boolean isImageFile(Context context, Uri uri) {
+        try {
+            if (context != null && uri != null)
+                return isImageFile(context.getContentResolver().openInputStream(uri));
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public static boolean isImageFile(File file) {
+        try {
+            if (file != null)
+                return isImageFile(new FileInputStream(file));
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public static boolean isImageFile(InputStream in) {
+        try {
+            if (in != null) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(in, null, options);
+                return options.outWidth != -1 && options.outHeight != -1;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
     public static Bitmap captureImageOfView(View view) {
         Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
