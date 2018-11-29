@@ -54,26 +54,29 @@ public class ImageLoader {
     }
 
     public void request(ArrayList<ImageRequest> requests) {
-        if (requests != null) {
-            ArrayList<ImageRequest> requestList = new ArrayList<>();
-            for (ImageRequest request : requests) {
-                if (request == null)
-                    continue;
-                try {
-                    if (fillRequest(request) && request.hasImage())
-                        request.onFinish(request.image);
-                    else if (!mergeRequest(request) || !request.hasImage())
-                        requestList.add(request);
-                } catch (Exception e) {
+        try {
+            if (requests != null) {
+                ArrayList<ImageRequest> requestList = new ArrayList<>();
+                for (ImageRequest request : requests) {
+                    if (request == null)
+                        continue;
+                    try {
+                        if (fillRequest(request) && request.hasImage())
+                            request.onFinish(request.image);
+                        else if (!mergeRequest(request) || !request.hasImage())
+                            requestList.add(request);
+                    } catch (Exception e) {
+                    }
+                }
+
+                if (requestList.size() > 0) {
+                    Loader loader = new Loader(requestList);
+                    if (loaderList != null && !loaderList.contains(loader))
+                        loaderList.add(loader);
+                    loader.start();
                 }
             }
-
-            if (requestList.size() > 0) {
-                Loader loader = new Loader(requestList);
-                if (loaderList != null && !loaderList.contains(loader))
-                    loaderList.add(loader);
-                loader.start();
-            }
+        } catch (Exception e) {
         }
     }
 
@@ -81,7 +84,7 @@ public class ImageLoader {
         try {
             if (request != null) {
                 for (ImageRequest image : imageList) {
-                    if (image.isEqualRequest(request)) {
+                    if (image.isEqualRequest(request) && image.hasImage()) {
                         image.applyTo(request);
                         return true;
                     }
@@ -136,22 +139,28 @@ public class ImageLoader {
     }
 
     public void pushRequest(ImageRequest request) {
-        if (request.storeRequest && !imageList.contains(request))
-            imageList.add(0, request);
+        try {
+            if (request.storeRequest && !imageList.contains(request))
+                imageList.add(0, request);
 
-        if (capacity >= 0 && imageList.size() > capacity) {
-            for (int pos = imageList.size() - 1; pos >= capacity; pos--) {
-                try {
+            if (capacity >= 0 && imageList.size() > capacity) {
+                for (int pos = imageList.size() - 1; pos >= capacity; pos--) {
                     if (pos >= 0 && pos < imageList.size()) {
-                        ImageRequest foundRequest = imageList.get(pos);
-                        if (foundRequest != null && foundRequest.hasImage())
-                            foundRequest.image.recycle();
+                        try {
+                            ImageRequest foundRequest = imageList.get(pos);
+                            if (foundRequest != null && foundRequest.hasImage())
+                                foundRequest.image.recycle();
+                        } catch (Exception e) {
+                        }
 
-                        imageList.remove(pos);
+                        try {
+                            imageList.remove(pos);
+                        } catch (Exception e) {
+                        }
                     }
-                } catch (Exception e) {
                 }
             }
+        } catch (Exception e) {
         }
     }
 
@@ -267,7 +276,11 @@ public class ImageLoader {
         }
 
         public boolean hasImage() {
-            return image != null;
+            try {
+                return image != null && !image.isRecycled();
+            } catch (Exception e) {
+            }
+            return false;
         }
 
         public void setStoreRequest(boolean storeRequest) {
