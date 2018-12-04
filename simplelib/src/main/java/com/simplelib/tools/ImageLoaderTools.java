@@ -79,10 +79,10 @@ public class ImageLoaderTools {
         int inSampleSize = 1;
 
         if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
+            int halfWidth = width / 2;
+            int halfHeight = height / 2;
 
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth)
+            while ((halfWidth / inSampleSize) >= reqWidth || (halfHeight / inSampleSize) >= reqHeight)
                 inSampleSize *= 2;
         }
 
