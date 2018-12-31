@@ -154,8 +154,14 @@ public class ImageLoader {
         return false;
     }
 
-    public void pushRequest(ImageRequest request) {
+    private void pushRequest(ImageRequest request) {
         try {
+            if (imageCapacity <= 0) {
+                if (imageList.size() > 0)
+                    imageList.clear();
+                return;
+            }
+
             if (request.storeRequest && !imageList.contains(request))
                 imageList.add(0, request);
 
@@ -175,6 +181,23 @@ public class ImageLoader {
                         }
                     }
                 }
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public void startNext() {
+        if (loaderList == null) return;
+        if (loaderList.size() <= 0) return;
+
+        try {
+            boolean found = false;
+
+            Iterator<Loader> loaderIterator = loaderList.iterator();
+            while (!found && loaderIterator.hasNext()) {
+                Loader loader = loaderIterator.next();
+                if (loader != null && loader.start())
+                    found = true;
             }
         } catch (Exception e) {
         }
@@ -481,18 +504,6 @@ public class ImageLoader {
                 }
             }
             dispatch();
-
-            try {
-                boolean found = false;
-                
-                Iterator<Loader> loaderIterator = loaderList.iterator();
-                while (!found && loaderIterator.hasNext()) {
-                    Loader loader = loaderIterator.next();
-                    if (loader != null && loader.start())
-                        found = true;
-                }
-            } catch (Exception e) {
-            }
         }
 
         @Override
@@ -515,6 +526,8 @@ public class ImageLoader {
                 mergeRequests.clear();
             } catch (Exception e) {
             }
+
+            startNext();
         }
     }
 }
