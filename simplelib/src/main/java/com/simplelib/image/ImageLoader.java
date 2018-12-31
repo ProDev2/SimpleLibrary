@@ -4,9 +4,12 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.Executor;
 
 public class ImageLoader {
-    private static final int DEFAULT_CAPACITY = 100;
+    private static final int DEFAULT_LOADER_CAPACITY = 100;
+    private static final int DEFAULT_IMAGE_CAPACITY = 10;
 
     //Statics
     private static ImageLoader loader;
@@ -33,18 +36,31 @@ public class ImageLoader {
 
     //Loader
     private ArrayList<Loader> loaderList;
+    private int loaderCapacity;
+
     private ArrayList<ImageRequest> imageList;
-    private int capacity;
+    private int imageCapacity;
+
+    private Executor executor;
 
     public ImageLoader() {
         this.loaderList = new ArrayList<>();
+        this.loaderCapacity = DEFAULT_LOADER_CAPACITY;
 
         this.imageList = new ArrayList<>();
-        this.capacity = DEFAULT_CAPACITY;
+        this.imageCapacity = DEFAULT_IMAGE_CAPACITY;
     }
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
+    public void setLoaderCapacity(int loaderCapacity) {
+        this.loaderCapacity = loaderCapacity;
+    }
+
+    public void setImageCapacity(int imageCapacity) {
+        this.imageCapacity = imageCapacity;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 
     public void request(ImageRequest request) {
@@ -143,8 +159,8 @@ public class ImageLoader {
             if (request.storeRequest && !imageList.contains(request))
                 imageList.add(0, request);
 
-            if (capacity >= 0 && imageList.size() > capacity) {
-                for (int pos = imageList.size() - 1; pos >= capacity; pos--) {
+            if (imageCapacity >= 0 && imageList.size() > imageCapacity) {
+                for (int pos = imageList.size() - 1; pos >= imageCapacity; pos--) {
                     if (pos >= 0 && pos < imageList.size()) {
                         try {
                             ImageRequest foundRequest = imageList.get(pos);
@@ -293,6 +309,8 @@ public class ImageLoader {
     }
 
     private class Loader extends AsyncTask<Void, Void, Bitmap> {
+        private boolean running;
+
         private ArrayList<ImageRequest> requests;
         private ArrayList<ImageRequest> mergeRequests;
 
@@ -307,16 +325,64 @@ public class ImageLoader {
             this.mergeRequests = new ArrayList<>();
         }
 
-        public void start() {
+        public boolean isRunning() {
+            if (isCancelled())
+                running = false;
+
+            return running;
+        }
+
+        public boolean canStart() {
             try {
-                if (!isCancelled())
-                    executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                if (isCancelled()) return false;
+                if (isRunning()) return false;
             } catch (Exception e) {
             }
+
+            try {
+                if (loaderCapacity >= 0 && loaderList != null && loaderList.contains(this)) {
+                    int runningCount = 0;
+
+                    Iterator<Loader> loaderIterator = loaderList.iterator();
+                    while (loaderIterator.hasNext()) {
+                        Loader loader = loaderIterator.next();
+                        if (loader != null && loader.isRunning())
+                            runningCount++;
+                        if (runningCount >= loaderCapacity)
+                            return false;
+                    }
+                }
+            } catch (Exception e) {
+            }
+            return true;
+        }
+
+        public boolean start() {
+            if (!canStart()) return false;
+
+            try {
+                if (!isCancelled() && loaderList.contains(this)) {
+                    try {
+                        if (executor != null)
+                            executeOnExecutor(executor);
+                        else
+                            executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    } catch (Exception e) {
+                        executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    }
+
+                    running = true;
+                    return true;
+                }
+            } catch (Exception e) {
+            }
+            return false;
         }
 
         public void stop() {
             try {
+                running = false;
+
                 if (loaderList != null && loaderList.contains(this))
                     loaderList.remove(this);
 
@@ -361,6 +427,8 @@ public class ImageLoader {
             if (requests == null)
                 return null;
 
+            running = true;
+
             try {
                 for (ImageRequest request : requests)
                     handleRequest(request);
@@ -391,6 +459,8 @@ public class ImageLoader {
 
         @Override
         protected void onPostExecute(Bitmap result) {
+            running = false;
+
             if (loaderList != null && loaderList.contains(this))
                 loaderList.remove(this);
 
@@ -411,6 +481,18 @@ public class ImageLoader {
                 }
             }
             dispatch();
+
+            try {
+                boolean found = false;
+                
+                Iterator<Loader> loaderIterator = loaderList.iterator();
+                while (!found && loaderIterator.hasNext()) {
+                    Loader loader = loaderIterator.next();
+                    if (loader != null && loader.start())
+                        found = true;
+                }
+            } catch (Exception e) {
+            }
         }
 
         @Override
@@ -427,6 +509,8 @@ public class ImageLoader {
 
         public void dispatch() {
             try {
+                running = false;
+
                 requests.clear();
                 mergeRequests.clear();
             } catch (Exception e) {
