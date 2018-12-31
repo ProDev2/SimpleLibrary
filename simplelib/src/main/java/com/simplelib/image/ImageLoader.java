@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.concurrent.Executor;
 
 public class ImageLoader {
-    private static final int DEFAULT_LOADER_CAPACITY = 100;
-    private static final int DEFAULT_IMAGE_CAPACITY = 10;
+    private static final int DEFAULT_LOADER_CAPACITY = 10;
+    private static final int DEFAULT_IMAGE_CAPACITY = 100;
 
     //Statics
     private static ImageLoader loader;
@@ -49,6 +49,18 @@ public class ImageLoader {
 
         this.imageList = new ArrayList<>();
         this.imageCapacity = DEFAULT_IMAGE_CAPACITY;
+
+        calculateLoaderLimit();
+    }
+
+    public void calculateLoaderLimit() {
+        try {
+            int cpuCount = Runtime.getRuntime().availableProcessors();
+            int maxLoaderCount = cpuCount * 2;
+
+            setLoaderCapacity(maxLoaderCount);
+        } catch (Exception e) {
+        }
     }
 
     public void setLoaderCapacity(int loaderCapacity) {
