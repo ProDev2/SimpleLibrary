@@ -135,12 +135,16 @@ public class ImageLoader {
         return false;
     }
 
-    public void removeRequest(String id) {
+    public void cancelRequest(String id) {
         try {
             Loader loader = findRequestLoaderById(id);
             if (loader != null) loader.removeRequest(id);
         } catch (Exception e) {
         }
+    }
+
+    public void removeRequest(String id) {
+        cancelRequest(id);
 
         try {
             ImageRequest imageRequest = findRequestById(id);
