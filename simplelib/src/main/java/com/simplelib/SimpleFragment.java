@@ -118,6 +118,9 @@ public abstract class SimpleFragment extends Fragment {
 
     public void setTitle(String title) {
         try {
+            if (title == null)
+                title = "";
+
             this.title = title;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
@@ -129,6 +132,9 @@ public abstract class SimpleFragment extends Fragment {
 
     public void setSubtitle(String subtitle) {
         try {
+            if (subtitle == null)
+                subtitle = "";
+
             this.subtitle = subtitle;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
