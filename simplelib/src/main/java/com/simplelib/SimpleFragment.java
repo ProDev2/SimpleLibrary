@@ -18,7 +18,7 @@ public abstract class SimpleFragment extends Fragment {
     private int id;
     private View contentView;
 
-    private String title;
+    private String title, subtitle;
     private boolean backButton;
 
     private int menuId;
@@ -65,6 +65,7 @@ public abstract class SimpleFragment extends Fragment {
         disableOptionsMenu();
 
         resetTitle();
+        resetSubtitle();
     }
 
     public void resetTitle() {
@@ -73,6 +74,13 @@ public abstract class SimpleFragment extends Fragment {
             String title = activityInfo.loadLabel(getActivity().getPackageManager()).toString();
 
             setTitle(title);
+        } catch (Exception e) {
+        }
+    }
+
+    public void resetSubtitle() {
+        try {
+            setSubtitle("");
         } catch (Exception e) {
         }
     }
@@ -119,6 +127,17 @@ public abstract class SimpleFragment extends Fragment {
         }
     }
 
+    public void setSubtitle(String subtitle) {
+        try {
+            this.subtitle = subtitle;
+            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
+                SimpleActivity activity = (SimpleActivity) getActivity();
+                activity.getSupportActionBar().setSubtitle(subtitle);
+            }
+        } catch (Exception e) {
+        }
+    }
+
     public void setBackButtonEnabled(boolean enabled) {
         try {
             this.backButton = backButton;
@@ -142,8 +161,8 @@ public abstract class SimpleFragment extends Fragment {
                 else
                     enableOptionsMenu(menuId);
 
-                if (title != null)
-                    setTitle(title);
+                if (title != null) setTitle(title);
+                if (subtitle != null) setSubtitle(subtitle);
 
                 setBackButtonEnabled(backButton);
             }
