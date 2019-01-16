@@ -126,11 +126,41 @@ public class ImageTools {
     }
 
     public static Bitmap getBitmap(Drawable drawable, int reqWidth, int reqHeight) {
-        return getBitmap(drawable, reqWidth, reqHeight, true);
-    }
+        if (drawable != null) {
+            if (reqWidth <= 0 || reqHeight <= 0)
+                return null;
 
-    public static Bitmap getBitmap(Drawable drawable, int reqWidth, int reqHeight, boolean filter) {
-        return fitImageIn(getBitmap(drawable), reqWidth, reqHeight, filter);
+            if (drawable instanceof BitmapDrawable) {
+                Bitmap image = ((BitmapDrawable) drawable).getBitmap();
+                if (image != null)
+                    return fitImageIn(image, reqWidth, reqHeight);
+                return image;
+            }
+
+            try {
+                int drawableWidth = drawable.getIntrinsicWidth();
+                int drawableHeight = drawable.getIntrinsicHeight();
+
+                int oversize = getOversize(drawableWidth, drawableHeight, reqWidth, reqHeight);
+                int width = drawableWidth - oversize;
+                int height = drawableHeight - oversize;
+
+                if (width <= 0 || height <= 0) {
+                    width = reqWidth;
+                    height = reqHeight;
+                }
+
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+
+                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                drawable.draw(canvas);
+
+                return bitmap;
+            } catch (Exception e) {
+            }
+        }
+        return null;
     }
 
     public static Bitmap fitImageIn(Bitmap image, int reqWidth, int reqHeight) {
