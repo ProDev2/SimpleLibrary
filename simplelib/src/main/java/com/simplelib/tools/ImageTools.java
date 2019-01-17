@@ -1,5 +1,6 @@
 package com.simplelib.tools;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -17,6 +18,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -79,6 +85,73 @@ public class ImageTools {
         canvas.drawBitmap(resultBitmap, 0, 0, paint);
 
         return resultBitmap;
+    }
+
+    private Bitmap darkenBitmap(Bitmap image, float manipulateValue) {
+        try {
+            if (!image.isMutable())
+                image = image.copy(Bitmap.Config.ARGB_8888, true);
+        } catch (Exception e) {
+        }
+
+        try {
+            int alpha = Math.round(manipulateValue * 255f);
+            if (alpha < 0) alpha = 0;
+            if (alpha > 255) alpha = 255;
+
+            Canvas canvas = new Canvas(image);
+            canvas.drawARGB(alpha,0,0,0);
+            canvas.drawBitmap(image, new Matrix(), new Paint());
+        } catch (Exception e) {
+        }
+
+        return image;
+    }
+
+    private Bitmap manipulateColor(Bitmap image, float manipulateValue) {
+        if (image == null) return null;
+
+        try {
+            if (!image.isMutable())
+                image = image.copy(Bitmap.Config.ARGB_8888, true);
+        } catch (Exception e) {
+        }
+
+        try {
+            int height = image.getHeight();
+            int width = image.getWidth();
+            int pixel;
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    pixel = image.getPixel(x, y);
+
+                    ColorTools.manipulateColor(pixel, manipulateValue);
+
+                    image.setPixel(x, y, pixel);
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return image;
+    }
+
+    @SuppressLint("NewApi")
+    public static Bitmap blurImage(RenderScript renderScript, Bitmap image, float blurRadius) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                Allocation input = Allocation.createFromBitmap(renderScript, image);
+                Allocation output = Allocation.createTyped(renderScript, input.getType());
+                ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+                script.setRadius(blurRadius);
+                script.setInput(input);
+                script.forEach(output);
+                output.copyTo(image);
+            }
+        } catch (Exception e) {
+        }
+        return image;
     }
 
     public static Drawable copyDrawable(Drawable drawable) {

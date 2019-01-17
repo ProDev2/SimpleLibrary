@@ -5,10 +5,14 @@ import android.support.v4.graphics.ColorUtils;
 
 public class ColorTools {
     public static int manipulateColor(int color, float manipulateValue) {
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        hsv[2] = hsv[2] * manipulateValue;
-        return Color.HSVToColor(hsv);
+        try {
+            float[] hsv = new float[3];
+            Color.colorToHSV(color, hsv);
+            hsv[2] = hsv[2] * manipulateValue;
+            return Color.HSVToColor(hsv);
+        } catch (Exception e) {
+        }
+        return color;
     }
 
     public static int manipulateAlphaChannel(int color, float ratio) {
@@ -40,9 +44,13 @@ public class ColorTools {
     }
 
     public static float getLightness(int color) {
-        float[] hsl = new float[3];
-        ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hsl);
-        return hsl[2];
+        try {
+            float[] hsl = new float[3];
+            ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hsl);
+            return hsl[2];
+        } catch (Exception e) {
+        }
+        return 0f;
     }
 
     public static String colorToHexa(int color) {
