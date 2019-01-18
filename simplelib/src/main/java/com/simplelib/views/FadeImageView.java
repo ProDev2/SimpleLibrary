@@ -17,7 +17,7 @@ import com.simplelib.tools.ImageTools;
 import java.util.ArrayList;
 
 public class FadeImageView extends View {
-    private static final long DEFAULT_ANIMATION_DURATION = 5000;
+    private static final long DEFAULT_ANIMATION_DURATION = 1500;
 
     private ValueAnimator animator;
     private float value;
@@ -79,20 +79,24 @@ public class FadeImageView extends View {
         }
     }
 
-    public void setDuration(long duration) {
-        if (animator != null) animator.setDuration(duration);
+    public ValueAnimator getAnimator() {
+        return animator;
     }
 
     public void setInterpolator(TimeInterpolator interpolator) {
         if (animator != null) animator.setInterpolator(interpolator);
     }
 
-    public ValueAnimator getAnimator() {
-        return animator;
+    public void setDuration(long duration) {
+        if (animator != null) animator.setDuration(duration);
     }
 
     public void animateToColor(int color) {
         setColor(color, true);
+    }
+
+    public void animateToBlurredImageBitmap(Bitmap image, float sampleSize, float blurRadius) {
+        setBlurredImageBitmap(image, sampleSize, blurRadius, true);
     }
 
     public void animateTo(Bitmap image) {
