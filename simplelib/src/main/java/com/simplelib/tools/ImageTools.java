@@ -18,6 +18,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -33,6 +34,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 public class ImageTools {
     public static boolean isImageFile(Context context, Uri uri) {
@@ -87,7 +91,7 @@ public class ImageTools {
         return resultBitmap;
     }
 
-    private Bitmap darkenBitmap(Bitmap image, float manipulateValue) {
+    public static Bitmap darkenBitmap(Bitmap image, float manipulateValue) {
         try {
             if (!image.isMutable())
                 image = image.copy(Bitmap.Config.ARGB_8888, true);
@@ -102,35 +106,6 @@ public class ImageTools {
             Canvas canvas = new Canvas(image);
             canvas.drawARGB(alpha,0,0,0);
             canvas.drawBitmap(image, new Matrix(), new Paint());
-        } catch (Exception e) {
-        }
-
-        return image;
-    }
-
-    private Bitmap manipulateColor(Bitmap image, float manipulateValue) {
-        if (image == null) return null;
-
-        try {
-            if (!image.isMutable())
-                image = image.copy(Bitmap.Config.ARGB_8888, true);
-        } catch (Exception e) {
-        }
-
-        try {
-            int height = image.getHeight();
-            int width = image.getWidth();
-            int pixel;
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    pixel = image.getPixel(x, y);
-
-                    ColorTools.manipulateColor(pixel, manipulateValue);
-
-                    image.setPixel(x, y, pixel);
-                }
-            }
         } catch (Exception e) {
         }
 
@@ -259,10 +234,23 @@ public class ImageTools {
     }
 
     public static int getOversize(int width, int height, int widthTo, int heightTo) {
-        int oversizeX = widthTo - width;
-        int oversizeY = heightTo - height;
+        int oversizeX = width - widthTo;
+        int oversizeY = height - heightTo;
 
         return Math.max(oversizeX, oversizeY);
+    }
+
+    public static int getCropOversize(Bitmap image, int widthTo, int heightTo) {
+        if (image != null)
+            return getCropOversize(image.getWidth(), image.getHeight(), widthTo, heightTo);
+        return 0;
+    }
+
+    public static int getCropOversize(int width, int height, int widthTo, int heightTo) {
+        int oversizeX = width - widthTo;
+        int oversizeY = height - heightTo;
+
+        return Math.min(oversizeX, oversizeY);
     }
 
     public static Bitmap resizeBitmapInDp(Bitmap bitmap, int newWidthDp, int newHeightDp) {
@@ -479,6 +467,172 @@ public class ImageTools {
                 } catch (Exception e) {
                 }
             }
+        }
+    }
+
+    public static class ImageBlur extends AsyncTask<Bitmap, Void, Void> {
+        private static RenderScript renderScript;
+
+        public static boolean blur(Context context, OnBlurListener listener, float blurRadius, Bitmap... images) {
+            return new ImageBlur(context).setBlurListener(listener).blur(blurRadius, images);
+        }
+
+        public static boolean blur(Context context, OnBlurListener listener, float sampleSize, float blurRadius, Bitmap... images) {
+            return new ImageBlur(context).setBlurListener(listener).blur(sampleSize, blurRadius, images);
+        }
+
+        public static boolean blur(Context context, OnBlurListener listener, Executor executor, float blurRadius, Bitmap... images) {
+            return new ImageBlur(context).setBlurListener(listener).blur(executor, blurRadius, images);
+        }
+
+        public static boolean blur(Context context, OnBlurListener listener, Executor executor, float sampleSize, float blurRadius, Bitmap... images) {
+            return new ImageBlur(context).setBlurListener(listener).blur(executor, sampleSize, blurRadius, images);
+        }
+
+        private ArrayList<Bitmap> imageList;
+
+        private float sampleSize;
+        private float blurRadius;
+
+        private OnBlurListener listener;
+
+        public ImageBlur(Context context) {
+            try {
+                if (context != null && renderScript == null)
+                    renderScript = RenderScript.create(context);
+            } catch (Exception e) {
+            }
+
+            imageList = new ArrayList<>();
+        }
+
+        public boolean blur(float blurRadius, Bitmap... images) {
+            return blur(1f, blurRadius, images);
+        }
+
+        public boolean blur(float sampleSize, float blurRadius, Bitmap... images) {
+            return blur(AsyncTask.SERIAL_EXECUTOR, sampleSize, blurRadius, images);
+        }
+
+        public boolean blur(Executor executor, float blurRadius, Bitmap... images) {
+            return blur(executor, 1f, blurRadius, images);
+        }
+
+        public boolean blur(Executor executor, float sampleSize, float blurRadius, Bitmap... images) {
+            try {
+                if (!isCancelled()) {
+                    imageList.clear();
+                    if (images != null && images.length > 0)
+                        imageList.addAll(Arrays.asList(images));
+
+                    this.sampleSize = sampleSize;
+                    this.blurRadius = blurRadius;
+
+                    executeOnExecutor(executor);
+                    return true;
+                }
+            } catch (Exception e) {
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            try {
+                if (listener != null)
+                    listener.onStart();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Bitmap... images) {
+            if (renderScript == null) return null;
+
+            try {
+                if (images != null && images.length > 0)
+                    imageList.addAll(Arrays.asList(images));
+
+                if (imageList.size() > 0) {
+                    for (int pos = 0; pos < imageList.size(); pos++) {
+                        try {
+                            Bitmap image = imageList.get(pos);
+
+                            if (image == null) continue;
+
+                            int width = image.getWidth();
+                            int height = image.getHeight();
+
+                            if (width <= 0 || height <= 0) continue;
+
+                            int sizeX = (int) ((float) width / sampleSize);
+                            int sizeY = (int) ((float) height / sampleSize);
+
+                            image = Bitmap.createScaledBitmap(image, sizeX, sizeY, true);
+
+                            try {
+                                if (listener != null) {
+                                    Bitmap modifiedImage = listener.modifyImageBeforeBlur(image);
+                                    if (modifiedImage != null)
+                                        image = modifiedImage;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            image = blurImage(renderScript, image, blurRadius);
+
+                            try {
+                                if (listener != null) {
+                                    Bitmap modifiedImage = listener.modifyImageAfterBlur(image);
+                                    if (modifiedImage != null)
+                                        image = modifiedImage;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            imageList.set(pos, image);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            try {
+                if (listener != null)
+                    listener.onFinish(imageList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public ImageBlur setBlurListener(OnBlurListener listener) {
+            this.listener = listener;
+            return this;
+        }
+
+        public static abstract class OnBlurListener {
+            public void onStart() {
+            }
+
+            public Bitmap modifyImageBeforeBlur(Bitmap image) {
+                return image;
+            }
+
+            public Bitmap modifyImageAfterBlur(Bitmap image) {
+                return image;
+            }
+
+            public abstract void onFinish(ArrayList<Bitmap> images);
         }
     }
 }
