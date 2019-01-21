@@ -566,10 +566,18 @@ public class ImageTools {
 
                             if (width <= 0 || height <= 0) continue;
 
-                            int sizeX = (int) ((float) width / sampleSize);
-                            int sizeY = (int) ((float) height / sampleSize);
+                            try {
+                                if (sampleSize != 1) {
+                                    int sizeX = (int) ((float) width * sampleSize);
+                                    int sizeY = (int) ((float) height * sampleSize);
 
-                            image = Bitmap.createScaledBitmap(image, sizeX, sizeY, true);
+                                    if (sizeX > 0 && sizeY > 0) {
+                                        image = Bitmap.createScaledBitmap(image, sizeX, sizeY, true);
+                                        image = Bitmap.createScaledBitmap(image, width, height, true);
+                                    }
+                                }
+                            } catch (Exception e) {
+                            }
 
                             try {
                                 if (listener != null) {

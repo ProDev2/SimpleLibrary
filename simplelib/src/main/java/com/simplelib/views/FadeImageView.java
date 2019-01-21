@@ -209,15 +209,9 @@ public class FadeImageView extends View {
         int height = canvas.getHeight();
 
         if (cachedImage != null) {
-            int alpha = (int) (255f - (255f * value));
-            if (alpha < 0) alpha = 0;
-            if (alpha > 255) alpha = 255;
-
-            alphaPaint.setAlpha(alpha);
-
             Rect cachedImageBounds = getBounds(cachedImage, width, height);
             if (cachedImageBounds != null)
-                canvas.drawBitmap(cachedImage, null, cachedImageBounds, alphaPaint);
+                canvas.drawBitmap(cachedImage, null, cachedImageBounds, null);
         }
 
         if (currentImage != null) {
