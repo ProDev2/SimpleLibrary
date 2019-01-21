@@ -1,5 +1,7 @@
 package com.simplelib.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -69,6 +71,24 @@ public class FadeImageView extends View {
                         if (value > 1f) value = 1f;
 
                         invalidate();
+                    }
+                });
+                animator.addListener(new AnimatorListenerAdapter() {
+                    private Bitmap baseImage;
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        baseImage = cachedImage;
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        try {
+                            if (baseImage != null && !baseImage.isRecycled())
+                                baseImage.recycle();
+                        } catch (Exception e) {
+                        }
+                        baseImage = null;
                     }
                 });
             } else {
@@ -209,9 +229,19 @@ public class FadeImageView extends View {
         int height = canvas.getHeight();
 
         if (cachedImage != null) {
+            if (currentImage != null) {
+                alphaPaint.setAlpha(255);
+            } else {
+                int alpha = (int) (255f - (255f * value));
+                if (alpha < 0) alpha = 0;
+                if (alpha > 255) alpha = 255;
+
+                alphaPaint.setAlpha(alpha);
+            }
+
             Rect cachedImageBounds = getBounds(cachedImage, width, height);
             if (cachedImageBounds != null)
-                canvas.drawBitmap(cachedImage, null, cachedImageBounds, null);
+                canvas.drawBitmap(cachedImage, null, cachedImageBounds, alphaPaint);
         }
 
         if (currentImage != null) {
