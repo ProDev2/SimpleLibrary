@@ -225,35 +225,38 @@ public class FadeImageView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        try {
+            int width = canvas.getWidth();
+            int height = canvas.getHeight();
 
-        if (cachedImage != null) {
-            if (currentImage != null) {
-                alphaPaint.setAlpha(255);
-            } else {
-                int alpha = (int) (255f - (255f * value));
+            if (cachedImage != null && !cachedImage.isRecycled() && value < 1f) {
+                if (currentImage != null && !currentImage.isRecycled()) {
+                    alphaPaint.setAlpha(255);
+                } else {
+                    int alpha = (int) (255f - (255f * value));
+                    if (alpha < 0) alpha = 0;
+                    if (alpha > 255) alpha = 255;
+
+                    alphaPaint.setAlpha(alpha);
+                }
+
+                Rect cachedImageBounds = getBounds(cachedImage, width, height);
+                if (cachedImageBounds != null)
+                    canvas.drawBitmap(cachedImage, null, cachedImageBounds, alphaPaint);
+            }
+
+            if (currentImage != null && !currentImage.isRecycled()) {
+                int alpha = (int) (255f * value);
                 if (alpha < 0) alpha = 0;
                 if (alpha > 255) alpha = 255;
 
                 alphaPaint.setAlpha(alpha);
+
+                Rect currentImageBounds = getBounds(currentImage, width, height);
+                if (currentImageBounds != null)
+                    canvas.drawBitmap(currentImage, null, currentImageBounds, alphaPaint);
             }
-
-            Rect cachedImageBounds = getBounds(cachedImage, width, height);
-            if (cachedImageBounds != null)
-                canvas.drawBitmap(cachedImage, null, cachedImageBounds, alphaPaint);
-        }
-
-        if (currentImage != null) {
-            int alpha = (int) (255f * value);
-            if (alpha < 0) alpha = 0;
-            if (alpha > 255) alpha = 255;
-
-            alphaPaint.setAlpha(alpha);
-
-            Rect currentImageBounds = getBounds(currentImage, width, height);
-            if (currentImageBounds != null)
-                canvas.drawBitmap(currentImage, null, currentImageBounds, alphaPaint);
+        } catch (Exception e) {
         }
     }
 
