@@ -138,7 +138,7 @@ allprojects {
 
 Add the dependency:
 ```
-implementation 'com.github.ProDev2:SimpleLibrary:5.9'
+implementation 'com.github.ProDev2:SimpleLibrary:6.0'
 ```
 
 ## Details
