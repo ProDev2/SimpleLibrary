@@ -47,4 +47,9 @@ public abstract class FileVideoThumbnailRequest extends ImageLoader.ImageRequest
             image = ImageTools.cropBitmap(image);
         return image;
     }
+
+    public static void cancelRequest(ImageLoader loader, File file) {
+        if (loader != null && file != null)
+            loader.cancelRequest(file.getAbsolutePath());
+    }
 }
