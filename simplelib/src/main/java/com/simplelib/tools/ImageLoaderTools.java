@@ -45,6 +45,32 @@ public class ImageLoaderTools {
         return null;
     }
 
+    public static Bitmap loadInReqSize(StreamFetcher fetcher, int reqWidth, int reqHeight) {
+        if (fetcher == null) return null;
+
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            if (reqWidth >= 0 && reqHeight >= 0) {
+                options.inJustDecodeBounds = true;
+
+                InputStream stream = openInputStream(fetcher);
+                if (stream == null) return null;
+
+                BitmapFactory.decodeStream(stream, null, options);
+
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+                options.inJustDecodeBounds = false;
+            }
+
+            InputStream stream = openInputStream(fetcher);
+            if (stream == null) return null;
+
+            return BitmapFactory.decodeStream(stream, null, options);
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static Bitmap loadInReqSize(InputStream stream, int reqWidth, int reqHeight) {
         if (stream == null) return null;
 
@@ -87,5 +113,19 @@ public class ImageLoaderTools {
         }
 
         return inSampleSize;
+    }
+
+    private static InputStream openInputStream(StreamFetcher fetcher) {
+        InputStream stream = null;
+        try {
+            if (fetcher != null)
+                stream = fetcher.openInputStream();
+        } catch (Exception e) {
+        }
+        return stream;
+    }
+
+    public interface StreamFetcher {
+        InputStream openInputStream();
     }
 }
