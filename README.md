@@ -34,7 +34,7 @@ public class TestAdapter extends SimpleRecyclerAdapter<String> {
         //Find and bind your views here
         
         //Like:
-        //TextView textView = (TextView) holder.findViewById(R.id.test_item_text);
+        //TextView textView = (TextView) holder.findViewById(R.preferencesId.test_item_text);
     }
 }
 ```
@@ -57,7 +57,7 @@ public class TestAdapter extends SimpleRecyclerFilterAdapter<String> {
         //Find and bind your views here
         
         //Like:
-        //TextView textView = (TextView) holder.findViewById(R.id.test_item_text);
+        //TextView textView = (TextView) holder.findViewById(R.preferencesId.test_item_text);
     }
     
     @Override
