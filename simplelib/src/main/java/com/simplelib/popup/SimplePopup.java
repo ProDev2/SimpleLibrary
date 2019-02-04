@@ -1,6 +1,7 @@
 package com.simplelib.popup;
 
 import android.content.Context;
+import android.support.annotation.IdRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public abstract class SimplePopup extends PopupWindow {
         setOutsideTouchable(true);
     }
 
-    public View findViewById(int id) {
+    public <T extends View> T findViewById(@IdRes int id) {
         return view.findViewById(id);
     }
 
