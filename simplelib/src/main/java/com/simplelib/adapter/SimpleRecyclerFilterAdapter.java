@@ -194,6 +194,34 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
+    public void scrollUp() {
+        try {
+            if (filteredList.size() > 0)
+                super.scrollToPosition(0);
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void scrollDown() {
+        try {
+            if (filteredList.size() > 0)
+                super.scrollToPosition(filteredList.size() - 1);
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void scrollToPosition(int pos) {
+        super.scrollToPosition(pos);
+    }
+
+    @Override
+    public void scrollToPosition(V item) {
+        super.scrollToPosition(item);
+    }
+
+    @Override
     public void scrollToPosition(int pos, boolean animate) {
         try {
             if (pos >= 0 && pos < unfilteredList.size()) {
