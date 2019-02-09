@@ -30,7 +30,10 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
         super.setList(filteredList);
 
-        filter = applyFilter();
+        try {
+            setFilter(applyFilter());
+        } catch (Exception e) {
+        }
     }
 
     private void init() {
@@ -243,6 +246,12 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     public void updateFilter(boolean animate) {
+        try {
+            if (filter != null)
+                filter.setAdapter(this);
+        } catch (Exception e) {
+        }
+
         if (animate) {
             try {
                 for (V item : unfilteredList) {
@@ -359,8 +368,11 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     public void setFilter(SimpleFilter<V> filter) {
         this.filter = filter;
-        if (this.filter != null)
-            this.filter.setAdapter(this);
+        try {
+            if (this.filter != null)
+                this.filter.setAdapter(this);
+        } catch (Exception e) {
+        }
         updateFilter();
     }
 }

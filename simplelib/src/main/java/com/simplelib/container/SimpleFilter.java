@@ -13,9 +13,22 @@ public abstract class SimpleFilter<V> {
         if (adapter != null) this.adapter = adapter;
     }
 
+    public SimpleRecyclerFilterAdapter<V> getAdapter() {
+        return adapter;
+    }
+
     public void update() {
-        adapter.setFilter(this);
-        if (adapter != null) adapter.updateFilter();
+        if (adapter != null) {
+            adapter.setFilter(this);
+            adapter.updateFilter();
+        }
+    }
+
+    public void reload() {
+        if (adapter != null) {
+            adapter.setFilter(this);
+            adapter.reload();
+        }
     }
 
     public ArrayList<V> getList() {
