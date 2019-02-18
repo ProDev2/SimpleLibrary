@@ -396,11 +396,7 @@ public class ImageLoader {
 
         public boolean hasImage() {
             try {
-                if (image != null) {
-                    synchronized (image) {
-                        return !image.isRecycled();
-                    }
-                }
+                return image != null && !image.isRecycled();
             } catch (Exception e) {
             }
             return false;
@@ -413,11 +409,9 @@ public class ImageLoader {
         public void recycle(boolean destroyImage) {
             try {
                 if (image != null) {
-                    synchronized (image) {
-                        if (destroyImage && !image.isRecycled())
-                            image.recycle();
-                        image = null;
-                    }
+                    if (destroyImage && !image.isRecycled())
+                        image.recycle();
+                    image = null;
                 }
             } catch (Exception e) {
             }
