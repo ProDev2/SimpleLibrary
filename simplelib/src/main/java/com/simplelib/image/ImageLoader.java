@@ -408,11 +408,9 @@ public class ImageLoader {
 
         public void recycle(boolean destroyImage) {
             try {
-                if (image != null) {
-                    if (destroyImage && !image.isRecycled())
-                        image.recycle();
-                    image = null;
-                }
+                if (image != null && destroyImage && !image.isRecycled())
+                    image.recycle();
+                image = null;
             } catch (Exception e) {
             }
         }
@@ -567,18 +565,16 @@ public class ImageLoader {
             try {
                 boolean removed = removeMergeRequest(id);
 
-                synchronized (requests) {
-                    Iterator<ImageRequest> imageRequestIterator = requests.iterator();
-                    while (imageRequestIterator.hasNext()) {
-                        ImageRequest imageRequest = imageRequestIterator.next();
-                        if (imageRequest != null && imageRequest.isId(id)) {
-                            imageRequestIterator.remove();
-                            removed = true;
+                Iterator<ImageRequest> imageRequestIterator = requests.iterator();
+                while (imageRequestIterator.hasNext()) {
+                    ImageRequest imageRequest = imageRequestIterator.next();
+                    if (imageRequest != null && imageRequest.isId(id)) {
+                        imageRequestIterator.remove();
+                        removed = true;
 
-                            try {
-                                imageRequest.recycle(autoRecycle);
-                            } catch (Exception e) {
-                            }
+                        try {
+                            imageRequest.recycle(autoRecycle);
+                        } catch (Exception e) {
                         }
                     }
                 }
@@ -598,18 +594,16 @@ public class ImageLoader {
             try {
                 boolean removed = false;
 
-                synchronized (mergeRequests) {
-                    Iterator<ImageRequest> mergeRequestIterator = mergeRequests.iterator();
-                    while (mergeRequestIterator.hasNext()) {
-                        ImageRequest mergeRequest = mergeRequestIterator.next();
-                        if (mergeRequest != null && mergeRequest.isId(id)) {
-                            mergeRequestIterator.remove();
-                            removed = true;
+                Iterator<ImageRequest> mergeRequestIterator = mergeRequests.iterator();
+                while (mergeRequestIterator.hasNext()) {
+                    ImageRequest mergeRequest = mergeRequestIterator.next();
+                    if (mergeRequest != null && mergeRequest.isId(id)) {
+                        mergeRequestIterator.remove();
+                        removed = true;
 
-                            try {
-                                mergeRequest.recycle(autoRecycle);
-                            } catch (Exception e) {
-                            }
+                        try {
+                            mergeRequest.recycle(autoRecycle);
+                        } catch (Exception e) {
                         }
                     }
                 }
@@ -625,13 +619,9 @@ public class ImageLoader {
 
         public boolean hasRequest(String id) {
             try {
-                if (requests != null) {
-                    synchronized (requests) {
-                        for (ImageRequest imageRequest : requests)
-                            if (imageRequest != null && imageRequest.isId(id))
-                                return true;
-                    }
-                }
+                for (ImageRequest imageRequest : requests)
+                    if (imageRequest != null && imageRequest.isId(id))
+                        return true;
             } catch (Exception e) {
             }
             return false;
@@ -639,13 +629,9 @@ public class ImageLoader {
 
         public ImageRequest getRequest(String id) {
             try {
-                if (requests != null) {
-                    synchronized (requests) {
-                        for (ImageRequest imageRequest : requests)
-                            if (imageRequest != null && imageRequest.isId(id))
-                                return imageRequest;
-                    }
-                }
+                for (ImageRequest imageRequest : requests)
+                    if (imageRequest != null && imageRequest.isId(id))
+                        return imageRequest;
             } catch (Exception e) {
             }
             return null;
@@ -653,13 +639,9 @@ public class ImageLoader {
 
         public boolean hasMergeRequest(String id) {
             try {
-                if (mergeRequests != null) {
-                    synchronized (mergeRequests) {
-                        for (ImageRequest mergeRequest : mergeRequests)
-                            if (mergeRequest != null && mergeRequest.isId(id))
-                                return true;
-                    }
-                }
+                for (ImageRequest mergeRequest : mergeRequests)
+                    if (mergeRequest != null && mergeRequest.isId(id))
+                        return true;
             } catch (Exception e) {
             }
             return false;
@@ -667,13 +649,9 @@ public class ImageLoader {
 
         public ImageRequest getMergeRequest(String id) {
             try {
-                if (mergeRequests != null) {
-                    synchronized (mergeRequests) {
-                        for (ImageRequest mergeRequest : mergeRequests)
-                            if (mergeRequest != null && mergeRequest.isId(id))
-                                return mergeRequest;
-                    }
-                }
+                for (ImageRequest mergeRequest : mergeRequests)
+                    if (mergeRequest != null && mergeRequest.isId(id))
+                        return mergeRequest;
             } catch (Exception e) {
             }
             return null;
@@ -681,12 +659,8 @@ public class ImageLoader {
 
         public boolean addMergeRequest(ImageRequest mergeRequest) {
             try {
-                if (mergeRequest != null && hasRequest(mergeRequest.id)) {
-                    synchronized (mergeRequest) {
-                        if (!mergeRequests.contains(mergeRequest))
-                            mergeRequests.add(mergeRequest);
-                    }
-
+                if (mergeRequest != null && hasRequest(mergeRequest.id) && !mergeRequests.contains(mergeRequest)) {
+                    mergeRequests.add(mergeRequest);
                     return true;
                 }
             } catch (Exception e) {
@@ -702,10 +676,8 @@ public class ImageLoader {
             running = true;
 
             try {
-                synchronized (requests) {
-                    for (ImageRequest request : requests)
-                        handleRequest(request);
-                }
+                for (ImageRequest request : requests)
+                    handleRequest(request);
             } catch (Exception e) {
             }
 
@@ -743,31 +715,22 @@ public class ImageLoader {
                     }
                 }
 
-                if (requests != null) {
-                    synchronized (requests) {
-                        for (ImageRequest request : requests) {
-                            try {
-                                request.onFinish(request.image);
-                            } catch (Exception e) {
-                            }
-                        }
+                for (ImageRequest request : requests) {
+                    try {
+                        request.onFinish(request.image);
+                    } catch (Exception e) {
                     }
                 }
 
-                if (mergeRequests != null) {
-                    synchronized (mergeRequests) {
-                        for (ImageRequest mergeRequest : mergeRequests) {
-                            try {
-                                ImageRequest request = getRequest(mergeRequest.id);
-                                if (request != null)
-                                    request.applyTo(mergeRequest);
-                                mergeRequest.onFinish(mergeRequest.image);
-                            } catch (Exception e) {
-                            }
-                        }
+                for (ImageRequest mergeRequest : mergeRequests) {
+                    try {
+                        ImageRequest request = getRequest(mergeRequest.id);
+                        if (request != null)
+                            request.applyTo(mergeRequest);
+                        mergeRequest.onFinish(mergeRequest.image);
+                    } catch (Exception e) {
                     }
                 }
-
                 dispatch();
             } catch (Exception e) {
             }
@@ -789,12 +752,8 @@ public class ImageLoader {
             try {
                 running = false;
 
-                synchronized (requests) {
-                    requests.clear();
-                }
-                synchronized (mergeRequests) {
-                    mergeRequests.clear();
-                }
+                requests.clear();
+                mergeRequests.clear();
             } catch (Exception e) {
             }
 
