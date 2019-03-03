@@ -93,6 +93,7 @@ public class SimpleMenuPopup extends SimplePopup {
         return layout;
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public void bindLayout(View view) {
         if (list == null)
@@ -217,7 +218,7 @@ public class SimpleMenuPopup extends SimplePopup {
             layout.setPadding(margins, margins + distance, margins, margins + distance);
             layout.setId(0);
 
-            int[] attrs = new int[]{R.attr.selectableItemBackgroundBorderless};
+            int[] attrs = new int[] {R.attr.selectableItemBackgroundBorderless};
             TypedArray typedArray = getContext().obtainStyledAttributes(attrs);
             int backgroundResource = typedArray.getResourceId(0, 0);
             layout.setBackgroundResource(backgroundResource);

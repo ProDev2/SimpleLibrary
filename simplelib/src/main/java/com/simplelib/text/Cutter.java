@@ -184,6 +184,10 @@ public class Cutter implements Iterable<Cutter.Part>
             return end;
         }
 
+        public String getBase() {
+            return base;
+        }
+
         public ArrayList<String> getData() {
             return data;
         }
