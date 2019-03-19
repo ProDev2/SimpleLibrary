@@ -82,7 +82,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         } catch (Exception e) {
         }
 
-        onMoveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        onMoveItem(from, to);
         return true;
     }
 
@@ -104,7 +104,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
             } catch (Exception e) {
             }
 
-            onRemoveItem(viewHolder.getAdapterPosition(), direction);
+            onRemoveItem(pos, direction);
         }
     }
 
