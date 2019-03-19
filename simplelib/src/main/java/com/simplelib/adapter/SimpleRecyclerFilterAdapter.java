@@ -123,7 +123,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     @Override
     public void move(int posFrom, int posTo) {
         try {
-            if (posFrom >= 0 && posTo >= 0 && posFrom < unfilteredList.size() && posTo < unfilteredList.size()) {
+            if (posFrom >= 0 && posTo >= 0 && posFrom < unfilteredList.size() && posTo < unfilteredList.size() && posFrom != posTo) {
                 V valueFrom = unfilteredList.get(posFrom);
                 V valueTo = unfilteredList.get(posTo);
 

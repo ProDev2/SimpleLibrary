@@ -93,7 +93,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
 
     public void move(int posFrom, int posTo) {
         try {
-            if (posFrom >= 0 && posTo >= 0 && posFrom < list.size() && posTo < list.size()) {
+            if (posFrom >= 0 && posTo >= 0 && posFrom < list.size() && posTo < list.size() && posFrom != posTo) {
                 swapList(list, posFrom, posTo);
                 notifyItemMoved(posFrom, posTo);
             }
@@ -216,13 +216,15 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     }
 
     public void swapList(ArrayList<?> list, int fromPos, int toPos) {
-        if (fromPos < toPos) {
-            for (int pos = fromPos; pos < toPos; pos++) {
-                Collections.swap(list, pos, pos + 1);
-            }
-        } else {
-            for (int pos = fromPos; pos > toPos; pos--) {
-                Collections.swap(list, pos, pos - 1);
+        if (list != null && fromPos != toPos) {
+            if (fromPos < toPos) {
+                for (int pos = fromPos; pos < toPos; pos++) {
+                    Collections.swap(list, pos, pos + 1);
+                }
+            } else {
+                for (int pos = fromPos; pos > toPos; pos--) {
+                    Collections.swap(list, pos, pos - 1);
+                }
             }
         }
     }
