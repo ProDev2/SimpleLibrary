@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
@@ -124,10 +125,15 @@ public class ImageLoader {
         try {
             if (request != null && imageList != null) {
                 synchronized (imageList) {
-                    for (ImageRequest image : imageList) {
+                    for (int pos = 0; pos < imageList.size(); pos++) {
+                        ImageRequest image = imageList.get(pos);
                         if (image.isEqualRequest(request) && image.hasImage()) {
                             image.applyTo(request);
-                            return true;
+
+                            if (request.hasImage()) {
+                                swap(imageList, pos, 0);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -319,6 +325,19 @@ public class ImageLoader {
     public void dispatch() {
         stopAll();
         clearAll();
+    }
+
+    private static void swap(ArrayList<?> list, int fromPos, int toPos) {
+        try {
+            if (fromPos < toPos) {
+                for (int pos = fromPos; pos < toPos; pos++)
+                    Collections.swap(list, pos, pos + 1);
+            } else if (fromPos > toPos) {
+                for (int pos = fromPos; pos > toPos; pos--)
+                    Collections.swap(list, pos, pos - 1);
+            }
+        } catch (Exception e) {
+        }
     }
 
     public static abstract class ImageRequest {
@@ -678,6 +697,8 @@ public class ImageLoader {
             try {
                 for (ImageRequest request : requests)
                     handleRequest(request);
+            } catch (OutOfMemoryError e) {
+                System.gc();
             } catch (Exception e) {
             }
 
