@@ -708,7 +708,7 @@ public class ImageLoader {
         private void handleRequest(ImageRequest request) {
             try {
                 Bitmap image = request.onLoad();
-                if (image != null) {
+                if (image != null && !image.isRecycled()) {
                     request.image = image;
                     request.resultCode = ImageRequest.RESULT_OK;
 
