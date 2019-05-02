@@ -154,7 +154,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
 
     public void setBackButtonEnabled(boolean enabled) {
         try {
-            this.backButton = backButton;
+            this.backButton = enabled;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
