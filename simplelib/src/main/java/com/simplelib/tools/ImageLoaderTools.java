@@ -10,16 +10,22 @@ import java.io.InputStream;
 
 public class ImageLoaderTools {
     public static Bitmap loadInReqSize(File path, int reqWidth, int reqHeight) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (reqWidth >= 0 && reqHeight >= 0) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path.getAbsolutePath(), options);
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            if (reqWidth >= 0 && reqHeight >= 0) {
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path.getAbsolutePath(), options);
 
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-            options.inJustDecodeBounds = false;
+                options.inJustDecodeBounds = false;
+            }
+            return BitmapFactory.decodeFile(path.getAbsolutePath(), options);
+        } catch (OutOfMemoryError e) {
+            System.gc();
+        } catch (Exception e) {
         }
-        return BitmapFactory.decodeFile(path.getAbsolutePath(), options);
+        return null;
     }
 
     public static Bitmap loadInReqSize(Context context, Uri uri, int reqWidth, int reqHeight) {
@@ -40,6 +46,8 @@ public class ImageLoaderTools {
 
             InputStream stream = context.getContentResolver().openInputStream(uri);
             return BitmapFactory.decodeStream(stream, null, options);
+        } catch (OutOfMemoryError e) {
+            System.gc();
         } catch (Exception e) {
         }
         return null;
@@ -66,6 +74,8 @@ public class ImageLoaderTools {
             if (stream == null) return null;
 
             return BitmapFactory.decodeStream(stream, null, options);
+        } catch (OutOfMemoryError e) {
+            System.gc();
         } catch (Exception e) {
         }
         return null;
@@ -74,29 +84,41 @@ public class ImageLoaderTools {
     public static Bitmap loadInReqSize(InputStream stream, int reqWidth, int reqHeight) {
         if (stream == null) return null;
 
-        Bitmap bitmap = BitmapFactory.decodeStream(stream);
-        Bitmap image = ImageTools.fitImageIn(bitmap, reqWidth, reqHeight);
-
         try {
-            if (!bitmap.isRecycled())
-                bitmap.recycle();
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            Bitmap image = ImageTools.fitImageIn(bitmap, reqWidth, reqHeight);
+
+            try {
+                if (!bitmap.isRecycled())
+                    bitmap.recycle();
+            } catch (Exception e) {
+            }
+
+            return image;
+        } catch (OutOfMemoryError e) {
+            System.gc();
         } catch (Exception e) {
         }
-
-        return image;
+        return null;
     }
 
     public static Bitmap loadInReqSize(byte[] data, int reqWidth, int reqHeight) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        if (reqWidth >= 0 && reqHeight >= 0) {
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            if (reqWidth >= 0 && reqHeight >= 0) {
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-            options.inJustDecodeBounds = false;
+                options.inJustDecodeBounds = false;
+            }
+            return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        } catch (OutOfMemoryError e) {
+            System.gc();
+        } catch (Exception e) {
         }
-        return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        return null;
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
