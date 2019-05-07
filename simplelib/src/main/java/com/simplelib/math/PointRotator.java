@@ -39,7 +39,7 @@ public class PointRotator {
         x += center.x;
         y += center.y;
 
-        return new Vector2((float) x, (float) y);
+        return new Vector2((double) x, (double) y);
     }
 
     public double getAngleTo(Vector2 point2) {

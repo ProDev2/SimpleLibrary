@@ -7,7 +7,7 @@ import android.graphics.RectF;
 public class Vector4 {
     public Vector2 pos, size;
 
-    public float rotation;
+    public double rotation;
     public Vector2 rotationPoint;
 
     public Vector4(Vector4 vector) {
@@ -22,7 +22,7 @@ public class Vector4 {
         this.setRotationPointToCenter();
     }
 
-    public Vector4(float x, float y, float width, float height) {
+    public Vector4(double x, double y, double width, double height) {
         this.pos = new Vector2(x, y);
         this.size = new Vector2(width, height);
 
@@ -38,7 +38,7 @@ public class Vector4 {
         this.setRotationPointToCenter();
     }
 
-    public Vector4 setPos(float x, float y) {
+    public Vector4 setPos(double x, double y) {
         pos.setX(x);
         pos.setY(y);
         return this;
@@ -48,12 +48,20 @@ public class Vector4 {
         return pos;
     }
 
-    public float getX() {
+    public double getX() {
         return pos.getX();
     }
 
-    public float getY() {
+    public double getY() {
         return pos.getY();
+    }
+
+    public float getXAsFloat() {
+        return pos.getXAsFloat();
+    }
+
+    public float getYAsFloat() {
+        return pos.getYAsFloat();
     }
 
     public int getXAsInt() {
@@ -64,12 +72,12 @@ public class Vector4 {
         return pos.getYAsInt();
     }
 
-    public Vector4 moveTo(float x, float y) {
+    public Vector4 moveTo(double x, double y) {
         pos.moveTo(x, y);
         return this;
     }
 
-    public Vector4 moveBy(float x, float y) {
+    public Vector4 moveBy(double x, double y) {
         pos.moveBy(x, y);
         return this;
     }
@@ -84,7 +92,7 @@ public class Vector4 {
         return this;
     }
 
-    public Vector4 setSize(float width, float height) {
+    public Vector4 setSize(double width, double height) {
         size.setX(width);
         size.setY(height);
         return this;
@@ -100,11 +108,11 @@ public class Vector4 {
         return size;
     }
 
-    public float getWidth() {
+    public double getWidth() {
         return size.getX();
     }
 
-    public float getHeight() {
+    public double getHeight() {
         return size.getY();
     }
 
@@ -116,12 +124,20 @@ public class Vector4 {
         return size.getYAsInt();
     }
 
-    public Vector4 resizeTo(float x, float y) {
+    public float getWidthAsFloat() {
+        return size.getXAsFloat();
+    }
+
+    public float getHeightAsFloat() {
+        return size.getYAsFloat();
+    }
+
+    public Vector4 resizeTo(double x, double y) {
         size.moveTo(x, y);
         return this;
     }
 
-    public Vector4 resizeBy(float x, float y) {
+    public Vector4 resizeBy(double x, double y) {
         size.moveBy(x, y);
         return this;
     }
@@ -136,7 +152,7 @@ public class Vector4 {
         return this;
     }
 
-    public Vector4 zoom(float x, float y) {
+    public Vector4 zoom(double x, double y) {
         moveBy(-x, -y);
         resizeBy(x * 2, y * 2);
         return this;
@@ -148,11 +164,11 @@ public class Vector4 {
         return this;
     }
 
-    public float getRotation() {
+    public double getRotation() {
         return rotation;
     }
 
-    public Vector4 setRotation(float rotation) {
+    public Vector4 setRotation(double rotation) {
         this.rotation = rotation;
         return this;
     }
@@ -162,11 +178,15 @@ public class Vector4 {
         return this;
     }
 
-    public float getRotationAsInt() {
+    public float getRotationAsFloat() {
+        return (float) rotation;
+    }
+
+    public int getRotationAsInt() {
         return (int) rotation;
     }
 
-    public Vector4 setRotationPoint(float x, float y) {
+    public Vector4 setRotationPoint(double x, double y) {
         rotationPoint.setX(x);
         rotationPoint.setY(y);
         return this;
@@ -187,12 +207,20 @@ public class Vector4 {
         return rotationPoint;
     }
 
-    public float getRotPointX() {
+    public double getRotPointX() {
         return rotationPoint.getX();
     }
 
-    public float getRotPointY() {
+    public double getRotPointY() {
         return rotationPoint.getY();
+    }
+
+    public float getRotPointXAsFloat() {
+        return rotationPoint.getXAsFloat();
+    }
+
+    public float getRotPointYAsFloat() {
+        return rotationPoint.getYAsFloat();
     }
 
     public int getRotPointXAsInt() {
@@ -211,11 +239,11 @@ public class Vector4 {
         }
     }
 
-    public float getHalfWidth() {
+    public double getHalfWidth() {
         return getCenter().getX();
     }
 
-    public float getHalfHeight() {
+    public double getHalfHeight() {
         return getCenter().getY();
     }
 
@@ -306,8 +334,8 @@ public class Vector4 {
     public Matrix getAsMatix() {
         Matrix matrix = new Matrix();
         matrix.reset();
-        matrix.postRotate(rotation, rotationPoint.getX(), rotationPoint.getY());
-        matrix.postTranslate(pos.getX(), pos.getY());
+        matrix.postRotate((float) rotation, rotationPoint.getXAsFloat(), rotationPoint.getYAsFloat());
+        matrix.postTranslate(pos.getXAsFloat(), pos.getYAsFloat());
         return matrix;
     }
 
@@ -316,6 +344,6 @@ public class Vector4 {
     }
 
     public RectF getAsRectF() {
-        return new RectF(getX(), getY(), getX() + getWidth(), getY() + getHeight());
+        return new RectF(getXAsFloat(), getYAsFloat(), getXAsFloat() + getWidthAsFloat(), getYAsFloat() + getHeightAsFloat());
     }
 }

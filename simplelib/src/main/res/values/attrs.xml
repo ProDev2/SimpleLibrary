@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="BubbleCardView">
+
+        <attr name="bcv_arrowTarget" format="reference" />
+        <attr name="bcv_arrowSize" format="dimension" />
+        <attr name="bcv_arrowCornerRadius" format="dimension" />
+
+        <attr name="bcv_cornerRadius" format="dimension" />
+        <attr name="bcv_contentPadding" format="dimension" />
+
+        <attr name="bcv_backgroundColor" format="color" />
+
+    </declare-styleable>
+
+</resources>

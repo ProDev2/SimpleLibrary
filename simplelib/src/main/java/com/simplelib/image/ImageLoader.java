@@ -63,6 +63,9 @@ public class ImageLoader {
             int cpuCount = Runtime.getRuntime().availableProcessors();
             int maxLoaderCount = cpuCount * 2;
 
+            if (maxLoaderCount >= 3)
+                maxLoaderCount -= 1;
+
             setLoaderCapacity(maxLoaderCount);
         } catch (Exception e) {
         }

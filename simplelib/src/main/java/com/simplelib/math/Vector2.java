@@ -1,7 +1,7 @@
 package com.simplelib.math;
 
 public class Vector2 {
-    public float x, y;
+    public double x, y;
 
     public Vector2() {
     }
@@ -15,64 +15,64 @@ public class Vector2 {
         this.y = y;
     }
 
-    public Vector2(float x, float y) {
+    public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
     }
 
-    public float getLength() {
-        return (float) Math.sqrt((x * x) + (y * y));
+    public double getLength() {
+        return (double) Math.sqrt((x * x) + (y * y));
     }
 
-    public Vector2 setLength(float length) {
-        float resizeBy = length / getLength();
+    public Vector2 setLength(double length) {
+        double resizeBy = length / getLength();
         multiply(resizeBy);
         return this;
     }
 
-    public Vector2 rotateBy(float angle) {
+    public Vector2 rotateBy(double angle) {
         PointRotator pointRotator = new PointRotator(this);
         pointRotator.rotate(angle).applyTo(this);
         return this;
     }
 
-    public Vector2 rotateTo(float angle) {
-        float rotBy = angle - getAngle();
+    public Vector2 rotateTo(double angle) {
+        double rotBy = angle - getAngle();
         if (rotBy != 0) rotateBy(rotBy);
         return this;
     }
 
-    public float getAngle() {
-        return (float) Math.toDegrees(Math.atan2(y, x));
+    public double getAngle() {
+        return (double) Math.toDegrees(Math.atan2(y, x));
     }
 
-    public float getSmallestAngle(Vector2 vector) {
-        float angle1 = getAngle();
-        float angle2 = vector.getAngle();
+    public double getSmallestAngle(Vector2 vector) {
+        double angle1 = getAngle();
+        double angle2 = vector.getAngle();
 
         while (angle1 < angle2) angle1 += 360;
         while (angle1 > angle2) angle1 -= 360;
 
-        float d1 = angle2 - angle1;
-        float d2 = angle1 + 360 - angle2;
+        double d1 = angle2 - angle1;
+        double d2 = angle1 + 360 - angle2;
 
         return Math.min(d1, d2);
     }
 
-    public float getLargestAngle(Vector2 vector) {
-        float angle1 = getAngle();
-        float angle2 = vector.getAngle();
+    public double getLargestAngle(Vector2 vector) {
+        double angle1 = getAngle();
+        double angle2 = vector.getAngle();
 
         while (angle1 < angle2) angle1 += 360;
         while (angle1 > angle2) angle1 -= 360;
 
-        float d1 = angle2 - angle1;
-        float d2 = angle1 + 360 - angle2;
+        double d1 = angle2 - angle1;
+        double d2 = angle1 + 360 - angle2;
 
         return Math.max(d1, d2);
     }
 
-    public Vector2 set(float x, float y) {
+    public Vector2 set(double x, double y) {
         this.x = x;
         this.y = y;
         return this;
@@ -84,11 +84,19 @@ public class Vector2 {
         return this;
     }
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public Vector2 setX(float x) {
+    public float getXAsFloat() {
+        return (float) x;
+    }
+
+    public int getXAsInt() {
+        return (int) x;
+    }
+
+    public Vector2 setX(double x) {
         this.x = x;
         return this;
     }
@@ -98,15 +106,19 @@ public class Vector2 {
         return this;
     }
 
-    public int getXAsInt() {
-        return (int) x;
-    }
-
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public Vector2 setY(float y) {
+    public float getYAsFloat() {
+        return (float) y;
+    }
+
+    public int getYAsInt() {
+        return (int) y;
+    }
+
+    public Vector2 setY(double y) {
         this.y = y;
         return this;
     }
@@ -114,10 +126,6 @@ public class Vector2 {
     public Vector2 setY(int y) {
         this.y = y;
         return this;
-    }
-
-    public int getYAsInt() {
-        return (int) y;
     }
 
     public Vector2 add(Vector2 vector) {
@@ -152,49 +160,49 @@ public class Vector2 {
         return this;
     }
 
-    public Vector2 add(float value) {
+    public Vector2 add(double value) {
         this.x += value;
         this.y += value;
         return this;
     }
 
-    public Vector2 subtract(float value) {
+    public Vector2 subtract(double value) {
         this.x -= value;
         this.y -= value;
         return this;
     }
 
-    public Vector2 multiply(float value) {
+    public Vector2 multiply(double value) {
         this.x *= value;
         this.y *= value;
         return this;
     }
 
-    public Vector2 divide(float value) {
+    public Vector2 divide(double value) {
         this.x /= value;
         this.y /= value;
         return this;
     }
 
-    public Vector2 add(float x, float y) {
+    public Vector2 add(double x, double y) {
         this.x += x;
         this.y += y;
         return this;
     }
 
-    public Vector2 subtract(float x, float y) {
+    public Vector2 subtract(double x, double y) {
         this.x -= x;
         this.y -= y;
         return this;
     }
 
-    public Vector2 multiply(float x, float y) {
+    public Vector2 multiply(double x, double y) {
         this.x *= x;
         this.y *= y;
         return this;
     }
 
-    public Vector2 divide(float x, float y) {
+    public Vector2 divide(double x, double y) {
         this.x /= x;
         this.y /= y;
         return this;
@@ -207,14 +215,14 @@ public class Vector2 {
     }
 
     public Vector2 toMinSize() {
-        float size = Math.min(x, y);
+        double size = Math.min(x, y);
         this.x = size;
         this.y = size;
         return this;
     }
 
     public Vector2 toMaxSize() {
-        float size = Math.max(x, y);
+        double size = Math.max(x, y);
         this.x = size;
         this.y = size;
         return this;
@@ -232,13 +240,13 @@ public class Vector2 {
         return this;
     }
 
-    public Vector2 moveTo(float x, float y) {
+    public Vector2 moveTo(double x, double y) {
         this.x = x;
         this.y = y;
         return this;
     }
 
-    public Vector2 moveBy(float x, float y) {
+    public Vector2 moveBy(double x, double y) {
         this.x += x;
         this.y += y;
         return this;

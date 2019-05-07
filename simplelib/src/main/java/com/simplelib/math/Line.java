@@ -24,9 +24,6 @@ public class Line {
     }
 
     public Line(Vector2 start, Vector2 end) {
-        this.start = start;
-        this.end = end;
-
         if (start == null)
             start = new Vector2();
         if (end == null)
@@ -34,38 +31,41 @@ public class Line {
 
         if (start.equals(end))
             end = end.copy();
+
+        this.start = start;
+        this.end = end;
     }
 
-    public Line(float x1, float y1, float x2, float y2) {
+    public Line(double x1, double y1, double x2, double y2) {
         this(new Vector2(x1, y1), new Vector2(x2, y2));
     }
 
-    public Line setStart(float x, float y) {
+    public Line setStart(double x, double y) {
         start.moveTo(x, y);
         return this;
     }
 
-    public Line setEnd(float x, float y) {
+    public Line setEnd(double x, double y) {
         end.moveTo(x, y);
         return this;
     }
 
-    public Line setStartX(float x) {
+    public Line setStartX(double x) {
         start.setX(x);
         return this;
     }
 
-    public Line setStartY(float y) {
+    public Line setStartY(double y) {
         start.setY(y);
         return this;
     }
 
-    public Line setEndX(float x) {
+    public Line setEndX(double x) {
         end.setX(x);
         return this;
     }
 
-    public Line setEndY(float y) {
+    public Line setEndY(double y) {
         end.setY(y);
         return this;
     }
@@ -90,20 +90,52 @@ public class Line {
         return this;
     }
 
-    public float getStartX() {
+    public double getStartX() {
         return start.getX();
     }
 
-    public float getStartY() {
+    public double getStartY() {
         return start.getY();
     }
 
-    public float getEndX() {
+    public float getStartXAsFloat() {
+        return start.getXAsFloat();
+    }
+
+    public float getStartYAsFloat() {
+        return start.getYAsFloat();
+    }
+
+    public int getStartXAsInt() {
+        return start.getXAsInt();
+    }
+
+    public int getStartYAsInt() {
+        return start.getYAsInt();
+    }
+
+    public double getEndX() {
         return end.getX();
     }
 
-    public float getEndY() {
+    public double getEndY() {
         return end.getY();
+    }
+
+    public float getEndXAsFloat() {
+        return end.getXAsFloat();
+    }
+
+    public float getEndYAsFloat() {
+        return end.getYAsFloat();
+    }
+
+    public int getEndXAsInt() {
+        return end.getXAsInt();
+    }
+
+    public int getEndYAsInt() {
+        return end.getYAsInt();
     }
 
     public boolean isVertical() {
@@ -114,7 +146,7 @@ public class Line {
         return start.getY() == end.getY();
     }
 
-    public Line moveBy(float dX, float dY) {
+    public Line moveBy(double dX, double dY) {
         start.moveBy(dX, dY);
         end.moveBy(dX, dY);
         return this;
@@ -138,14 +170,14 @@ public class Line {
         return this;
     }
 
-    public float getLength() {
+    public double getLength() {
         double dx = getStartX() - getEndX();
         double dy = getStartY() - getEndY();
-        return (float) Math.sqrt((dx * dx) + (dy * dy));
+        return (double) Math.sqrt((dx * dx) + (dy * dy));
     }
 
-    public Line setLength(float length) {
-        float resizeBy = length / getLength();
+    public Line setLength(double length) {
+        double resizeBy = length / getLength();
 
         end.subtract(start);
         end.multiply(new Vector2(resizeBy, resizeBy));
@@ -153,44 +185,44 @@ public class Line {
         return this;
     }
 
-    public Line rotateBy(float angle) {
+    public Line rotateBy(double angle) {
         PointRotator pointRotator = new PointRotator(end, start);
         pointRotator.rotate(angle).applyTo(end);
         return this;
     }
 
-    public Line rotateTo(float angle) {
-        float rotBy = angle - getAngle();
+    public Line rotateTo(double angle) {
+        double rotBy = angle - getAngle();
         if (rotBy != 0) rotateBy(rotBy);
         return this;
     }
 
-    public float getAngle() {
-        return (float) Math.toDegrees(Math.atan2(getEndY() - getStartY(), getEndX() - getStartX()));
+    public double getAngle() {
+        return (double) Math.toDegrees(Math.atan2(getEndY() - getStartY(), getEndX() - getStartX()));
     }
 
-    public float getSmallestAngle(Line line) {
-        float angle1 = getAngle();
-        float angle2 = line.getAngle();
+    public double getSmallestAngle(Line line) {
+        double angle1 = getAngle();
+        double angle2 = line.getAngle();
 
         while (angle1 < angle2) angle1 += 360;
         while (angle1 > angle2) angle1 -= 360;
 
-        float d1 = angle2 - angle1;
-        float d2 = angle1 + 360 - angle2;
+        double d1 = angle2 - angle1;
+        double d2 = angle1 + 360 - angle2;
 
         return Math.min(d1, d2);
     }
 
-    public float getLargestAngle(Line line) {
-        float angle1 = getAngle();
-        float angle2 = line.getAngle();
+    public double getLargestAngle(Line line) {
+        double angle1 = getAngle();
+        double angle2 = line.getAngle();
 
         while (angle1 < angle2) angle1 += 360;
         while (angle1 > angle2) angle1 -= 360;
 
-        float d1 = angle2 - angle1;
-        float d2 = angle1 + 360 - angle2;
+        double d1 = angle2 - angle1;
+        double d2 = angle1 + 360 - angle2;
 
         return Math.max(d1, d2);
     }
@@ -201,6 +233,67 @@ public class Line {
 
     public Vector2 getDelta() {
         return end.copy().subtract(start);
+    }
+
+    public double getDeltaX() {
+        return getEndX() - getStartX();
+    }
+
+    public double getDeltaY() {
+        return getEndY() - getStartY();
+    }
+
+    public float getDeltaXAsFloat() {
+        return getEndXAsFloat() - getStartXAsFloat();
+    }
+
+    public float getDeltaYAsFloat() {
+        return getEndYAsFloat() - getStartYAsFloat();
+    }
+
+    public int getDeltaXAsInt() {
+        return getEndXAsInt() - getStartXAsInt();
+    }
+
+    public int getDeltaYAsInt() {
+        return getEndYAsInt() - getStartYAsInt();
+    }
+
+    public Vector2 getPoint(double relativePos) {
+        return getPoint(relativePos, false);
+    }
+
+    public Vector2 getPoint(double relativePos, boolean noBounds) {
+        if (!noBounds) {
+            if (relativePos < 0) relativePos = 0;
+            if (relativePos > 1) relativePos = 1;
+        }
+
+        Vector2 delta = getDelta();
+        if (delta.getX() == 0 && delta.getY() == 0) return null;
+
+        double relPosX = delta.getX() * (double) relativePos;
+        double relPosY = delta.getY() * (double) relativePos;
+        return start.copy().add(new Vector2(relPosX, relPosY));
+    }
+
+    public double closestRelativePos(Vector2 pos) {
+        return closestRelativePos(pos, false);
+    }
+
+    public double closestRelativePos(Vector2 pos, boolean noBounds) {
+        Vector2 delta = getDelta();
+        if (delta.getX() == 0 && delta.getY() == 0) return -1;
+
+        double dX = (pos.getX() - getStartX()) * delta.getX();
+        double dY = (pos.getY() - getStartY()) * delta.getY();
+        double relPos = (dX + dY) / (Math.pow(delta.getX(), 2) + Math.pow(delta.getY(), 2));
+
+        if (!noBounds) {
+            if (relPos < 0) relPos = 0;
+            if (relPos > 1) relPos = 1;
+        }
+        return (double) relPos;
     }
 
     public Line closestLineFrom(Vector2 pos) {
@@ -224,8 +317,8 @@ public class Line {
         } else if (relPos > 1) {
             return end.copy();
         } else {
-            float relPosX = delta.getX() * (float) relPos;
-            float relPosY = delta.getY() * (float) relPos;
+            double relPosX = delta.getX() * (double) relPos;
+            double relPosY = delta.getY() * (double) relPos;
             return start.copy().add(new Vector2(relPosX, relPosY));
         }
     }
@@ -243,16 +336,16 @@ public class Line {
         double y2line2 = line.getEndY();
 
         if ((x1line1 == x1line2) && (y1line1 == y1line2))
-            return (new Vector2((float) x1line1, (float) y1line1));
+            return (new Vector2((double) x1line1, (double) y1line1));
 
         if ((x1line1 == x2line2) && (y1line1 == y2line2))
-            return (new Vector2((float) x1line1, (float) y1line1));
+            return (new Vector2((double) x1line1, (double) y1line1));
 
         if ((x2line1 == x1line2) && (y2line1 == y1line2))
-            return (new Vector2((float) x2line1, (float) y2line1));
+            return (new Vector2((double) x2line1, (double) y2line1));
 
         if ((x2line1 == x2line2) && (y2line1 == y2line2))
-            return (new Vector2((float) x2line1, (float) y2line1));
+            return (new Vector2((double) x2line1, (double) y2line1));
 
         double dyline1 = -(y2line1 - y1line1);
         double dxline1 = x2line1 - x1line1;
@@ -266,8 +359,8 @@ public class Line {
             return null;
 
         Vector2 point = new Vector2();
-        point.setX((float) (-(e * dxline2 - dxline1 * f) / (dyline1 * dxline2 - dyline2 * dxline1)));
-        point.setY((float) (-(dyline1 * f - dyline2 * e) / (dyline1 * dxline2 - dyline2 * dxline1)));
+        point.setX((double) (-(e * dxline2 - dxline1 * f) / (dyline1 * dxline2 - dyline2 * dxline1)));
+        point.setY((double) (-(dyline1 * f - dyline2 * e) / (dyline1 * dxline2 - dyline2 * dxline1)));
 
         return point;
     }
