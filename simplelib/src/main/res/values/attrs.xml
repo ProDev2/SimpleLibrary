@@ -7,8 +7,9 @@
         <attr name="bcv_arrowSize" format="dimension" />
         <attr name="bcv_arrowCornerRadius" format="dimension" />
 
+        <attr name="bcv_roundCorners" format="boolean" />
+
         <attr name="bcv_cornerRadius" format="dimension" />
-        <attr name="bcv_contentPadding" format="dimension" />
 
         <attr name="bcv_backgroundColor" format="color" />
 

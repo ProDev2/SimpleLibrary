@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -21,6 +22,7 @@ public class BubbleCardDrawable extends Drawable {
     private int color = Color.WHITE;
 
     //Variables
+    private boolean roundCorners;
     private double cornerRadius;
 
     private double arrowSize;
@@ -35,6 +37,9 @@ public class BubbleCardDrawable extends Drawable {
     private Paint paint;
 
     //Calculation
+    private Rect bounds;
+    private Rect bubbleBounds;
+
     private Line lineLeft;
     private Line lineTop;
     private Line lineRight;
@@ -53,6 +58,15 @@ public class BubbleCardDrawable extends Drawable {
 
     public BubbleCardDrawable(int color, double cornerRadius, double arrowSize, double arrowCornerRadius) {
         this.color = color;
+        this.cornerRadius = cornerRadius;
+        this.arrowSize = arrowSize;
+        this.arrowCornerRadius = arrowCornerRadius;
+        initialize();
+    }
+
+    public BubbleCardDrawable(int color, boolean roundCorners, double cornerRadius, double arrowSize, double arrowCornerRadius) {
+        this.color = color;
+        this.roundCorners = roundCorners;
         this.cornerRadius = cornerRadius;
         this.arrowSize = arrowSize;
         this.arrowCornerRadius = arrowCornerRadius;
@@ -81,6 +95,10 @@ public class BubbleCardDrawable extends Drawable {
         return color;
     }
 
+    public boolean isRoundCorners() {
+        return roundCorners;
+    }
+
     public double getCornerRadius() {
         return cornerRadius;
     }
@@ -97,11 +115,28 @@ public class BubbleCardDrawable extends Drawable {
         return arrowTarget;
     }
 
+    public Rect getFullBounds() {
+        return bounds;
+    }
+
+    public Rect getBubbleBounds() {
+        return bubbleBounds;
+    }
+
     public void setColor(int color) {
         boolean changed = this.color != color;
         this.color = color;
         this.paint.setColor(color);
         if (changed) {
+            invalidateSelf();
+        }
+    }
+
+    public void setRoundCorners(boolean roundCorners) {
+        boolean changed = this.roundCorners != roundCorners;
+        this.roundCorners = roundCorners;
+        if (changed) {
+            path = getPath(true);
             invalidateSelf();
         }
     }
@@ -119,7 +154,7 @@ public class BubbleCardDrawable extends Drawable {
         boolean changed = this.arrowSize != arrowSize;
         this.arrowSize = arrowSize;
         if (changed) {
-            path = getPath(true);
+            calculateBounds(bounds, true);
             invalidateSelf();
         }
     }
@@ -134,31 +169,52 @@ public class BubbleCardDrawable extends Drawable {
     }
 
     public void setArrowTarget(Vector2 arrowTarget) {
-        boolean changed = this.arrowTarget != arrowTarget;
         this.arrowTarget = arrowTarget;
-        if (changed) {
-            path = getPath(true);
-            invalidateSelf();
-        }
+
+        path = getPath(true);
+        invalidateSelf();
+    }
+
+    public void setFullBounds(Rect bounds) {
+        this.bounds = bounds;
+
+        calculateBounds(bounds, true);
+        invalidateSelf();
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        if (bounds == null) {
+            bounds = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+            calculateBounds(bounds, true);
+        }
+
         path = getPath(false);
 
-        canvas.drawPath(path, paint);
+        if (path != null && paint != null) {
+            canvas.drawPath(path, paint);
+        }
     }
 
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
+
+        calculateBounds(bounds, true);
     }
 
     @Override
     public void getOutline(@NonNull Outline outline) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                outline.setConvexPath(getPath(false));
+                double cornerRadius = calculateCornerRadius();
+
+                if (bubbleBounds != null && cornerRadius >= 0) {
+                    if (roundCorners)
+                        outline.setRoundRect(bubbleBounds, (float) cornerRadius);
+                    else
+                        outline.setRect(bubbleBounds);
+                }
             }
         } catch (Exception e) {
         }
@@ -194,10 +250,48 @@ public class BubbleCardDrawable extends Drawable {
         return PixelFormat.TRANSLUCENT;
     }
 
+    public void calculateBounds(Rect bounds) {
+        calculateBounds(bounds, false);
+    }
+
+    public void calculateBounds(Rect bounds, boolean rebuild) {
+        if (bounds == null)
+            bounds = this.bounds;
+        if (bounds == null)
+            bounds = getBounds();
+
+        boolean changed = this.bounds != bounds;
+        this.bounds = bounds;
+        if (!changed && !rebuild) return;
+
+        if (bounds == null) {
+            this.bubbleBounds = null;
+        } else {
+            int offset = (int) calculateOffset();
+
+            int left = bounds.left + offset;
+            int top = bounds.top + offset;
+            int right = bounds.right - offset;
+            int bottom = bounds.bottom - offset;
+
+            Rect bubbleBounds = new Rect(left, top, right, bottom);
+            if (bubbleBounds != null && bubbleBounds.width() > 0 && bubbleBounds.height() > 0)
+                this.bubbleBounds = bubbleBounds;
+            else
+                this.bubbleBounds = null;
+        }
+
+        path = getPath(rebuild);
+    }
+
     public Path getPath(boolean rebuild) {
         //Check path
         if (path != null && !rebuild)
             return path;
+
+        //Check for bounds
+        if (bounds == null || bubbleBounds == null)
+            return null;
 
         //Create or reset path
         if (path == null)
@@ -242,7 +336,7 @@ public class BubbleCardDrawable extends Drawable {
         }
 
         //Calculate path
-        Rect bounds = getBounds();
+        Rect bounds = bubbleBounds;
         if (bounds == null) return path;
 
         int left = bounds.left;
@@ -319,7 +413,18 @@ public class BubbleCardDrawable extends Drawable {
         //Corner (left | top)
         if (lineLeft != null && lineTop != null) {
             path.lineTo(lineLeft.getStartXAsFloat(), lineLeft.getStartYAsFloat());
-            path.quadTo(lineTop.getStartXAsFloat() - (float) cornerRadius, lineLeft.getStartYAsFloat() - (float) cornerRadius, lineTop.getStartXAsFloat(), lineTop.getStartYAsFloat());
+
+            if (roundCorners) {
+                RectF cornerRect = new RectF(
+                        lineLeft.getStartXAsFloat(),
+                        lineTop.getStartYAsFloat(),
+                        lineTop.getStartXAsFloat() + (float) cornerRadius,
+                        lineLeft.getStartYAsFloat() + (float) cornerRadius
+                );
+                path.arcTo(cornerRect, -180, 90);
+            } else {
+                path.quadTo(lineTop.getStartXAsFloat() - (float) cornerRadius, lineLeft.getStartYAsFloat() - (float) cornerRadius, lineTop.getStartXAsFloat(), lineTop.getStartYAsFloat());
+            }
         }
 
         //Path top
@@ -333,7 +438,18 @@ public class BubbleCardDrawable extends Drawable {
         //Corner (right | top)
         if (lineTop != null && lineRight != null) {
             path.lineTo(lineTop.getEndXAsFloat(), lineTop.getEndYAsFloat());
-            path.quadTo(lineTop.getEndXAsFloat() + (float) cornerRadius, lineRight.getStartYAsFloat() - (float) cornerRadius, lineRight.getStartXAsFloat(), lineRight.getStartYAsFloat());
+
+            if (roundCorners) {
+                RectF cornerRect = new RectF(
+                        lineTop.getEndXAsFloat() - (float) cornerRadius,
+                        lineTop.getEndYAsFloat(),
+                        lineRight.getStartXAsFloat(),
+                        lineRight.getStartYAsFloat() + (float) cornerRadius
+                );
+                path.arcTo(cornerRect, -90, 90);
+            } else {
+                path.quadTo(lineTop.getEndXAsFloat() + (float) cornerRadius, lineRight.getStartYAsFloat() - (float) cornerRadius, lineRight.getStartXAsFloat(), lineRight.getStartYAsFloat());
+            }
         }
 
         //Path right
@@ -347,7 +463,18 @@ public class BubbleCardDrawable extends Drawable {
         //Corner (right | bottom)
         if (lineRight != null && lineBottom != null) {
             path.lineTo(lineRight.getEndXAsFloat(), lineRight.getEndYAsFloat());
-            path.quadTo(lineBottom.getEndXAsFloat() + (float) cornerRadius, lineRight.getEndYAsFloat() + (float) cornerRadius, lineBottom.getEndXAsFloat(), lineBottom.getEndYAsFloat());
+
+            if (roundCorners) {
+                RectF cornerRect = new RectF(
+                        lineBottom.getEndXAsFloat() - (float) cornerRadius,
+                        lineRight.getEndYAsFloat() - (float) cornerRadius,
+                        lineRight.getEndXAsFloat(),
+                        lineBottom.getEndYAsFloat()
+                );
+                path.arcTo(cornerRect, 0, 90);
+            } else {
+                path.quadTo(lineBottom.getEndXAsFloat() + (float) cornerRadius, lineRight.getEndYAsFloat() + (float) cornerRadius, lineBottom.getEndXAsFloat(), lineBottom.getEndYAsFloat());
+            }
         }
 
         //Path bottom
@@ -361,7 +488,18 @@ public class BubbleCardDrawable extends Drawable {
         //Corner (left | bottom)
         if (lineBottom != null && lineLeft != null) {
             path.lineTo(lineBottom.getStartXAsFloat(), lineBottom.getStartYAsFloat());
-            path.quadTo(lineBottom.getStartXAsFloat() - (float) cornerRadius, lineLeft.getEndYAsFloat() + (float) cornerRadius, lineLeft.getEndXAsFloat(), lineLeft.getEndYAsFloat());
+
+            if (roundCorners) {
+                RectF cornerRect = new RectF(
+                        lineLeft.getEndXAsFloat(),
+                        lineLeft.getEndYAsFloat() - (float) cornerRadius,
+                        lineBottom.getStartXAsFloat() + (float) cornerRadius,
+                        lineBottom.getStartYAsFloat()
+                );
+                path.arcTo(cornerRect, 90, 90);
+            } else {
+                path.quadTo(lineBottom.getStartXAsFloat() - (float) cornerRadius, lineLeft.getEndYAsFloat() + (float) cornerRadius, lineLeft.getEndXAsFloat(), lineLeft.getEndYAsFloat());
+            }
         }
 
         //Close path
@@ -382,7 +520,7 @@ public class BubbleCardDrawable extends Drawable {
         lineBottom = null;
 
         //Calculate bound lines
-        Rect bounds = getBounds();
+        Rect bounds = bubbleBounds;
         if (bounds == null) return;
 
         int left = bounds.left;
@@ -408,8 +546,8 @@ public class BubbleCardDrawable extends Drawable {
         lineBottom = new Line(centerX - halfLengthX, bottom, centerX + halfLengthX, bottom);
     }
 
-    private double calculateCornerRadius() {
-        Rect bounds = getBounds();
+    public double calculateCornerRadius() {
+        Rect bounds = bubbleBounds;
         if (bounds == null)
             return cornerRadius >= 0 ? cornerRadius : 0;
 
@@ -429,12 +567,28 @@ public class BubbleCardDrawable extends Drawable {
         }
     }
 
-    private double calculateMaxArrowLength() {
+    public double calculateMaxArrowSize() {
         double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
-        double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0f;
+        double minLength = radius > 0 ? (double) ((Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) / 2d) : 0d;
+
+        double size = arrowSize;
+
+        return Math.max(minLength, size);
+    }
+
+    public double calculateMaxArrowLength() {
+        double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
+        double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0d;
 
         double length = arrowSize * 2;
 
         return Math.max(minLength, length);
+    }
+
+    public double calculateOffset() {
+        double maxArrowSize = calculateMaxArrowSize();
+        if (maxArrowSize < 0) maxArrowSize = 0;
+
+        return maxArrowSize;
     }
 }
