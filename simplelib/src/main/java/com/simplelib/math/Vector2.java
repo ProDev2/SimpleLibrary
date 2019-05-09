@@ -72,6 +72,12 @@ public class Vector2 {
         return Math.max(d1, d2);
     }
 
+    public Vector2 set(Vector2 vector) {
+        if (vector != null)
+            vector.applyTo(this);
+        return this;
+    }
+
     public Vector2 set(double x, double y) {
         this.x = x;
         this.y = y;

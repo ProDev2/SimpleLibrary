@@ -12,8 +12,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.ViewTreeObserver;
 
 import com.simplelib.R;
+import com.simplelib.math.Line;
 import com.simplelib.math.Vector2;
 import com.simplelib.tools.Tools;
 import com.simplelib.views.drawable.BubbleCardDrawable;
@@ -24,7 +26,8 @@ public class BubbleCardView extends ViewGroup {
     private static final float DEFAULT_CORNER_RADIUS_DP = -1f;
 
     private static final int DEFAULT_ARROW_TARGET_ID = 0;
-    private static final float DEFAULT_ARROW_SIZE_DP = 20f;
+    private static final float DEFAULT_ARROW_SIZE_DP = 5f;
+    private static final float DEFAULT_ARROW_LENGTH_DP = 10f;
     private static final float DEFAULT_ARROW_CORNER_RADIUS_DP = 5f;
 
     private static final int DEFAULT_BACKGROUND_COLOR = Color.WHITE;
@@ -35,6 +38,7 @@ public class BubbleCardView extends ViewGroup {
 
     private int arrowTarget;
     private float arrowSize;
+    private float arrowLength;
     private float arrowCornerRadius;
 
     private int backgroundColor;
@@ -83,6 +87,7 @@ public class BubbleCardView extends ViewGroup {
 
         arrowTarget = DEFAULT_ARROW_TARGET_ID;
         arrowSize = Tools.dpToPx(DEFAULT_ARROW_SIZE_DP);
+        arrowLength = Tools.dpToPx(DEFAULT_ARROW_LENGTH_DP);
         arrowCornerRadius = Tools.dpToPx(DEFAULT_ARROW_CORNER_RADIUS_DP);
 
         backgroundColor = DEFAULT_BACKGROUND_COLOR;
@@ -96,6 +101,7 @@ public class BubbleCardView extends ViewGroup {
 
             arrowTarget = attributes.getResourceId(R.styleable.BubbleCardView_bcv_arrowTarget, arrowTarget);
             arrowSize = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowSize, arrowSize);
+            arrowLength = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowLength, arrowLength);
             arrowCornerRadius = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowCornerRadius, arrowCornerRadius);
 
             backgroundColor = attributes.getColor(R.styleable.BubbleCardView_bcv_backgroundColor, backgroundColor);
@@ -103,18 +109,23 @@ public class BubbleCardView extends ViewGroup {
             attributes.recycle();
         }
 
-        //Set attributes
-        if (arrowTarget != 0)
-            setPointer(new Pointer(arrowTarget));
-
         //Set background
-        drawable = new BubbleCardDrawable(backgroundColor, roundCorners, cornerRadius, arrowSize, arrowCornerRadius);
+        drawable = new BubbleCardDrawable(backgroundColor, roundCorners, cornerRadius, arrowSize, arrowLength, arrowCornerRadius);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setBackground(drawable);
         } else {
             setBackgroundDrawable(drawable);
         }
+
+        //Add events
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (drawable != null)
+                    drawable.redraw(true);
+            }
+        });
 
         //Update
         update();
@@ -140,6 +151,11 @@ public class BubbleCardView extends ViewGroup {
         update();
     }
 
+    public void setArrowLength(float arrowLength) {
+        this.arrowLength = arrowLength;
+        update();
+    }
+
     public void setArrowCornerRadius(float arrowCornerRadius) {
         this.arrowCornerRadius = arrowCornerRadius;
         update();
@@ -162,6 +178,7 @@ public class BubbleCardView extends ViewGroup {
             drawable.setCornerRadius(cornerRadius);
 
             drawable.setArrowSize(arrowSize);
+            drawable.setArrowLength(arrowLength);
             drawable.setArrowCornerRadius(arrowCornerRadius);
         }
     }
@@ -186,17 +203,42 @@ public class BubbleCardView extends ViewGroup {
             View child = getChildAt(pos);
             if (child == null) continue;
 
-            LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            int width = MeasureSpec.UNSPECIFIED;
+            int height = MeasureSpec.UNSPECIFIED;
+
+            int marginWidth = 0;
+            int marginHeight = 0;
+
+            ViewGroup.LayoutParams params = child.getLayoutParams();
+            if (params != null) {
+                width = params.width;
+                height = params.height;
+            }
+
+            if (params != null && params instanceof LayoutParams) {
+                LayoutParams lp = (LayoutParams) params;
+                marginWidth = lp.leftMargin + lp.rightMargin;
+                marginHeight = lp.topMargin + lp.bottomMargin;
+            } else if (params != null && params instanceof MarginLayoutParams) {
+                MarginLayoutParams lp = (MarginLayoutParams) params;
+                marginWidth = lp.leftMargin + lp.rightMargin;
+                marginHeight = lp.topMargin + lp.bottomMargin;
+            }
+
+            if (marginWidth < 0) marginWidth = 0;
+            if (marginHeight < 0) marginHeight = 0;
 
             int childWidthMeasureSpec = getChildMeasureSpec(
                     widthMeasureSpec,
-                    widthConstraints + lp.leftMargin + lp.rightMargin,
-                    lp.width);
+                    widthConstraints + marginWidth,
+                    width
+            );
 
             int childHeightMeasureSpec = getChildMeasureSpec(
                     heightMeasureSpec,
-                    heightConstraints + lp.topMargin + lp.bottomMargin,
-                    lp.height);
+                    heightConstraints + marginHeight,
+                    height
+            );
 
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
@@ -265,6 +307,15 @@ public class BubbleCardView extends ViewGroup {
                 child.layout(childLeft, childTop, childRight, childBottom);
             }
         }
+
+        //Calculate attributes
+        onCalculateAttributes();
+    }
+
+    protected void onCalculateAttributes() {
+        //Set attributes
+        if (arrowTarget != 0 && pointer == null)
+            setPointer(new Pointer(arrowTarget));
     }
 
     @Override
@@ -364,20 +415,27 @@ public class BubbleCardView extends ViewGroup {
             } else if (contentView != null) {
                 try {
                     View rootView = contentView.getRootView();
-                    if (rootView != null)
-                        contentView = rootView;
-
-                    pointerView = contentView.findViewById(pointerId);
+                    pointerView = rootView.findViewById(pointerId);
                 } catch (Exception e) {
                 }
             }
 
-            if (pointerView != null) {
+            if (contentView != null && pointerView != null) {
                 try {
+                    Rect contentViewBounds = new Rect();
+                    contentView.getGlobalVisibleRect(contentViewBounds);
+
                     Rect pointerViewBounds = new Rect();
                     pointerView.getGlobalVisibleRect(pointerViewBounds);
 
-                    set(pointerViewBounds.centerX(), pointerViewBounds.centerY());
+                    Line line = new Line(
+                            contentViewBounds.left,
+                            contentViewBounds.top,
+                            pointerViewBounds.centerX(),
+                            pointerViewBounds.centerY()
+                    );
+
+                    set(line.getDelta());
                 } catch (Exception e) {
                 }
             }

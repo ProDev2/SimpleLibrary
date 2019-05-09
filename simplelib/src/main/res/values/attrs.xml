@@ -5,6 +5,7 @@
 
         <attr name="bcv_arrowTarget" format="reference" />
         <attr name="bcv_arrowSize" format="dimension" />
+        <attr name="bcv_arrowLength" format="dimension" />
         <attr name="bcv_arrowCornerRadius" format="dimension" />
 
         <attr name="bcv_roundCorners" format="boolean" />

@@ -160,6 +160,28 @@ public class Line {
         return this;
     }
 
+    public Line moveStart(double distance) {
+        return moveStart(distance, true);
+    }
+
+    public Line moveStart(double distance, boolean noBounds) {
+        Vector2 point = getPointFromStart(distance, noBounds);
+        if (point != null)
+            point.applyTo(start);
+        return this;
+    }
+
+    public Line moveEnd(double distance) {
+        return moveEnd(distance, true);
+    }
+
+    public Line moveEnd(double distance, boolean noBounds) {
+        Vector2 point = getPointFromEnd(distance, noBounds);
+        if (point != null)
+            point.applyTo(end);
+        return this;
+    }
+
     public Line reverse() {
         Vector2 startTemp = start;
         Vector2 endTemp = end;
@@ -183,6 +205,18 @@ public class Line {
         end.multiply(new Vector2(resizeBy, resizeBy));
         end.add(start);
         return this;
+    }
+
+    public double getRelativeLength(double absoluteLength) {
+        double length = getLength();
+        if (length == 0d) return 0d;
+        return absoluteLength / length;
+    }
+
+    public double getAbsoluteLength(double relativeLength) {
+        double length = getLength();
+        if (length == 0d) return 0d;
+        return length * relativeLength;
     }
 
     public Line rotateBy(double angle) {
@@ -259,8 +293,26 @@ public class Line {
         return getEndYAsInt() - getStartYAsInt();
     }
 
+    public Vector2 getPointFromStart(double distance) {
+        return getPointFromStart(distance, true);
+    }
+
+    public Vector2 getPointFromStart(double distance, boolean noBounds) {
+        double relativeLength = getRelativeLength(distance);
+        return getPoint(relativeLength, noBounds);
+    }
+
+    public Vector2 getPointFromEnd(double distance) {
+        return getPointFromEnd(distance, true);
+    }
+
+    public Vector2 getPointFromEnd(double distance, boolean noBounds) {
+        double relativeLength = getRelativeLength(distance);
+        return getPoint(1 - relativeLength, noBounds);
+    }
+
     public Vector2 getPoint(double relativePos) {
-        return getPoint(relativePos, false);
+        return getPoint(relativePos, true);
     }
 
     public Vector2 getPoint(double relativePos, boolean noBounds) {

@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:background="?selectableItemBackground"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        card_view:bcv_arrowTarget="@+id/main_fragment_search">
 
         <TextView
             android:id="@+id/main_item_text"

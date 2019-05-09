@@ -25,7 +25,9 @@ public class BubbleCardDrawable extends Drawable {
     private boolean roundCorners;
     private double cornerRadius;
 
+    private boolean noArrow;
     private double arrowSize;
+    private double arrowLength;
     private double arrowCornerRadius;
 
     private Vector2 arrowTarget;
@@ -56,19 +58,21 @@ public class BubbleCardDrawable extends Drawable {
         initialize();
     }
 
-    public BubbleCardDrawable(int color, double cornerRadius, double arrowSize, double arrowCornerRadius) {
+    public BubbleCardDrawable(int color, double cornerRadius, double arrowSize, double arrowLength, double arrowCornerRadius) {
         this.color = color;
         this.cornerRadius = cornerRadius;
         this.arrowSize = arrowSize;
+        this.arrowLength = arrowLength;
         this.arrowCornerRadius = arrowCornerRadius;
         initialize();
     }
 
-    public BubbleCardDrawable(int color, boolean roundCorners, double cornerRadius, double arrowSize, double arrowCornerRadius) {
+    public BubbleCardDrawable(int color, boolean roundCorners, double cornerRadius, double arrowSize, double arrowLength, double arrowCornerRadius) {
         this.color = color;
         this.roundCorners = roundCorners;
         this.cornerRadius = cornerRadius;
         this.arrowSize = arrowSize;
+        this.arrowLength = arrowLength;
         this.arrowCornerRadius = arrowCornerRadius;
         initialize();
     }
@@ -103,8 +107,16 @@ public class BubbleCardDrawable extends Drawable {
         return cornerRadius;
     }
 
+    public boolean isNoArrow() {
+        return noArrow;
+    }
+
     public double getArrowSize() {
         return arrowSize;
+    }
+
+    public double getArrowLength() {
+        return arrowLength;
     }
 
     public double getArrowCornerRadius() {
@@ -150,11 +162,29 @@ public class BubbleCardDrawable extends Drawable {
         }
     }
 
+    public void setNoArrow(boolean noArrow) {
+        boolean changed = this.noArrow != noArrow;
+        this.noArrow = noArrow;
+        if (changed) {
+            path = getPath(true);
+            invalidateSelf();
+        }
+    }
+
     public void setArrowSize(double arrowSize) {
         boolean changed = this.arrowSize != arrowSize;
         this.arrowSize = arrowSize;
         if (changed) {
             calculateBounds(bounds, true);
+            invalidateSelf();
+        }
+    }
+
+    public void setArrowLength(double arrowLength) {
+        boolean changed = this.arrowLength != arrowLength;
+        this.arrowLength = arrowLength;
+        if (changed) {
+            path = getPath(true);
             invalidateSelf();
         }
     }
@@ -201,6 +231,7 @@ public class BubbleCardDrawable extends Drawable {
         super.onBoundsChange(bounds);
 
         calculateBounds(bounds, true);
+        invalidateSelf();
     }
 
     @Override
@@ -248,6 +279,11 @@ public class BubbleCardDrawable extends Drawable {
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
+    }
+
+    public void redraw(boolean rebuild) {
+        calculateBounds(null, rebuild);
+        invalidateSelf();
     }
 
     public void calculateBounds(Rect bounds) {
@@ -302,39 +338,6 @@ public class BubbleCardDrawable extends Drawable {
         update();
         calculateLines();
 
-        //Find line with arrow
-        Line lineFromArrow = null;
-        Line lineWithArrow = null;
-
-        if (arrowTarget != null) {
-            Line arrowToLineLeft = lineLeft != null ? lineLeft.closestLineFrom(arrowTarget) : null;
-            Line arrowToLineTop = lineTop != null ? lineTop.closestLineFrom(arrowTarget) : null;
-            Line arrowToLineRight = lineRight != null ? lineRight.closestLineFrom(arrowTarget) : null;
-            Line arrowToLineBottom = lineBottom != null ? lineBottom.closestLineFrom(arrowTarget) : null;
-
-            double arrowDistToLineLeft = arrowToLineLeft != null ? arrowToLineLeft.getLength() : -1;
-            double arrowDistToLineTop = arrowToLineTop != null ? arrowToLineTop.getLength() : -1;
-            double arrowDistToLineRight = arrowToLineRight != null ? arrowToLineRight.getLength() : -1;
-            double arrowDistToLineBottom = arrowToLineBottom != null ? arrowToLineBottom.getLength() : -1;
-
-            if (lineWithArrow == null || lineWithArrow.getLength() > arrowDistToLineLeft) {
-                lineFromArrow = arrowToLineLeft;
-                lineWithArrow = lineLeft;
-            }
-            if (lineWithArrow == null || lineWithArrow.getLength() > arrowDistToLineTop) {
-                lineFromArrow = arrowToLineTop;
-                lineWithArrow = lineTop;
-            }
-            if (lineWithArrow == null || lineWithArrow.getLength() > arrowDistToLineRight) {
-                lineFromArrow = arrowToLineRight;
-                lineWithArrow = lineRight;
-            }
-            if (lineWithArrow == null || lineWithArrow.getLength() > arrowDistToLineBottom) {
-                lineFromArrow = arrowToLineBottom;
-                lineWithArrow = lineBottom;
-            }
-        }
-
         //Calculate path
         Rect bounds = bubbleBounds;
         if (bounds == null) return path;
@@ -356,10 +359,51 @@ public class BubbleCardDrawable extends Drawable {
         double halfLengthX = (((double) width) / 2d) - cornerRadius;
         double halfLengthY = (((double) height) / 2d) - cornerRadius;
 
+        double maxArrowSize = calculateMaxArrowSize();
+        if (maxArrowSize < 0d) maxArrowSize = 0d;
+
         double maxArrowLength = calculateMaxArrowLength();
         if (maxArrowLength < 0d) maxArrowLength = 0d;
 
-        double halfArrowLength = maxArrowLength / 2d;
+        double arrowCornerRadius = calculateArrowCornerRadius();
+        if (arrowCornerRadius < 0d) arrowCornerRadius = 0d;
+
+        double arrowMargin = (maxArrowLength / 2d);
+        double arrowInset = arrowMargin + arrowCornerRadius;
+        double fullArrowLength = arrowInset * 2d;
+
+        //Find line with arrow
+        Line lineFromArrow = null;
+        Line lineWithArrow = null;
+
+        if (arrowTarget != null && !noArrow) {
+            Line arrowToLineLeft = lineLeft != null ? lineLeft.closestLineFrom(arrowTarget) : null;
+            Line arrowToLineTop = lineTop != null ? lineTop.closestLineFrom(arrowTarget) : null;
+            Line arrowToLineRight = lineRight != null ? lineRight.closestLineFrom(arrowTarget) : null;
+            Line arrowToLineBottom = lineBottom != null ? lineBottom.closestLineFrom(arrowTarget) : null;
+
+            double arrowDistToLineLeft = arrowToLineLeft != null ? arrowToLineLeft.getLength() : -1;
+            double arrowDistToLineTop = arrowToLineTop != null ? arrowToLineTop.getLength() : -1;
+            double arrowDistToLineRight = arrowToLineRight != null ? arrowToLineRight.getLength() : -1;
+            double arrowDistToLineBottom = arrowToLineBottom != null ? arrowToLineBottom.getLength() : -1;
+
+            if (lineLeft != null && lineLeft.getLength() >= fullArrowLength && (lineFromArrow == null || lineFromArrow.getLength() > arrowDistToLineLeft)) {
+                lineFromArrow = arrowToLineLeft;
+                lineWithArrow = lineLeft;
+            }
+            if (lineTop != null && lineTop.getLength() >= fullArrowLength && (lineFromArrow == null || lineFromArrow.getLength() > arrowDistToLineTop)) {
+                lineFromArrow = arrowToLineTop;
+                lineWithArrow = lineTop;
+            }
+            if (lineRight != null && lineRight.getLength() >= fullArrowLength && (lineFromArrow == null || lineFromArrow.getLength() > arrowDistToLineRight)) {
+                lineFromArrow = arrowToLineRight;
+                lineWithArrow = lineRight;
+            }
+            if (lineBottom != null && lineBottom.getLength() >= fullArrowLength && (lineFromArrow == null || lineFromArrow.getLength() > arrowDistToLineBottom)) {
+                lineFromArrow = arrowToLineBottom;
+                lineWithArrow = lineBottom;
+            }
+        }
 
         //Basics
         boolean startPointSet = false;
@@ -387,26 +431,8 @@ public class BubbleCardDrawable extends Drawable {
         //Path left
         if (lineLeft != null && lineLeft.getLength() > 0) {
             path.lineTo(lineLeft.getEndXAsFloat(), lineLeft.getEndYAsFloat());
-            if (lineWithArrow == null || lineWithArrow != lineLeft || arrowSize <= 0 || maxArrowLength <= 0) {
+            if (lineWithArrow == null || lineWithArrow != lineLeft || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineLeft.getStartXAsFloat(), lineLeft.getStartYAsFloat());
-            } else if (lineWithArrow != null && lineFromArrow != null) {
-                Vector2 arrowPos = lineFromArrow.getEnd();
-                double relPos = lineWithArrow.closestRelativePos(arrowPos, false);
-
-                if (arrowPos != null) {
-                    Line movementLine = lineWithArrow.copy();
-
-                    if (movementLine.getLength() >= maxArrowLength) {
-                        movementLine.setLength(movementLine.getLength() - halfArrowLength);
-                        movementLine.reverse();
-                        movementLine.setLength(movementLine.getLength() - halfArrowLength);
-
-                        Vector2 realArrowPos = movementLine.getPoint(relPos, false);
-                        Line lineToTopArrow = new Line(realArrowPos, realArrowPos.copy().add(-arrowSize, 0));
-
-                        //TODO: Add arrow
-                    }
-                }
             }
         }
 
@@ -430,8 +456,103 @@ public class BubbleCardDrawable extends Drawable {
         //Path top
         if (lineTop != null && lineTop.getLength() > 0) {
             path.lineTo(lineTop.getStartXAsFloat(), lineTop.getStartYAsFloat());
-            if (lineWithArrow == null || lineWithArrow != lineTop || arrowSize <= 0 || maxArrowLength <= 0) {
+            if (lineWithArrow == null || lineWithArrow != lineTop || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineTop.getEndXAsFloat(), lineTop.getEndYAsFloat());
+            } else if (lineWithArrow != null && lineFromArrow != null) {
+                Vector2 arrowPos = lineFromArrow.getEnd();
+
+                if (arrowPos != null) {
+                    Line arrowLine = lineWithArrow.copy();
+
+                    if (arrowLine.getLength() >= fullArrowLength) {
+                        //Calculate relative sizes
+                        double relArrowMargin = arrowLine.getRelativeLength(arrowMargin);
+                        double relArrowCornerRadius = arrowLine.getRelativeLength(arrowCornerRadius);
+
+                        double relArrowInset = relArrowMargin + relArrowCornerRadius;
+
+                        //Calculate relative arrow center point
+                        double relPos = arrowLine.closestRelativePos(arrowPos, false);
+
+                        double relOversizeLeft = relPos - relArrowInset;
+                        double relOversizeRight = 1d - relPos - relArrowInset;
+
+                        if (relOversizeLeft < 0) relPos -= relOversizeLeft;
+                        if (relOversizeRight < 0) relPos += relOversizeRight;
+
+                        //Calculate relative arrow points
+                        double relLeft = relPos - relArrowMargin;
+                        double relRight = relPos + relArrowMargin;
+
+                        double relStart = relPos - relArrowInset;
+                        double relEnd = relPos + relArrowInset;
+
+                        //Create arrow points
+                        Vector2 realArrowPos = arrowLine.getPoint(relPos, false);
+
+                        Vector2 realArrowLeftPos = arrowLine.getPoint(relLeft, false);
+                        Vector2 realArrowRightPos = arrowLine.getPoint(relRight, false);
+
+                        Vector2 realArrowStartPos = arrowLine.getPoint(relStart, false);
+                        Vector2 realArrowEndPos = arrowLine.getPoint(relEnd, false);
+
+                        //Create arrow lines
+                        Line lineToTopArrow = new Line(realArrowPos, realArrowPos.copy().add(0, -maxArrowSize));
+
+                        Line leftArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowLeftPos.copy());
+                        Line rightArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowRightPos.copy());
+
+                        //Create arrow points
+                        Vector2 realArrowLeftBreakPos = leftArrowLine.getPointFromEnd(arrowCornerRadius, false);
+                        Vector2 realArrowRightBreakPos = rightArrowLine.getPointFromEnd(arrowCornerRadius, false);
+
+                        //Create path to start
+                        path.lineTo(
+                                arrowLine.getStartXAsFloat(),
+                                arrowLine.getStartYAsFloat()
+                        );
+
+                        //Create path to arrow start
+                        path.lineTo(
+                                realArrowStartPos.getXAsFloat(),
+                                realArrowStartPos.getYAsFloat()
+                        );
+
+                        //Create arrow path
+                        path.cubicTo(
+                                realArrowLeftPos.getXAsFloat(),
+                                realArrowLeftPos.getYAsFloat(),
+                                leftArrowLine.getEndXAsFloat(),
+                                leftArrowLine.getEndYAsFloat(),
+                                realArrowLeftBreakPos.getXAsFloat(),
+                                realArrowLeftBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                leftArrowLine.getStartXAsFloat(),
+                                leftArrowLine.getStartYAsFloat(),
+                                rightArrowLine.getStartXAsFloat(),
+                                rightArrowLine.getStartYAsFloat(),
+                                realArrowRightBreakPos.getXAsFloat(),
+                                realArrowRightBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                rightArrowLine.getEndXAsFloat(),
+                                rightArrowLine.getEndYAsFloat(),
+                                realArrowRightPos.getXAsFloat(),
+                                realArrowRightPos.getYAsFloat(),
+                                realArrowEndPos.getXAsFloat(),
+                                realArrowEndPos.getYAsFloat()
+                        );
+
+                        //Create path to end
+                        path.lineTo(
+                                arrowLine.getEndXAsFloat(),
+                                arrowLine.getEndYAsFloat()
+                        );
+                    }
+                }
             }
         }
 
@@ -455,7 +576,7 @@ public class BubbleCardDrawable extends Drawable {
         //Path right
         if (lineRight != null && lineRight.getLength() > 0) {
             path.lineTo(lineRight.getStartXAsFloat(), lineRight.getStartYAsFloat());
-            if (lineWithArrow == null || lineWithArrow != lineRight || arrowSize <= 0 || maxArrowLength <= 0) {
+            if (lineWithArrow == null || lineWithArrow != lineRight || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineRight.getEndXAsFloat(), lineRight.getEndYAsFloat());
             }
         }
@@ -480,8 +601,103 @@ public class BubbleCardDrawable extends Drawable {
         //Path bottom
         if (lineBottom != null && lineBottom.getLength() > 0) {
             path.lineTo(lineBottom.getEndXAsFloat(), lineBottom.getEndYAsFloat());
-            if (lineWithArrow == null || lineWithArrow != lineBottom || arrowSize <= 0 || maxArrowLength <= 0) {
+            if (lineWithArrow == null || lineWithArrow != lineBottom || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineBottom.getStartXAsFloat(), lineBottom.getStartYAsFloat());
+            } else if (lineWithArrow != null && lineFromArrow != null) {
+                Vector2 arrowPos = lineFromArrow.getEnd();
+
+                if (arrowPos != null) {
+                    Line arrowLine = lineWithArrow.copy();
+
+                    if (arrowLine.getLength() >= fullArrowLength) {
+                        //Calculate relative sizes
+                        double relArrowMargin = arrowLine.getRelativeLength(arrowMargin);
+                        double relArrowCornerRadius = arrowLine.getRelativeLength(arrowCornerRadius);
+
+                        double relArrowInset = relArrowMargin + relArrowCornerRadius;
+
+                        //Calculate relative arrow center point
+                        double relPos = arrowLine.closestRelativePos(arrowPos, false);
+
+                        double relOversizeLeft = relPos - relArrowInset;
+                        double relOversizeRight = 1 - relPos - relArrowInset;
+
+                        if (relOversizeLeft < 0) relPos -= relOversizeLeft;
+                        if (relOversizeRight < 0) relPos += relOversizeRight;
+
+                        //Calculate relative arrow points
+                        double relLeft = relPos - relArrowMargin;
+                        double relRight = relPos + relArrowMargin;
+
+                        double relStart = relPos - relArrowInset;
+                        double relEnd = relPos + relArrowInset;
+
+                        //Create arrow points
+                        Vector2 realArrowPos = arrowLine.getPoint(relPos, false);
+
+                        Vector2 realArrowLeftPos = arrowLine.getPoint(relLeft, false);
+                        Vector2 realArrowRightPos = arrowLine.getPoint(relRight, false);
+
+                        Vector2 realArrowStartPos = arrowLine.getPoint(relStart, false);
+                        Vector2 realArrowEndPos = arrowLine.getPoint(relEnd, false);
+
+                        //Create arrow lines
+                        Line lineToTopArrow = new Line(realArrowPos, realArrowPos.copy().add(0, maxArrowSize));
+
+                        Line leftArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowLeftPos.copy());
+                        Line rightArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowRightPos.copy());
+
+                        //Create arrow points
+                        Vector2 realArrowLeftBreakPos = leftArrowLine.getPointFromEnd(arrowCornerRadius, false);
+                        Vector2 realArrowRightBreakPos = rightArrowLine.getPointFromEnd(arrowCornerRadius, false);
+
+                        //Create path to start
+                        path.lineTo(
+                                arrowLine.getStartXAsFloat(),
+                                arrowLine.getStartYAsFloat()
+                        );
+
+                        //Create path to arrow start
+                        path.lineTo(
+                                realArrowStartPos.getXAsFloat(),
+                                realArrowStartPos.getYAsFloat()
+                        );
+
+                        //Create arrow path
+                        path.cubicTo(
+                                realArrowLeftPos.getXAsFloat(),
+                                realArrowLeftPos.getYAsFloat(),
+                                leftArrowLine.getEndXAsFloat(),
+                                leftArrowLine.getEndYAsFloat(),
+                                realArrowLeftBreakPos.getXAsFloat(),
+                                realArrowLeftBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                leftArrowLine.getStartXAsFloat(),
+                                leftArrowLine.getStartYAsFloat(),
+                                rightArrowLine.getStartXAsFloat(),
+                                rightArrowLine.getStartYAsFloat(),
+                                realArrowRightBreakPos.getXAsFloat(),
+                                realArrowRightBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                rightArrowLine.getEndXAsFloat(),
+                                rightArrowLine.getEndYAsFloat(),
+                                realArrowRightPos.getXAsFloat(),
+                                realArrowRightPos.getYAsFloat(),
+                                realArrowEndPos.getXAsFloat(),
+                                realArrowEndPos.getYAsFloat()
+                        );
+
+                        //Create path to end
+                        path.lineTo(
+                                arrowLine.getEndXAsFloat(),
+                                arrowLine.getEndYAsFloat()
+                        );
+                    }
+                }
             }
         }
 
@@ -551,8 +767,8 @@ public class BubbleCardDrawable extends Drawable {
         if (bounds == null)
             return cornerRadius >= 0 ? cornerRadius : 0;
 
-        int halfWidth = (int) ((double) bounds.width() / 2f);
-        int halfHeight = (int) ((double) bounds.height() / 2f);
+        double halfWidth = (double) bounds.width() / 2f;
+        double halfHeight = (double) bounds.height() / 2f;
 
         if (halfWidth >= halfHeight) {
             if (cornerRadius >= 0)
@@ -567,9 +783,13 @@ public class BubbleCardDrawable extends Drawable {
         }
     }
 
+    public double calculateArrowCornerRadius() {
+        return arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
+    }
+
     public double calculateMaxArrowSize() {
         double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
-        double minLength = radius > 0 ? (double) ((Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) / 2d) : 0d;
+        double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0d;
 
         double size = arrowSize;
 
@@ -580,7 +800,7 @@ public class BubbleCardDrawable extends Drawable {
         double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
         double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0d;
 
-        double length = arrowSize * 2;
+        double length = arrowLength;
 
         return Math.max(minLength, length);
     }
