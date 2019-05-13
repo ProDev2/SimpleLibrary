@@ -36,17 +36,20 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     }
 
     public void setList(ArrayList<V> list) {
-        if (list != null)
-            this.list = list;
+        if (list == null)
+            list = new ArrayList<>();
+
+        this.list = list;
+        notifyDataSetChanged();
     }
 
     public void setList(ArrayList<V> list, boolean update) {
-        if (list != null) {
-            this.list = list;
+        if (list == null)
+            list = new ArrayList<>();
+        this.list = list;
 
-            if (update)
-                notifyDataSetChanged();
-        }
+        if (update)
+            notifyDataSetChanged();
     }
 
     public void add(V value) {
