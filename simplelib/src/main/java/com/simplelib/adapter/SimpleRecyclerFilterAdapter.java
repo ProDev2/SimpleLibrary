@@ -28,12 +28,14 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
             filteredList.addAll(unfilteredList);
         }
 
-        super.setList(filteredList);
+        super.setList(filteredList, false);
 
         try {
-            setFilter(applyFilter());
+            setFilter(applyFilter(), false);
         } catch (Exception e) {
         }
+
+        updateFilter(false);
     }
 
     private void init() {
@@ -43,6 +45,44 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     public SimpleFilter<V> applyFilter() {
         return null;
+    }
+
+    @Override
+    public void applyTo(SimpleRecyclerAdapter<V> src) {
+        try {
+            if (src != null) {
+                if (src instanceof SimpleRecyclerFilterAdapter) {
+                    SimpleRecyclerFilterAdapter<V> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V>) src;
+
+                    srcFilterAdapter.filter = filter;
+                }
+
+                ArrayList<V> list = new ArrayList<>();
+                if (unfilteredList != null)
+                    list.addAll(unfilteredList);
+                src.setList(unfilteredList, true);
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void applyTo(SimpleRecyclerAdapter<V> src, boolean update) {
+        try {
+            if (src != null) {
+                if (src instanceof SimpleRecyclerFilterAdapter) {
+                    SimpleRecyclerFilterAdapter<V> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V>) src;
+
+                    srcFilterAdapter.filter = filter;
+                }
+
+                ArrayList<V> list = new ArrayList<>();
+                if (unfilteredList != null)
+                    list.addAll(unfilteredList);
+                src.setList(unfilteredList, update);
+            }
+        } catch (Exception e) {
+        }
     }
 
     @Override

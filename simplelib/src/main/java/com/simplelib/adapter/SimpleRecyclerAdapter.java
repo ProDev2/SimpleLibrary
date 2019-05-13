@@ -31,6 +31,37 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
             this.list = new ArrayList<>();
     }
 
+    public void applyTo(SimpleRecyclerAdapter<V> src) {
+        try {
+            if (src != null) {
+                if (src.list == null)
+                    src.list = new ArrayList<>();
+                src.list.clear();
+                if (list != null)
+                    src.list.addAll(list);
+
+                src.notifyDataSetChanged();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public void applyTo(SimpleRecyclerAdapter<V> src, boolean update) {
+        try {
+            if (src != null) {
+                if (src.list == null)
+                    src.list = new ArrayList<>();
+                src.list.clear();
+                if (list != null)
+                    src.list.addAll(list);
+
+                if (update)
+                    src.notifyDataSetChanged();
+            }
+        } catch (Exception e) {
+        }
+    }
+
     public ArrayList<V> getList() {
         return list;
     }
@@ -38,8 +69,8 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     public void setList(ArrayList<V> list) {
         if (list == null)
             list = new ArrayList<>();
-
         this.list = list;
+
         notifyDataSetChanged();
     }
 
