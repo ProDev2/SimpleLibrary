@@ -9,8 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapter<V> {
-    private boolean synchronizedLists;
-
     private SimpleFilter<V> filter;
 
     private ArrayList<V> unfilteredList;
@@ -49,10 +47,12 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        boolean setup = getRecyclerView() == null && recyclerView != null;
+
         super.onAttachedToRecyclerView(recyclerView);
 
         try {
-            if (recyclerView != null)
+            if (setup && recyclerView != null)
                 updateFilter(false);
         } catch (Exception e) {
         }
@@ -372,12 +372,17 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     public void setFilter(SimpleFilter<V> filter) {
+        setFilter(filter, true);
+    }
+
+    public void setFilter(SimpleFilter<V> filter, boolean update) {
         this.filter = filter;
         try {
             if (this.filter != null)
                 this.filter.setAdapter(this);
         } catch (Exception e) {
         }
-        updateFilter();
+        if (update)
+            updateFilter();
     }
 }
