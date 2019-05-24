@@ -433,6 +433,101 @@ public class BubbleCardDrawable extends Drawable {
             path.lineTo(lineLeft.getEndXAsFloat(), lineLeft.getEndYAsFloat());
             if (lineWithArrow == null || lineWithArrow != lineLeft || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineLeft.getStartXAsFloat(), lineLeft.getStartYAsFloat());
+            } else if (lineWithArrow != null && lineFromArrow != null) {
+                Vector2 arrowPos = lineFromArrow.getEnd();
+
+                if (arrowPos != null) {
+                    Line arrowLine = lineWithArrow.copy();
+
+                    if (arrowLine.getLength() >= fullArrowLength) {
+                        //Calculate relative sizes
+                        double relArrowMargin = arrowLine.getRelativeLength(arrowMargin);
+                        double relArrowCornerRadius = arrowLine.getRelativeLength(arrowCornerRadius);
+
+                        double relArrowInset = relArrowMargin + relArrowCornerRadius;
+
+                        //Calculate relative arrow center point
+                        double relPos = arrowLine.closestRelativePos(arrowPos, false);
+
+                        double relOversizeLeft = relPos - relArrowInset;
+                        double relOversizeRight = 1d - relPos - relArrowInset;
+
+                        if (relOversizeLeft < 0) relPos -= relOversizeLeft;
+                        if (relOversizeRight < 0) relPos += relOversizeRight;
+
+                        //Calculate relative arrow points
+                        double relLeft = relPos - relArrowMargin;
+                        double relRight = relPos + relArrowMargin;
+
+                        double relStart = relPos - relArrowInset;
+                        double relEnd = relPos + relArrowInset;
+
+                        //Create arrow points
+                        Vector2 realArrowPos = arrowLine.getPoint(relPos, false);
+
+                        Vector2 realArrowLeftPos = arrowLine.getPoint(relLeft, false);
+                        Vector2 realArrowRightPos = arrowLine.getPoint(relRight, false);
+
+                        Vector2 realArrowStartPos = arrowLine.getPoint(relStart, false);
+                        Vector2 realArrowEndPos = arrowLine.getPoint(relEnd, false);
+
+                        //Create arrow lines
+                        Line lineToTopArrow = new Line(realArrowPos, realArrowPos.copy().add(-maxArrowSize, 0));
+
+                        Line leftArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowLeftPos.copy());
+                        Line rightArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowRightPos.copy());
+
+                        //Create arrow points
+                        Vector2 realArrowLeftBreakPos = leftArrowLine.getPointFromEnd(arrowCornerRadius, false);
+                        Vector2 realArrowRightBreakPos = rightArrowLine.getPointFromEnd(arrowCornerRadius, false);
+
+                        //Create path to start
+                        path.lineTo(
+                                arrowLine.getStartXAsFloat(),
+                                arrowLine.getStartYAsFloat()
+                        );
+
+                        //Create path to arrow start
+                        path.lineTo(
+                                realArrowStartPos.getXAsFloat(),
+                                realArrowStartPos.getYAsFloat()
+                        );
+
+                        //Create arrow path
+                        path.cubicTo(
+                                realArrowLeftPos.getXAsFloat(),
+                                realArrowLeftPos.getYAsFloat(),
+                                leftArrowLine.getEndXAsFloat(),
+                                leftArrowLine.getEndYAsFloat(),
+                                realArrowLeftBreakPos.getXAsFloat(),
+                                realArrowLeftBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                leftArrowLine.getStartXAsFloat(),
+                                leftArrowLine.getStartYAsFloat(),
+                                rightArrowLine.getStartXAsFloat(),
+                                rightArrowLine.getStartYAsFloat(),
+                                realArrowRightBreakPos.getXAsFloat(),
+                                realArrowRightBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                rightArrowLine.getEndXAsFloat(),
+                                rightArrowLine.getEndYAsFloat(),
+                                realArrowRightPos.getXAsFloat(),
+                                realArrowRightPos.getYAsFloat(),
+                                realArrowEndPos.getXAsFloat(),
+                                realArrowEndPos.getYAsFloat()
+                        );
+
+                        //Create path to end
+                        path.lineTo(
+                                arrowLine.getEndXAsFloat(),
+                                arrowLine.getEndYAsFloat()
+                        );
+                    }
+                }
             }
         }
 
@@ -578,6 +673,101 @@ public class BubbleCardDrawable extends Drawable {
             path.lineTo(lineRight.getStartXAsFloat(), lineRight.getStartYAsFloat());
             if (lineWithArrow == null || lineWithArrow != lineRight || maxArrowSize <= 0 || maxArrowLength <= 0 || noArrow) {
                 path.lineTo(lineRight.getEndXAsFloat(), lineRight.getEndYAsFloat());
+            } else if (lineWithArrow != null && lineFromArrow != null) {
+                Vector2 arrowPos = lineFromArrow.getEnd();
+
+                if (arrowPos != null) {
+                    Line arrowLine = lineWithArrow.copy();
+
+                    if (arrowLine.getLength() >= fullArrowLength) {
+                        //Calculate relative sizes
+                        double relArrowMargin = arrowLine.getRelativeLength(arrowMargin);
+                        double relArrowCornerRadius = arrowLine.getRelativeLength(arrowCornerRadius);
+
+                        double relArrowInset = relArrowMargin + relArrowCornerRadius;
+
+                        //Calculate relative arrow center point
+                        double relPos = arrowLine.closestRelativePos(arrowPos, false);
+
+                        double relOversizeLeft = relPos - relArrowInset;
+                        double relOversizeRight = 1d - relPos - relArrowInset;
+
+                        if (relOversizeLeft < 0) relPos -= relOversizeLeft;
+                        if (relOversizeRight < 0) relPos += relOversizeRight;
+
+                        //Calculate relative arrow points
+                        double relLeft = relPos - relArrowMargin;
+                        double relRight = relPos + relArrowMargin;
+
+                        double relStart = relPos - relArrowInset;
+                        double relEnd = relPos + relArrowInset;
+
+                        //Create arrow points
+                        Vector2 realArrowPos = arrowLine.getPoint(relPos, false);
+
+                        Vector2 realArrowLeftPos = arrowLine.getPoint(relLeft, false);
+                        Vector2 realArrowRightPos = arrowLine.getPoint(relRight, false);
+
+                        Vector2 realArrowStartPos = arrowLine.getPoint(relStart, false);
+                        Vector2 realArrowEndPos = arrowLine.getPoint(relEnd, false);
+
+                        //Create arrow lines
+                        Line lineToTopArrow = new Line(realArrowPos, realArrowPos.copy().add(maxArrowSize, 0));
+
+                        Line leftArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowLeftPos.copy());
+                        Line rightArrowLine = new Line(lineToTopArrow.getEnd().copy(), realArrowRightPos.copy());
+
+                        //Create arrow points
+                        Vector2 realArrowLeftBreakPos = leftArrowLine.getPointFromEnd(arrowCornerRadius, false);
+                        Vector2 realArrowRightBreakPos = rightArrowLine.getPointFromEnd(arrowCornerRadius, false);
+
+                        //Create path to start
+                        path.lineTo(
+                                arrowLine.getStartXAsFloat(),
+                                arrowLine.getStartYAsFloat()
+                        );
+
+                        //Create path to arrow start
+                        path.lineTo(
+                                realArrowStartPos.getXAsFloat(),
+                                realArrowStartPos.getYAsFloat()
+                        );
+
+                        //Create arrow path
+                        path.cubicTo(
+                                realArrowLeftPos.getXAsFloat(),
+                                realArrowLeftPos.getYAsFloat(),
+                                leftArrowLine.getEndXAsFloat(),
+                                leftArrowLine.getEndYAsFloat(),
+                                realArrowLeftBreakPos.getXAsFloat(),
+                                realArrowLeftBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                leftArrowLine.getStartXAsFloat(),
+                                leftArrowLine.getStartYAsFloat(),
+                                rightArrowLine.getStartXAsFloat(),
+                                rightArrowLine.getStartYAsFloat(),
+                                realArrowRightBreakPos.getXAsFloat(),
+                                realArrowRightBreakPos.getYAsFloat()
+                        );
+
+                        path.cubicTo(
+                                rightArrowLine.getEndXAsFloat(),
+                                rightArrowLine.getEndYAsFloat(),
+                                realArrowRightPos.getXAsFloat(),
+                                realArrowRightPos.getYAsFloat(),
+                                realArrowEndPos.getXAsFloat(),
+                                realArrowEndPos.getYAsFloat()
+                        );
+
+                        //Create path to end
+                        path.lineTo(
+                                arrowLine.getEndXAsFloat(),
+                                arrowLine.getEndYAsFloat()
+                        );
+                    }
+                }
             }
         }
 

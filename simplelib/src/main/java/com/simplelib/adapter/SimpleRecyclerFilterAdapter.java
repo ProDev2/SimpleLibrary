@@ -226,7 +226,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
-    public void reload() {
+    public synchronized void reload() {
         try {
             filteredList.clear();
             notifyDataSetChanged();
@@ -290,7 +290,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         updateFilter(true);
     }
 
-    public void updateFilter(boolean animate) {
+    public synchronized void updateFilter(boolean animate) {
         try {
             if (filter != null)
                 filter.setAdapter(this);
