@@ -22,6 +22,9 @@ public class ScrollHelper extends GestureHelper implements Runnable {
     private float scrollFactor;
     private float scrollOffset;
 
+    private float maxScrollX;
+    private float maxScrollY;
+
     //Scrolling
     private Handler handler;
 
@@ -52,6 +55,9 @@ public class ScrollHelper extends GestureHelper implements Runnable {
 
         scrollFactor = 0.08f;
         scrollOffset = 100f;
+
+        maxScrollX = -1;
+        maxScrollY = -1;
     }
 
     public ScrollHelper setScrollAdapter(ScrollAdapter adapter) {
@@ -99,6 +105,26 @@ public class ScrollHelper extends GestureHelper implements Runnable {
         return this;
     }
 
+    public ScrollHelper setMaxScrollX(float maxScrollX) {
+        this.maxScrollX = maxScrollX;
+        return this;
+    }
+
+    public ScrollHelper setMaxScrollY(float maxScrollY) {
+        this.maxScrollY = maxScrollY;
+        return this;
+    }
+
+    public ScrollHelper setMaxScrollXForASecond(float maxScrollX) {
+        setMaxScrollX(fps > 0 ? maxScrollX / fps : -1);
+        return this;
+    }
+
+    public ScrollHelper setMaxScrollYForASecond(float maxScrollY) {
+        setMaxScrollY(fps > 0 ? maxScrollY / fps : -1);
+        return this;
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent event) {
         return super.onTouch(view, event);
@@ -143,7 +169,9 @@ public class ScrollHelper extends GestureHelper implements Runnable {
         if (handler == null)
             handler = new Handler(Looper.getMainLooper());
         handler.removeCallbacks(this);
-        handler.postDelayed(this, (long) (1000f / fps));
+
+        long delay = fps > 0 ? (long) (1000f / fps) : -1;
+        if (delay >= 0) handler.postDelayed(this, delay);
     }
 
     public void stopScroll() {
@@ -163,8 +191,10 @@ public class ScrollHelper extends GestureHelper implements Runnable {
             scroll();
 
         //Post next update
-        if (canScroll)
-            handler.postDelayed(this, (long) (1000f / fps));
+        if (canScroll) {
+            long delay = fps > 0 ? (long) (1000f / fps) : -1;
+            if (delay >= 0) handler.postDelayed(this, delay);
+        }
     }
 
     public void scroll() {
@@ -177,13 +207,22 @@ public class ScrollHelper extends GestureHelper implements Runnable {
             distX = moveTowards(distX, 0, scrollOffset);
             distY = moveTowards(distY, 0, scrollOffset);
 
-            if (reverseScrollAxis) {
-                distX = -distX;
-                distY = -distY;
-            }
-
             float scrollDistX = distX * scrollFactor;
             float scrollDistY = distY * scrollFactor;
+
+            if (maxScrollX >= 0) {
+                if (scrollDistX > maxScrollX) scrollDistX = maxScrollX;
+                if (scrollDistX < -maxScrollX) scrollDistX = -maxScrollX;
+            }
+            if (maxScrollY >= 0) {
+                if (scrollDistY > maxScrollY) scrollDistY = maxScrollY;
+                if (scrollDistY < -maxScrollY) scrollDistY = -maxScrollY;
+            }
+
+            if (reverseScrollAxis) {
+                scrollDistX = -scrollDistX;
+                scrollDistY = -scrollDistY;
+            }
 
             if (combineScrollAxis) {
                 float minScroll = Math.min(scrollDistX, scrollDistY);
