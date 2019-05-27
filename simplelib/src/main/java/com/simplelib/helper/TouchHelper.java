@@ -3,7 +3,7 @@ package com.simplelib.helper;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class TouchHelper implements View.OnTouchListener {
+public class TouchHelper extends BasicTouchHelper {
     private static final float DEFAULT_MIN_MOVEMENT = 50;
 
     protected boolean enabled;
@@ -38,11 +38,6 @@ public class TouchHelper implements View.OnTouchListener {
 
     public void setMinMovement(int minMovement) {
         this.minMovement = minMovement;
-    }
-
-    public View applyTo(View view) {
-        view.setOnTouchListener(this);
-        return view;
     }
 
     public boolean isPressed() {
@@ -82,6 +77,8 @@ public class TouchHelper implements View.OnTouchListener {
         if (!enabled) return false;
 
         boolean handled = false;
+
+        handled |= super.onTouch(view, event);
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
