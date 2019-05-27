@@ -3,25 +3,41 @@ package com.simplelib.helper;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.simplelib.tools.Tools;
-
 public class TouchHelper implements View.OnTouchListener {
-    private static final int DEFAULT_MAX_MOVEMENT = 5;
+    private static final float DEFAULT_MIN_MOVEMENT = 50;
+
+    protected boolean enabled;
+    protected boolean fixed;
 
     private boolean pressed;
     private boolean moved;
 
+    private float startX, startY;
     private float touchX, touchY;
     private float moveX, moveY;
+    private float distX, distY;
 
-    private int maxMovement = DEFAULT_MAX_MOVEMENT;
+    private float minMovement = DEFAULT_MIN_MOVEMENT;
 
     public TouchHelper() {
+        enabled = true;
+        fixed = false;
     }
 
-    public TouchHelper setMaxMovement(int maxMovement) {
-        this.maxMovement = maxMovement;
-        return this;
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    public void setMinMovement(int minMovement) {
+        this.minMovement = minMovement;
     }
 
     public View applyTo(View view) {
@@ -29,73 +45,149 @@ public class TouchHelper implements View.OnTouchListener {
         return view;
     }
 
+    public boolean isPressed() {
+        return pressed;
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public float getStartX() {
+        return startX;
+    }
+
+    public float getStartY() {
+        return startY;
+    }
+
+    public float getTouchX() {
+        return touchX;
+    }
+
+    public float getTouchY() {
+        return touchY;
+    }
+
+    public float getDistX() {
+        return distX;
+    }
+
+    public float getDistY() {
+        return distY;
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent event) {
-        int maxMovementInDp = Tools.dpToPx(maxMovement);
+        if (!enabled) return false;
+
+        boolean handled = false;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touchX = event.getX();
-                touchY = event.getY();
-
                 if (!pressed) {
                     pressed = true;
-                    onPress(view, touchX, touchY);
+                    moved = false;
+
+                    startX = event.getRawX();
+                    startY = event.getRawY();
+
+                    touchX = startX;
+                    touchY = startY;
+
+                    moveX = 0;
+                    moveY = 0;
+
+                    distX = 0;
+                    distY = 0;
+
+                    handled |= onPress(view, touchX, touchY);
                 }
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                moveX = event.getX() - touchX;
-                moveY = event.getY() - touchY;
+                if (pressed) {
+                    handled |= true;
 
-                touchX = event.getX();
-                touchY = event.getY();
+                    moveX = event.getRawX() - touchX;
+                    moveY = event.getRawY() - touchY;
 
-                if (moveX >= maxMovementInDp || moveX <= -maxMovementInDp || moveY >= maxMovementInDp || moveY <= -maxMovementInDp) {
-                    if (!moved)
-                        onStartMoving(view, touchX, touchY);
-                    moved = true;
+                    distX += moveX;
+                    distY += moveY;
+
+                    touchX = event.getRawX();
+                    touchY = event.getRawY();
+
+                    if (distX >= minMovement || distX <= -minMovement || distY >= minMovement || distY <= -minMovement) {
+                        if (!moved)
+                            onStartMoving(view, touchX, touchY);
+                        moved = true;
+                    } else if (fixed) {
+                        if (moved)
+                            onCancelDrag(view, touchX, touchY);
+                        moved = false;
+                    }
+
+                    if (moved)
+                        onDragBy(view, moveX, moveY, distX, distY);
                 }
-
-                if (moved)
-                    onDragBy(view, moveX, moveY);
                 break;
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                touchX = event.getX();
-                touchY = event.getY();
+                touchX = event.getRawX();
+                touchY = event.getRawY();
 
                 if (pressed) {
-                    pressed = false;
-                    onRelease(view, touchX, touchY);
+                    handled |= onRelease(view, touchX, touchY, distX, distY);
 
                     if (moved)
-                        onStopMoving(view, touchX, touchY);
+                        onStopMoving(view, touchX, touchY, distX, distY);
                     else
                         onClick(view, touchX, touchY);
-                    moved = false;
                 }
+
+                pressed = false;
+                moved = false;
+
+                startX = 0;
+                startY = 0;
+
+                touchX = 0;
+                touchY = 0;
+
+                moveX = 0;
+                moveY = 0;
+
+                distX = 0;
+                distY = 0;
+
                 break;
         }
-        return true;
+
+        return handled;
     }
 
-    public void onPress(View view, float x, float y) {
+    public boolean onPress(View view, float x, float y) {
+        return false;
     }
 
-    public void onRelease(View view, float x, float y) {
+    public boolean onRelease(View view, float x, float y, float distX, float distY) {
+        return false;
     }
 
     public void onStartMoving(View view, float x, float y) {
     }
 
-    public void onStopMoving(View view, float x, float y) {
+    public void onStopMoving(View view, float x, float y, float distX, float distY) {
     }
 
     public void onClick(View view, float x, float y) {
     }
 
-    public void onDragBy(View view, float x, float y) {
+    public void onCancelDrag(View view, float x, float y) {
+    }
+
+    public void onDragBy(View view, float moveByX, float moveByY, float distX, float distY) {
     }
 }
