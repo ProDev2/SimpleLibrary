@@ -1,8 +1,6 @@
 package com.simplelib;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -60,31 +58,6 @@ public abstract class SimpleFragment extends Fragment {
         return true;
     }
 
-    public void resetToolbar() {
-        setBackButtonEnabled(false);
-        disableOptionsMenu();
-
-        resetTitle();
-        resetSubtitle();
-    }
-
-    public void resetTitle() {
-        try {
-            ActivityInfo activityInfo = getActivity().getPackageManager().getActivityInfo(getActivity().getComponentName(), PackageManager.GET_META_DATA);
-            String title = activityInfo.loadLabel(getActivity().getPackageManager()).toString();
-
-            setTitle(title);
-        } catch (Exception e) {
-        }
-    }
-
-    public void resetSubtitle() {
-        try {
-            setSubtitle("");
-        } catch (Exception e) {
-        }
-    }
-
     public void setToolbar(int toolbarId) {
         try {
             View view = findViewById(toolbarId);
@@ -116,6 +89,28 @@ public abstract class SimpleFragment extends Fragment {
         return null;
     }
 
+    public String getDefaultName() {
+        return SimpleActivity.getApplicationName(getActivity());
+    }
+
+    public void resetToolbar() {
+        setBackButtonEnabled(false);
+        disableOptionsMenu();
+
+        resetTitle();
+        resetSubtitle();
+    }
+
+    public void resetTitle() {
+        String title = getDefaultName();
+        setTitle(title);
+    }
+
+    public void resetSubtitle() {
+        String subtitle = "";
+        setSubtitle(subtitle);
+    }
+
     public void setTitle(String title) {
         try {
             if (title == null)
@@ -124,7 +119,7 @@ public abstract class SimpleFragment extends Fragment {
             this.title = title;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
-                activity.getSupportActionBar().setTitle(title);
+                activity.setTitle(title);
             }
         } catch (Exception e) {
         }
@@ -138,7 +133,7 @@ public abstract class SimpleFragment extends Fragment {
             this.subtitle = subtitle;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
-                activity.getSupportActionBar().setSubtitle(subtitle);
+                activity.setSubtitle(subtitle);
             }
         } catch (Exception e) {
         }
@@ -149,8 +144,7 @@ public abstract class SimpleFragment extends Fragment {
             this.backButton = enabled;
             if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
-                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
-                activity.getSupportActionBar().setDisplayShowHomeEnabled(enabled);
+                activity.setBackButtonEnabled(enabled);
             }
         } catch (Exception e) {
         }
