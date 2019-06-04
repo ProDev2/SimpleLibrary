@@ -138,4 +138,8 @@ public class SimpleActivity extends AppCompatActivity {
         }
         return null;
     }
+
+    public void onReceiveCall(int code, Object[] args) {
+        //Override this method if needed
+    }
 }

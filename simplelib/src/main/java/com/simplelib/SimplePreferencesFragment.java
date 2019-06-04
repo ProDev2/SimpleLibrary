@@ -174,6 +174,18 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         }
     }
 
+    public void callActivity(int code, Object... args) {
+        if (args == null) args = new Object[0];
+
+        try {
+            if (getActivity() instanceof SimpleActivity) {
+                SimpleActivity activity = (SimpleActivity) getActivity();
+                activity.onReceiveCall(code, args);
+            }
+        } catch (Exception e) {
+        }
+    }
+
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
