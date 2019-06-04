@@ -119,6 +119,12 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         setSubtitle(subtitle);
     }
 
+    public String getTitle() {
+        if (title == null)
+            resetTitle();
+        return title;
+    }
+
     public void setTitle(String title) {
         try {
             if (title == null)
@@ -133,6 +139,12 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         }
     }
 
+    public String getSubtitle() {
+        if (subtitle == null)
+            resetSubtitle();
+        return subtitle;
+    }
+
     public void setSubtitle(String subtitle) {
         try {
             if (subtitle == null)
@@ -145,6 +157,10 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
             }
         } catch (Exception e) {
         }
+    }
+
+    public boolean isBackButtonEnabled() {
+        return backButton;
     }
 
     public void setBackButtonEnabled(boolean enabled) {
