@@ -100,6 +100,8 @@ public class FadeImageView extends View {
     }
 
     public ValueAnimator getAnimator() {
+        if (animator == null)
+            setupAnimator();
         return animator;
     }
 
