@@ -16,6 +16,8 @@ public abstract class SimpleFragment extends Fragment {
     private int id;
     private View contentView;
 
+    protected boolean overrideActivityDefaults;
+
     private String title, subtitle;
     private boolean backButton;
 
@@ -33,7 +35,8 @@ public abstract class SimpleFragment extends Fragment {
         View view = inflater.inflate(id, container, false);
         this.contentView = view;
 
-        resetToolbar();
+        if (overrideActivityDefaults)
+            resetToolbar();
 
         create(view);
 
@@ -183,7 +186,7 @@ public abstract class SimpleFragment extends Fragment {
         super.setUserVisibleHint(isVisibleToUser);
 
         try {
-            if (isVisibleToUser) {
+            if (isVisibleToUser && overrideActivityDefaults) {
                 if (menuId < 0)
                     disableOptionsMenu();
                 else
