@@ -1,7 +1,9 @@
 package com.simplelib;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -126,15 +128,25 @@ public class SimpleActivity extends AppCompatActivity {
         ft.commit();
     }
 
-    public static String getApplicationName(Context context) {
-        if (context == null) return null;
+    public static String getApplicationName(Activity activity) {
+        if (activity == null) return null;
 
         try {
-            ApplicationInfo applicationInfo = context.getApplicationInfo();
+            PackageManager packageManager = activity.getPackageManager();
+            ActivityInfo activityInfo = packageManager.getActivityInfo(activity.getComponentName(), 0);
+            if (activityInfo == null) return null;
+
+            int labelResId = activityInfo.labelRes;
+            return labelResId != 0 ? activity.getString(labelResId) : activityInfo.nonLocalizedLabel.toString();
+        } catch (Exception e) {
+        }
+
+        try {
+            ApplicationInfo applicationInfo = activity.getApplicationInfo();
             if (applicationInfo == null) return null;
 
             int labelResId = applicationInfo.labelRes;
-            return labelResId != 0 ? context.getString(labelResId) : applicationInfo.nonLocalizedLabel.toString();
+            return labelResId != 0 ? activity.getString(labelResId) : applicationInfo.nonLocalizedLabel.toString();
         } catch (Exception e) {
         }
         return null;
