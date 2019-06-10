@@ -137,7 +137,9 @@ public class SimpleActivity extends AppCompatActivity {
             if (activityInfo == null) return null;
 
             int labelResId = activityInfo.labelRes;
-            return labelResId != 0 ? activity.getString(labelResId) : activityInfo.nonLocalizedLabel.toString();
+            String label = labelResId != 0 ? activity.getString(labelResId) : activityInfo.nonLocalizedLabel.toString();
+
+            if (label != null) return label;
         } catch (Exception e) {
         }
 
@@ -146,7 +148,9 @@ public class SimpleActivity extends AppCompatActivity {
             if (applicationInfo == null) return null;
 
             int labelResId = applicationInfo.labelRes;
-            return labelResId != 0 ? activity.getString(labelResId) : applicationInfo.nonLocalizedLabel.toString();
+            String label = labelResId != 0 ? activity.getString(labelResId) : applicationInfo.nonLocalizedLabel.toString();
+
+            if (label != null) return label;
         } catch (Exception e) {
         }
         return null;
