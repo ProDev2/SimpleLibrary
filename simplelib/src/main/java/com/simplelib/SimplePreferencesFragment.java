@@ -16,6 +16,8 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
     private int preferencesId;
     private View contentView;
 
+    protected boolean overrideActivityDefaults;
+
     private String title, subtitle;
     private boolean backButton;
 
@@ -25,7 +27,8 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
     public SimplePreferencesFragment(int preferencesId) {
         this.preferencesId = preferencesId;
 
-        resetToolbar();
+        if (overrideActivityDefaults || getActivity() == null)
+            resetToolbar();
     }
 
     @Override
@@ -191,7 +194,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         super.setUserVisibleHint(isVisibleToUser);
 
         try {
-            if (isVisibleToUser) {
+            if (isVisibleToUser && overrideActivityDefaults) {
                 if (menuId < 0)
                     disableOptionsMenu();
                 else

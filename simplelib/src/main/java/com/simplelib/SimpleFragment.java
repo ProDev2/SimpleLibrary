@@ -35,7 +35,7 @@ public abstract class SimpleFragment extends Fragment {
         View view = inflater.inflate(id, container, false);
         this.contentView = view;
 
-        if (overrideActivityDefaults)
+        if (overrideActivityDefaults || getActivity() == null)
             resetToolbar();
 
         create(view);
