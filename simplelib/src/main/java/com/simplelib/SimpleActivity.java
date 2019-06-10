@@ -45,6 +45,7 @@ public class SimpleActivity extends AppCompatActivity {
             if (title == null)
                 title = "";
 
+            setTitle(title);
             getSupportActionBar().setTitle(title);
         } catch (Exception e) {
         }
@@ -55,6 +56,7 @@ public class SimpleActivity extends AppCompatActivity {
             if (subtitle == null)
                 subtitle = "";
 
+            setSubtitle(subtitle);
             getSupportActionBar().setSubtitle(subtitle);
         } catch (Exception e) {
         }
