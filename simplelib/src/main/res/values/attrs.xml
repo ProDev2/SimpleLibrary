@@ -3,6 +3,7 @@
 
     <declare-styleable name="BubbleCardView">
 
+        <attr name="bvc_noArrow" format="boolean" />
         <attr name="bcv_arrowTarget" format="reference" />
         <attr name="bcv_arrowSize" format="dimension" />
         <attr name="bcv_arrowLength" format="dimension" />

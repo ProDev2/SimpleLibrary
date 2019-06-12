@@ -25,6 +25,7 @@ public class BubbleCardView extends ViewGroup {
     private static final boolean DEFAULT_ROUND_CORNERS = true;
     private static final float DEFAULT_CORNER_RADIUS_DP = -1f;
 
+    private static final boolean DEFAULT_NO_ARROW = false;
     private static final int DEFAULT_ARROW_TARGET_ID = 0;
     private static final float DEFAULT_ARROW_SIZE_DP = 5f;
     private static final float DEFAULT_ARROW_LENGTH_DP = 10f;
@@ -36,6 +37,7 @@ public class BubbleCardView extends ViewGroup {
     private boolean roundCorners;
     private float cornerRadius;
 
+    private boolean noArrow;
     private int arrowTarget;
     private float arrowSize;
     private float arrowLength;
@@ -85,6 +87,7 @@ public class BubbleCardView extends ViewGroup {
         roundCorners = DEFAULT_ROUND_CORNERS;
         cornerRadius = Tools.dpToPx(DEFAULT_CORNER_RADIUS_DP);
 
+        noArrow = DEFAULT_NO_ARROW;
         arrowTarget = DEFAULT_ARROW_TARGET_ID;
         arrowSize = Tools.dpToPx(DEFAULT_ARROW_SIZE_DP);
         arrowLength = Tools.dpToPx(DEFAULT_ARROW_LENGTH_DP);
@@ -99,6 +102,7 @@ public class BubbleCardView extends ViewGroup {
             roundCorners = attributes.getBoolean(R.styleable.BubbleCardView_bcv_roundCorners, roundCorners);
             cornerRadius = attributes.getDimension(R.styleable.BubbleCardView_bcv_cornerRadius, cornerRadius);
 
+            noArrow = attributes.getBoolean(R.styleable.BubbleCardView_bvc_noArrow, noArrow);
             arrowTarget = attributes.getResourceId(R.styleable.BubbleCardView_bcv_arrowTarget, arrowTarget);
             arrowSize = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowSize, arrowSize);
             arrowLength = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowLength, arrowLength);
@@ -146,6 +150,11 @@ public class BubbleCardView extends ViewGroup {
         update();
     }
 
+    public void setNoArrow(boolean noArrow) {
+        this.noArrow = noArrow;
+        update();
+    }
+
     public void setArrowSize(float arrowSize) {
         this.arrowSize = arrowSize;
         update();
@@ -177,6 +186,7 @@ public class BubbleCardView extends ViewGroup {
             drawable.setRoundCorners(roundCorners);
             drawable.setCornerRadius(cornerRadius);
 
+            drawable.setNoArrow(noArrow);
             drawable.setArrowSize(arrowSize);
             drawable.setArrowLength(arrowLength);
             drawable.setArrowCornerRadius(arrowCornerRadius);
