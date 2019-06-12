@@ -259,14 +259,14 @@ public class BubbleCardView extends ViewGroup {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             Drawable foregroundDrawable = getForeground();
             if (foregroundDrawable != null) {
-                maxHeight = Math.max(maxHeight, foregroundDrawable.getMinimumHeight());
                 maxWidth = Math.max(maxWidth, foregroundDrawable.getMinimumWidth());
+                maxHeight = Math.max(maxHeight, foregroundDrawable.getMinimumHeight());
             }
         }
 
         //Check against minimum height and width
-        maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
+        maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
 
         setMeasuredDimension(
                 resolveSizeAndState(maxWidth, widthMeasureSpec, 0),
