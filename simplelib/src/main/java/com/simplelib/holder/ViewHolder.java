@@ -18,8 +18,6 @@ public abstract class ViewHolder {
             throw new NullPointerException("No context attached");
 
         this.context = context;
-
-        create();
     }
 
     public ViewHolder(View contentView) {
@@ -32,8 +30,6 @@ public abstract class ViewHolder {
             throw new NullPointerException("No context attached");
 
         this.contentView = contentView;
-
-        create();
     }
 
     public ViewHolder(ViewGroup parentView) {
@@ -46,8 +42,6 @@ public abstract class ViewHolder {
             throw new NullPointerException("No context attached");
 
         this.parentView = parentView;
-
-        create();
     }
 
     public final Context getContext() {
@@ -64,6 +58,75 @@ public abstract class ViewHolder {
 
     public final View getContentView() {
         return contentView;
+    }
+
+    public boolean detach() {
+        try {
+            if (parentView != null && contentView != null) {
+                int index = parentView.indexOfChild(contentView);
+                if (index >= 0) {
+                    parentView.removeViewAt(index);
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean attach() {
+        try {
+            if (parentView != null && contentView != null) {
+                parentView.addView(contentView);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean attach(int index) {
+        try {
+            if (parentView != null && contentView != null) {
+                parentView.addView(contentView, index);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean attach(int width, int height) {
+        try {
+            if (parentView != null && contentView != null) {
+                parentView.addView(contentView, width, height);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean attach(ViewGroup.LayoutParams params) {
+        try {
+            if (parentView != null && contentView != null) {
+                parentView.addView(contentView, params);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean attach(int index, ViewGroup.LayoutParams params) {
+        try {
+            if (parentView != null && contentView != null) {
+                parentView.addView(contentView, index, params);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
     }
 
     public final <T extends View> T findViewById(@IdRes int id) {
