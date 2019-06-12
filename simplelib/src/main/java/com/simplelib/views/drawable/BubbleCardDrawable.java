@@ -974,10 +974,14 @@ public class BubbleCardDrawable extends Drawable {
     }
 
     public double calculateArrowCornerRadius() {
+        if (noArrow) return 0;
+
         return arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
     }
 
     public double calculateMaxArrowSize() {
+        if (noArrow) return 0;
+
         double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
         double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0d;
 
@@ -987,6 +991,8 @@ public class BubbleCardDrawable extends Drawable {
     }
 
     public double calculateMaxArrowLength() {
+        if (noArrow) return 0;
+
         double radius = arrowCornerRadius >= 0 ? arrowCornerRadius : 0;
         double minLength = radius > 0 ? (double) (Math.pow((Math.pow(radius, 2d) + Math.pow(radius, 2d)), 1d / 2d)) : 0d;
 
@@ -996,6 +1002,8 @@ public class BubbleCardDrawable extends Drawable {
     }
 
     public double calculateOffset() {
+        if (noArrow) return 0;
+
         double maxArrowSize = calculateMaxArrowSize();
         if (maxArrowSize < 0) maxArrowSize = 0;
 

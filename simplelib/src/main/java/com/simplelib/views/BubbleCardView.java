@@ -153,6 +153,7 @@ public class BubbleCardView extends ViewGroup {
     public void setNoArrow(boolean noArrow) {
         this.noArrow = noArrow;
         update();
+        requestLayout();
     }
 
     public void setArrowSize(float arrowSize) {
