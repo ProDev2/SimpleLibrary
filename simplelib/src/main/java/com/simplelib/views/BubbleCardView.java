@@ -135,6 +135,10 @@ public class BubbleCardView extends ViewGroup {
         update();
     }
 
+    public BubbleCardDrawable getDrawable() {
+        return drawable;
+    }
+
     public void setColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
         update();

@@ -258,9 +258,12 @@ public class BubbleCardDrawable extends Drawable {
 
     @Override
     public void setAlpha(int alpha) {
+        boolean changed = this.alpha != alpha;
         this.alpha = alpha;
-        this.paint.setAlpha(alpha);
-        invalidateSelf();
+        if (changed) {
+            this.paint.setAlpha(alpha);
+            invalidateSelf();
+        }
     }
 
     @Nullable
