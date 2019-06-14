@@ -334,6 +334,11 @@ public class BubbleCardView extends ViewGroup {
     }
 
     @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
+    @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
@@ -361,11 +366,6 @@ public class BubbleCardView extends ViewGroup {
         return null;
     }
 
-    @Override
-    public boolean shouldDelayChildPressedState() {
-        return false;
-    }
-
     public static class LayoutParams extends MarginLayoutParams {
         public LayoutParams(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -385,12 +385,6 @@ public class BubbleCardView extends ViewGroup {
 
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
-        }
-
-        @Override
-        public void resolveLayoutDirection(int layoutDirection) {
-            //TODO: LayoutDirection overrides margins
-            super.resolveLayoutDirection(layoutDirection);
         }
     }
 
