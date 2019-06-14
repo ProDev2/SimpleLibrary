@@ -258,8 +258,8 @@ public class BubbleCardView extends ViewGroup {
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
             if (child.getVisibility() != GONE) {
-                int childRight = child.getMeasuredWidth();
-                int childBottom = child.getMeasuredHeight();
+                int childRight = child.getMeasuredWidth() + marginWidth;
+                int childBottom = child.getMeasuredHeight() + marginHeight;
 
                 maxWidth = Math.max(maxWidth, childRight);
                 maxHeight = Math.max(maxHeight, childBottom);
@@ -292,10 +292,14 @@ public class BubbleCardView extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         //Calculate constraints
-        final int boundsLeft = this.getPaddingLeft();
-        final int boundsTop = this.getPaddingTop();
-        final int boundsRight = this.getMeasuredWidth() - this.getPaddingRight();
-        final int boundsBottom = this.getMeasuredHeight() - this.getPaddingBottom();
+        int offset = 0;
+        if (drawable != null) offset = (int) drawable.calculateOffset();
+        if (offset < 0) offset = 0;
+
+        final int boundsLeft = this.getPaddingLeft() + offset;
+        final int boundsTop = this.getPaddingTop() + offset;
+        final int boundsRight = this.getMeasuredWidth() - this.getPaddingRight() - offset;
+        final int boundsBottom = this.getMeasuredHeight() - this.getPaddingBottom() - offset;
 
         final int width = boundsRight - boundsLeft;
         final int height = boundsBottom - boundsTop;
@@ -310,14 +314,45 @@ public class BubbleCardView extends ViewGroup {
             View child = getChildAt(pos);
             if (child == null) continue;
 
+            int leftMargin = 0;
+            int topMargin = 0;
+            int rightMargin = 0;
+            int bottomMargin = 0;
+
+            ViewGroup.LayoutParams params = child.getLayoutParams();
+            if (params != null && params instanceof LayoutParams) {
+                LayoutParams lp = (LayoutParams) params;
+                leftMargin = lp.leftMargin;
+                topMargin = lp.topMargin;
+                rightMargin = lp.rightMargin;
+                bottomMargin = lp.bottomMargin;
+            } else if (params != null && params instanceof MarginLayoutParams) {
+                MarginLayoutParams lp = (MarginLayoutParams) params;
+                leftMargin = lp.leftMargin;
+                topMargin = lp.topMargin;
+                rightMargin = lp.rightMargin;
+                bottomMargin = lp.bottomMargin;
+            }
+
             if (child.getVisibility() != GONE) {
                 int childWidth = child.getMeasuredWidth();
                 int childHeight = child.getMeasuredHeight();
 
-                int childLeft = centerX - (childWidth / 2);
-                int childTop = centerY - (childHeight / 2);
-                int childRight = centerX + (childWidth / 2);
-                int childBottom = centerY + (childHeight / 2);
+                int offsetX = (width - childWidth) / 2;
+                int offsetY = (height - childHeight) / 2;
+
+                int offsetLeft = Math.max(0, leftMargin - offsetX);
+                int offsetTop = Math.max(0, topMargin - offsetY);
+                int offsetRight = Math.min(0, offsetX - rightMargin);
+                int offsetBottom = Math.min(0, offsetY - bottomMargin);
+
+                int centerPosX = centerX + offsetLeft + offsetRight;
+                int centerPosY = centerY + offsetTop + offsetBottom;
+
+                int childLeft = centerPosX - (childWidth / 2);
+                int childTop = centerPosY - (childHeight / 2);
+                int childRight = centerPosX + (childWidth / 2);
+                int childBottom = centerPosY + (childHeight / 2);
 
                 child.layout(childLeft, childTop, childRight, childBottom);
             }

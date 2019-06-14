@@ -64,7 +64,7 @@ public class MainFragment extends SimpleFragment {
 
         recyclerView = (RecyclerView) findViewById(R.id.main_fragment_recyclerView);
 
-        layoutManager = new GridLayoutManager(getActivity(), 5);
+        layoutManager = new GridLayoutManager(getActivity(), 4);
         recyclerView.setLayoutManager(layoutManager);
 
         adapter = new MainAdapter(itemList);
