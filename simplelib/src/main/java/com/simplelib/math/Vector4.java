@@ -15,6 +15,14 @@ public class Vector4 {
     }
 
     public Vector4(Vector2 pos, Vector2 size) {
+        if (pos == null)
+            pos = new Vector2();
+        if (size == null)
+            size = new Vector2();
+
+        if (pos.equals(size))
+            size = size.copy();
+
         this.pos = pos;
         this.size = size;
 
@@ -253,6 +261,11 @@ public class Vector4 {
 
     public int getHalfHeightAsInt() {
         return getCenter().getYAsInt();
+    }
+
+    public boolean isEqualTo(Vector4 src) {
+        if (src == null) return false;
+        return pos.isEqualTo(src.pos) && size.isEqualTo(src.size);
     }
 
     public Vector4 applyTo(Vector4 vector) {

@@ -501,6 +501,11 @@ public class Line {
             return null;
     }
 
+    public boolean isEqualTo(Line src) {
+        if (src == null) return false;
+        return start.isEqualTo(src.start) && end.isEqualTo(src.end);
+    }
+
     public void applyTo(Line line) {
         line.start = start.copy();
         line.end = end.copy();

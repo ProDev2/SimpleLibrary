@@ -270,16 +270,21 @@ public class Vector2 {
         return this;
     }
 
+    public boolean isNull() {
+        return x == 0 && y == 0;
+    }
+
+    public boolean isEqualTo(Vector2 src) {
+        if (src == null) return false;
+        return x == src.x && y == src.y;
+    }
+
     public Vector2 applyTo(Vector2 vector) {
         if (vector != null) {
             vector.x = x;
             vector.y = y;
         }
         return this;
-    }
-
-    public boolean isNull() {
-        return x == 0 && y == 0;
     }
 
     public Vector2 copy() {
