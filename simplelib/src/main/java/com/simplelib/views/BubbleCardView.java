@@ -350,7 +350,15 @@ public class BubbleCardView extends ViewGroup {
 
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams params) {
-        return new LayoutParams(params);
+        if (params != null) {
+            if (params instanceof LayoutParams)
+                return new LayoutParams((LayoutParams) params);
+            else if (params instanceof ViewGroup.MarginLayoutParams)
+                return new LayoutParams((ViewGroup.MarginLayoutParams) params);
+            else
+                return new LayoutParams((ViewGroup.LayoutParams) params);
+        }
+        return null;
     }
 
     @Override
@@ -368,6 +376,10 @@ public class BubbleCardView extends ViewGroup {
         }
 
         public LayoutParams(LayoutParams source) {
+            super(source);
+        }
+
+        public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
         }
 

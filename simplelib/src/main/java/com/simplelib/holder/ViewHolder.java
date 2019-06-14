@@ -20,18 +20,6 @@ public abstract class ViewHolder {
         this.context = context;
     }
 
-    public ViewHolder(View contentView) {
-        if (contentView == null)
-            throw new NullPointerException("No content view attached");
-
-        this.context = contentView.getContext();
-
-        if (context == null)
-            throw new NullPointerException("No context attached");
-
-        this.contentView = contentView;
-    }
-
     public ViewHolder(ViewGroup parentView) {
         if (parentView == null)
             throw new NullPointerException("No parent view attached");
