@@ -10,11 +10,11 @@ public class ClassHelper {
     }
 
     // Create Instance
-    public static <T> T createInstance(Class<T> targetClass) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static Object createInstance(Class<?> targetClass) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         return createInstance(targetClass, null);
     }
 
-    public static <T> T createInstance(Class<T> targetClass, Object[] args) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static Object createInstance(Class<?> targetClass, Object[] args) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         if (targetClass == null) throw new NullPointerException("Missing target class");
         if (args == null) args = new Object[0];
 
@@ -24,14 +24,14 @@ public class ClassHelper {
         return createInstance(targetClass, parameterTypes, args);
     }
 
-    public static <T> T createInstance(Class<T> targetClass, Class<?>[] initParameterTypes, Object[] args) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static Object createInstance(Class<?> targetClass, Class<?>[] initParameterTypes, Object[] args) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         if (targetClass == null) throw new NullPointerException("Missing target class");
         if (initParameterTypes == null) initParameterTypes = new Class<?>[0];
         if (args == null) args = new Object[0];
 
         if (args.length < initParameterTypes.length) throw new IllegalArgumentException("More parameters than arguments");
 
-        Constructor<T> constructor = findConstructor(targetClass, initParameterTypes);
+        Constructor<?> constructor = findConstructor(targetClass, initParameterTypes);
         if (constructor == null) throw new IllegalArgumentException("Constructor not found");
 
         return createInstance(constructor, args);
@@ -164,12 +164,12 @@ public class ClassHelper {
     }
 
     // Find
-    public static <T> Constructor<T> findConstructor(Class<? super T> searchClass, Class<?>[] types) {
+    public static Constructor<?> findConstructor(Class<?> searchClass, Class<?>[] types) {
         if (searchClass == null) throw new NullPointerException("Missing class to be searched");
         if (types == null) throw new NullPointerException("Missing parameter types");
 
         while (searchClass != null) {
-            for (Constructor constructor : searchClass.getDeclaredConstructors()) {
+            for (Constructor<?> constructor : searchClass.getDeclaredConstructors()) {
                 try {
                     constructor.setAccessible(true);
 
