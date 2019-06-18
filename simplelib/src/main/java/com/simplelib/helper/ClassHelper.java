@@ -1,5 +1,6 @@
 package com.simplelib.helper;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -268,10 +269,31 @@ public class ClassHelper {
             if (assignableType == null) return false;
             if (type == null) continue;
 
+            if (assignableType.isPrimitive()) {
+                try {
+                    assignableType = toWrapper(assignableType);
+                } catch (Exception e) {
+                }
+            }
+            if (type.isPrimitive()) {
+                try {
+                    type = toWrapper(type);
+                } catch (Exception e) {
+                }
+            }
+
             if (!assignableType.isAssignableFrom(type))
                 return false;
         }
 
         return true;
+    }
+
+    public static Class<?> toWrapper(Class<?> primitiveClass) {
+        if (primitiveClass == null) throw new NullPointerException("Missing primitive class");
+        if (!primitiveClass.isPrimitive()) throw new IllegalArgumentException("Not a primitive class");
+
+        Object primitiveArray = Array.newInstance(primitiveClass, 1);
+        return Array.get(primitiveArray, 0).getClass();
     }
 }
