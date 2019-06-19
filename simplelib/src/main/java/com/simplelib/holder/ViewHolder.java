@@ -13,6 +13,9 @@ public abstract class ViewHolder {
 
     private View contentView;
 
+    private boolean created;
+    private boolean bound;
+
     public ViewHolder(Context context) {
         if (context == null)
             throw new NullPointerException("No context attached");
@@ -36,11 +39,11 @@ public abstract class ViewHolder {
         return context;
     }
 
-    public ViewGroup getParentView() {
+    public final ViewGroup getParentView() {
         return parentView;
     }
 
-    public void setParentView(ViewGroup parentView) {
+    public final void setParentView(ViewGroup parentView) {
         this.parentView = parentView;
     }
 
@@ -48,7 +51,7 @@ public abstract class ViewHolder {
         return contentView;
     }
 
-    public boolean detach() {
+    public final boolean detach() {
         try {
             if (parentView != null && contentView != null) {
                 int index = parentView.indexOfChild(contentView);
@@ -62,7 +65,7 @@ public abstract class ViewHolder {
         return false;
     }
 
-    public boolean attach() {
+    public final boolean attach() {
         try {
             if (parentView != null && contentView != null) {
                 parentView.addView(contentView);
@@ -73,7 +76,7 @@ public abstract class ViewHolder {
         return false;
     }
 
-    public boolean attach(int index) {
+    public final boolean attach(int index) {
         try {
             if (parentView != null && contentView != null) {
                 parentView.addView(contentView, index);
@@ -84,7 +87,7 @@ public abstract class ViewHolder {
         return false;
     }
 
-    public boolean attach(int width, int height) {
+    public final boolean attach(int width, int height) {
         try {
             if (parentView != null && contentView != null) {
                 parentView.addView(contentView, width, height);
@@ -95,7 +98,7 @@ public abstract class ViewHolder {
         return false;
     }
 
-    public boolean attach(ViewGroup.LayoutParams params) {
+    public final boolean attach(ViewGroup.LayoutParams params) {
         try {
             if (parentView != null && contentView != null) {
                 parentView.addView(contentView, params);
@@ -106,7 +109,7 @@ public abstract class ViewHolder {
         return false;
     }
 
-    public boolean attach(int index, ViewGroup.LayoutParams params) {
+    public final boolean attach(int index, ViewGroup.LayoutParams params) {
         try {
             if (parentView != null && contentView != null) {
                 parentView.addView(contentView, index, params);
@@ -127,15 +130,15 @@ public abstract class ViewHolder {
         return null;
     }
 
-    public View inflateLayout(@LayoutRes int id) {
+    public final View inflateLayout(@LayoutRes int id) {
         return inflateLayout(id, true);
     }
 
-    public View inflateLayout(@LayoutRes int id, boolean useParent) {
+    public final View inflateLayout(@LayoutRes int id, boolean useParent) {
         return inflateLayout(id, useParent, false);
     }
 
-    public View inflateLayout(@LayoutRes int id, boolean useParent, boolean attachToParent) {
+    public final View inflateLayout(@LayoutRes int id, boolean useParent, boolean attachToParent) {
         try {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (parentView != null && useParent)
@@ -148,31 +151,75 @@ public abstract class ViewHolder {
         return null;
     }
 
-    public void recreate() {
-        contentView = null;
-        create();
+    public final boolean isCreated() {
+        return contentView != null || created;
     }
 
-    public void create() {
+    public final boolean isBound() {
+        return bound;
+    }
+
+    public synchronized final boolean recreate() {
+        destroy();
+        return create();
+    }
+
+    public synchronized final boolean create() {
+        return create(false);
+    }
+
+    public synchronized final boolean create(boolean rebind) {
+        if (contentView == null) {
+            created = false;
+            bound = false;
+        }
+
         try {
-            if (contentView == null)
+            if (contentView == null || !isCreated()) {
                 contentView = createHolder(parentView);
+                if (contentView != null) created = true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (contentView == null)
-            throw new NullPointerException("No content view attached");
+        if (contentView == null) {
+            created = false;
+            bound = false;
 
+            return false;
+        }
+
+        try {
+            if (!isBound() || rebind) {
+                bindHolder(contentView);
+                bound = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public synchronized final void destroy() {
         try {
             if (contentView != null)
-                bindHolder(contentView);
+                destroyHolder(contentView);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        contentView = null;
+
+        created = false;
+        bound = false;
     }
 
-    public abstract View createHolder(ViewGroup parentView);
+    protected void destroyHolder(View contentView) {
+    }
 
-    public abstract void bindHolder(View contentView);
+    protected abstract View createHolder(ViewGroup parentView);
+
+    protected abstract void bindHolder(View contentView);
 }
