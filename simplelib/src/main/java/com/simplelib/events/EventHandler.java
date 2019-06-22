@@ -1,95 +1,116 @@
 package com.simplelib.events;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+
+import com.simplelib.builder.PathBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
-public class EventHandler {
-    //Static
-    private static EventHandler handler;
+public class EventHandler implements Iterable<IEvent>, IEvent {
+    public static final String DEFAULT_HANDLER_ID = "default_handler";
 
-    public static EventHandler get() {
-        if (handler == null)
+    private static HashMap<String, EventHandler> handlerMap;
+
+    public static final synchronized HashMap<String, EventHandler> getHandlerMap() {
+        if (handlerMap == null)
+            handlerMap = new HashMap<>();
+        return handlerMap;
+    }
+
+    public static final synchronized EventHandler get(String handlerId) {
+        if (handlerId == null) return null;
+
+        HashMap<String, EventHandler> handlerMap = getHandlerMap();
+        if (handlerMap == null) return null;
+
+        EventHandler handler = null;
+        if (handlerMap.containsKey(handlerId)) {
+            handler = handlerMap.get(handlerId);
+        }
+        if (handler == null) {
             handler = new EventHandler();
+            handlerMap.put(handlerId, handler);
+        }
         return handler;
     }
 
-    //EventHandler
-    private ArrayList<Event> events;
+    public static final synchronized EventHandler get() {
+        return get(DEFAULT_HANDLER_ID);
+    }
+
+    public static final synchronized boolean invoke(String handlerId, String key, Bundle args) {
+        if (handlerId == null) return false;
+
+        EventHandler handler = get(handlerId);
+        if (handler == null) return false;
+
+        return handler.invoke(key, args);
+    }
+
+    // EventHandler
+    private ArrayList<IEvent> events;
 
     public EventHandler() {
         this.events = new ArrayList<>();
     }
 
-    public ArrayList<Event> getEvents() {
+    @NonNull
+    @Override
+    public Iterator<IEvent> iterator() {
+        synchronized (this) {
+            return events.iterator();
+        }
+    }
+
+    public final synchronized ArrayList<IEvent> getEvents() {
         return events;
     }
 
-    public void clear() {
-        try {
+    public final void clearEvents() {
+        synchronized (this) {
             events.clear();
-        } catch (Exception e) {
         }
     }
 
-    public ArrayList<Event> getById(Object id) {
-        ArrayList<Event> list = new ArrayList<>();
-        try {
-            for (Event event : events) {
-                if (event != null && event.hasId(id))
-                    list.add(event);
-            }
-        } catch (Exception e) {
-        }
-        return list;
-    }
-
-    public boolean add(Event event) {
-        try {
-            if (event != null && !events.contains(event)) {
-                event.setEventHandler(this);
+    public final void addEvent(IEvent event) {
+        if (event == null) return;
+        synchronized (this) {
+            if (!events.contains(event))
                 events.add(event);
-                return true;
-            }
-        } catch (Exception e) {
         }
-        return false;
     }
 
-    public boolean remove(Event event) {
-        try {
-            if (event != null && events.contains(event)) {
-                event.setEventHandler(this);
+    public final void removeEvent(IEvent event) {
+        if (event == null) return;
+        synchronized (this) {
+            if (events.contains(event))
                 events.remove(event);
-                return true;
+        }
+    }
+
+    @Override
+    public boolean invoke(String key, Bundle args) {
+        key = PathBuilder.format(key);
+        if (args == null)
+            args = new Bundle();
+
+        boolean handled = false;
+        synchronized (this) {
+            for (IEvent event : events) {
+                if (event == null)
+                    continue;
+
+                try {
+                    handled |= event.invoke(key, args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
         }
-        return false;
-    }
-
-    public void removeById(Object id) {
-        try {
-            events.removeAll(getById(id));
-        } catch (Exception e) {
-        }
-    }
-
-    public void run() {
-        run(null);
-    }
-
-    public void run(Object id) {
-        run(id, null);
-    }
-
-    public void run(Object id, Bundle extras) {
-        try {
-            for (Event event : events) {
-                if (event != null)
-                    event.post(id, extras);
-            }
-        } catch (Exception e) {
-        }
+        return handled;
     }
 }
