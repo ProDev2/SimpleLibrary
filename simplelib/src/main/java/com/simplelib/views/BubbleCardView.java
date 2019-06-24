@@ -102,7 +102,7 @@ public class BubbleCardView extends ViewGroup {
             roundCorners = attributes.getBoolean(R.styleable.BubbleCardView_bcv_roundCorners, roundCorners);
             cornerRadius = attributes.getDimension(R.styleable.BubbleCardView_bcv_cornerRadius, cornerRadius);
 
-            noArrow = attributes.getBoolean(R.styleable.BubbleCardView_bvc_noArrow, noArrow);
+            noArrow = attributes.getBoolean(R.styleable.BubbleCardView_bcv_noArrow, noArrow);
             arrowTarget = attributes.getResourceId(R.styleable.BubbleCardView_bcv_arrowTarget, arrowTarget);
             arrowSize = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowSize, arrowSize);
             arrowLength = attributes.getDimension(R.styleable.BubbleCardView_bcv_arrowLength, arrowLength);

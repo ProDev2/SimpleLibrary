@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <declare-styleable name="AspectRatioLayout">
+
+        <attr name="arl_widthRatio" format="float" />
+        <attr name="arl_heightRatio" format="float" />
+
+    </declare-styleable>
+
     <declare-styleable name="BubbleCardView">
 
-        <attr name="bvc_noArrow" format="boolean" />
+        <attr name="bcv_noArrow" format="boolean" />
         <attr name="bcv_arrowTarget" format="reference" />
         <attr name="bcv_arrowSize" format="dimension" />
         <attr name="bcv_arrowLength" format="dimension" />
