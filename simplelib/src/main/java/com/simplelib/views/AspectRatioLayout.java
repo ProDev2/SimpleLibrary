@@ -70,29 +70,19 @@ public class AspectRatioLayout extends RelativeLayout {
             if (widthMode == MeasureSpec.EXACTLY) {
                 int newHeight = Math.round(heightRatio / widthRatio * width);
 
-                if (heightMode == MeasureSpec.UNSPECIFIED) {
+                if (newHeight > height && heightMode != MeasureSpec.UNSPECIFIED)
+                    width *= (float) height / (float) newHeight;
+                else
                     height = newHeight;
-                    heightMode = MeasureSpec.AT_MOST;
-                } else if (heightMode == MeasureSpec.AT_MOST) {
-                    if (newHeight > height)
-                        width *= (float) height / (float) newHeight;
-                    else
-                        height = newHeight;
-                    heightMode = MeasureSpec.AT_MOST;
-                }
+                heightMode = MeasureSpec.AT_MOST;
             } else if (heightMode == MeasureSpec.EXACTLY) {
                 int newWidth = Math.round(widthRatio / heightRatio * height);
 
-                if (widthMode == MeasureSpec.UNSPECIFIED) {
+                if (newWidth > width && widthMode != MeasureSpec.UNSPECIFIED)
+                    height *= (float) width / (float) newWidth;
+                else
                     width = newWidth;
-                    widthMode = MeasureSpec.AT_MOST;
-                } else if (widthMode == MeasureSpec.AT_MOST) {
-                    if (newWidth > width)
-                        height *= (float) width / (float) newWidth;
-                    else
-                        width = newWidth;
-                    widthMode = MeasureSpec.AT_MOST;
-                }
+                widthMode = MeasureSpec.AT_MOST;
             } else {
                 Log.w(TAG, "Width or height are not exact or at most, so do nothing.");
             }
