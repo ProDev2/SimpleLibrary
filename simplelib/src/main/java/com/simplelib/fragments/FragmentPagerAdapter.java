@@ -22,6 +22,8 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
 
     private boolean makeAllPagesSwipeable;
 
+    private Data data;
+
     public FragmentPagerAdapter(ViewPager viewPager, FragmentManager fm) {
         super(fm);
 
@@ -35,6 +37,8 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
         this.noPosition = false;
 
         this.makeAllPagesSwipeable = true;
+
+        this.data = new Data(pages);
     }
 
     public void setViewPager(ViewPager viewPager) {
@@ -53,6 +57,27 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
             this.viewPager.setAdapter(this);
         } catch (Exception e) {
         }
+    }
+
+    public Data getData() {
+        if (data == null)
+            data = new Data(getPages());
+        return data;
+    }
+
+    public void setData(Data data) {
+        if (data == null) return;
+
+        try {
+            this.pages.clear();
+
+            ArrayList<Page> pagesList = data.getPages();
+            if (pagesList != null)
+                this.pages.addAll(pagesList);
+        } catch (Exception e) {
+        }
+
+        update();
     }
 
     public void setMakeAllPagesSwipeable(boolean makeAllPagesSwipeable) {
@@ -301,6 +326,20 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
                 return src == fragment;
             }
             return super.equals(obj);
+        }
+    }
+
+    public static final class Data {
+        private ArrayList<Page> pages;
+
+        public Data(ArrayList<Page> pages) {
+            if (pages == null)
+                pages = new ArrayList<>();
+            this.pages = pages;
+        }
+
+        public ArrayList<Page> getPages() {
+            return pages;
         }
     }
 }
