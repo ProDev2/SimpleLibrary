@@ -37,6 +37,24 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
         this.makeAllPagesSwipeable = true;
     }
 
+    public void setViewPager(ViewPager viewPager) {
+        if (viewPager == null)
+            throw new NullPointerException("No view pager");
+
+        try {
+            if (this.viewPager != null)
+                this.viewPager.setAdapter(null);
+        } catch (Exception e) {
+        }
+
+        this.viewPager = viewPager;
+
+        try {
+            this.viewPager.setAdapter(this);
+        } catch (Exception e) {
+        }
+    }
+
     public void setMakeAllPagesSwipeable(boolean makeAllPagesSwipeable) {
         this.makeAllPagesSwipeable = makeAllPagesSwipeable;
     }
