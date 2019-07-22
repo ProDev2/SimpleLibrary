@@ -52,7 +52,7 @@ public abstract class ListLoader<K, V, E> {
     public static final long NO_EXECUTION_DELAY = -1;
 
     // ListLoader
-    private IMap<K, E> listMap;
+    private IMap<K, E> map;
 
     private Looper looper;
     private Handler handler;
@@ -65,25 +65,25 @@ public abstract class ListLoader<K, V, E> {
     private OnLoadingListener<K, V, E> onLoadingListener;
 
     public ListLoader() {
-        this((IMap<K, E>) null, null);
+        this((IMap<K, E>) null);
     }
 
-    public ListLoader(HashMap<K, List<E>> listMap) {
-        this(listMap, Looper.getMainLooper());
+    public ListLoader(HashMap<K, List<E>> map) {
+        this(map, Looper.getMainLooper());
     }
 
-    public ListLoader(HashMap<K, List<E>> listMap, Looper looper) {
-        this(listMap != null ? new ListMapWrapper<>(listMap) : null, looper);
+    public ListLoader(HashMap<K, List<E>> map, Looper looper) {
+        this(map != null ? new MapWrapper<>(map) : null, looper);
     }
 
-    public ListLoader(IMap<K, E> listMap) {
-        this(listMap, Looper.getMainLooper());
+    public ListLoader(IMap<K, E> map) {
+        this(map, Looper.getMainLooper());
     }
 
-    public ListLoader(IMap<K, E> listMap, Looper looper) {
-        if (listMap == null)
-            listMap = new ListMap<>();
-        this.listMap = listMap;
+    public ListLoader(IMap<K, E> map, Looper looper) {
+        if (map == null)
+            map = new ListMap<>();
+        this.map = map;
 
         this.looper = looper;
         if (this.looper != null)
@@ -93,22 +93,22 @@ public abstract class ListLoader<K, V, E> {
         this.lastExecution = -1;
     }
 
-    public final IMap<K, E> getListMap() {
-        synchronized (listMap) {
-            return listMap;
+    public final IMap<K, E> getMap() {
+        synchronized (map) {
+            return map;
         }
     }
 
-    public void setListMap(IMap<K, E> listMap) {
-        if (listMap != null) {
-            synchronized (listMap) {
-                this.listMap = null;
+    public void setMap(IMap<K, E> map) {
+        if (map != null) {
+            synchronized (map) {
+                this.map = null;
             }
         }
 
-        if (listMap == null)
-            listMap = new ListMap<>();
-        this.listMap = listMap;
+        if (map == null)
+            map = new ListMap<>();
+        this.map = map;
     }
 
     public final void setOnLoadingListener(OnLoadingListener<K, V, E> onLoadingListener) {
@@ -210,16 +210,16 @@ public abstract class ListLoader<K, V, E> {
     }
 
     public final void clearLists() {
-        synchronized (listMap) {
-            HashMap<K, List<E>> tempListMap = new HashMap<>();
+        synchronized (map) {
+            HashMap<K, List<E>> tempMap = new HashMap<>();
             try {
-                listMap.applyTo(tempListMap);
-                listMap.clear();
+                map.applyTo(tempMap);
+                map.clear();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            for (Map.Entry<K, List<E>> listEntry : tempListMap.entrySet()) {
+            for (Map.Entry<K, List<E>> listEntry : tempMap.entrySet()) {
                 if (listEntry == null) continue;
 
                 K key = listEntry.getKey();
@@ -232,14 +232,14 @@ public abstract class ListLoader<K, V, E> {
                 }
             }
 
-            tempListMap.clear();
+            tempMap.clear();
         }
     }
 
     public final boolean hasList(K key) {
-        synchronized (listMap) {
+        synchronized (map) {
             try {
-                return listMap.contains(key);
+                return map.contains(key);
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
@@ -248,18 +248,18 @@ public abstract class ListLoader<K, V, E> {
     }
 
     public final List<E> getList(K key, boolean createIfNeeded) {
-        synchronized (listMap) {
+        synchronized (map) {
             List<E> list = null;
             try {
-                if (listMap.contains(key))
-                    list = listMap.getKey(key);
+                if (map.contains(key))
+                    list = map.getKey(key);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             if (createIfNeeded && list == null) {
                 list = new ArrayList<>();
                 try {
-                    listMap.putKey(key, list);
+                    map.putKey(key, list);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -275,11 +275,11 @@ public abstract class ListLoader<K, V, E> {
     }
 
     public final boolean removeList(K key) {
-        synchronized (listMap) {
+        synchronized (map) {
             if (hasList(key)) {
                 List<E> list = null;
                 try {
-                    list = listMap.removeKey(key);
+                    list = map.removeKey(key);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -535,7 +535,7 @@ public abstract class ListLoader<K, V, E> {
         return task.publish(lockDelay, lockIfRunning, copyList);
     }
 
-    // Listloader task
+    // ListLoader task
     public final class Task extends Loader {
         private final int flags;
 
@@ -797,7 +797,7 @@ public abstract class ListLoader<K, V, E> {
         }
     }
 
-    // Listloader loader
+    // ListLoader loader
     public static abstract class Loader implements Runnable {
         // States
         public static final int STATE_NONE = 1;
@@ -967,7 +967,7 @@ public abstract class ListLoader<K, V, E> {
         protected abstract void onFinish(boolean success);
     }
 
-    // Listloader list interface
+    // ListLoader list interface
     public static abstract class ListInterface<E> implements Iterable<E> {
         private final List<E> list;
         private final Comparator<E> comparator;
@@ -1355,7 +1355,7 @@ public abstract class ListLoader<K, V, E> {
         protected abstract void onInvokeInterface();
     }
 
-    // Listloader map
+    // ListLoader map
     public interface IMap<K, E> {
         void applyTo(Map<K, List<E>> map);
 
@@ -1366,7 +1366,7 @@ public abstract class ListLoader<K, V, E> {
         List<E> removeKey(K key);
     }
 
-    // Listloader list map
+    // ListLoader list map
     public static class ListMap<K, E> extends HashMap<K, List<E>> implements IMap<K, E> {
         public ListMap() {
         }
@@ -1439,19 +1439,19 @@ public abstract class ListLoader<K, V, E> {
         }
     }
 
-    // Listloader map wrapper
-    public static class ListMapWrapper<K, E> implements IMap<K, E> {
-        private final Map<K, List<E>> listMap;
+    // ListLoader map wrapper
+    public static class MapWrapper<K, E> implements IMap<K, E> {
+        private final Map<K, List<E>> map;
 
-        public ListMapWrapper(Map<K, List<E>> listMap) {
-            if (listMap == null)
-                throw new NullPointerException("No list map");
-            this.listMap = listMap;
+        public MapWrapper(Map<K, List<E>> map) {
+            if (map == null)
+                throw new NullPointerException("No map attached");
+            this.map = map;
         }
 
-        public Map<K, List<E>> getListMap() {
-            synchronized (listMap) {
-                return listMap;
+        public Map<K, List<E>> getMap() {
+            synchronized (map) {
+                return map;
             }
         }
 
@@ -1459,10 +1459,10 @@ public abstract class ListLoader<K, V, E> {
         public void applyTo(Map<K, List<E>> map) {
             try {
                 if (map != null) {
-                    synchronized (listMap) {
+                    synchronized (this.map) {
                         synchronized (map) {
                             map.clear();
-                            map.putAll(listMap);
+                            map.putAll(this.map);
                         }
                     }
                 }
@@ -1474,8 +1474,8 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public boolean contains(K key) {
             try {
-                synchronized (listMap) {
-                    return listMap.containsKey(key);
+                synchronized (map) {
+                    return map.containsKey(key);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1486,8 +1486,8 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public void clear() {
             try {
-                synchronized (listMap) {
-                    listMap.clear();
+                synchronized (map) {
+                    map.clear();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1497,8 +1497,8 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public List<E> getKey(K key) {
             try {
-                synchronized (listMap) {
-                    return listMap.get(key);
+                synchronized (map) {
+                    return map.get(key);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1509,8 +1509,8 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public List<E> putKey(K key, List<E> list) {
             try {
-                synchronized (listMap) {
-                    return listMap.put(key, list);
+                synchronized (map) {
+                    return map.put(key, list);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1521,8 +1521,8 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public List<E> removeKey(K key) {
             try {
-                synchronized (listMap) {
-                    return listMap.remove(key);
+                synchronized (map) {
+                    return map.remove(key);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1531,7 +1531,7 @@ public abstract class ListLoader<K, V, E> {
         }
     }
     
-    // Listloader loading listener
+    // ListLoader loading listener
     public interface OnLoadingListener<K, V, E> {
         void onListLoading(boolean success, int flags, K key, V value);
         void onListChanged(K key, V value, List<E> list);
