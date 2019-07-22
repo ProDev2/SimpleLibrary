@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListLoader.ListHolder<E>>> {
+public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<E>>> {
     // Flags
     public static final int FLAG_NONE = 1;
     public static final int FLAG_LOAD = 2;
@@ -52,7 +52,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
     public static final long NO_EXECUTION_DELAY = -1;
 
     // ListLoader
-    private HashMap<K, ListHolder<E>> listMap;
+    private HashMap<K, List<E>> listMap;
 
     private Looper looper;
     private Handler handler;
@@ -68,13 +68,13 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         this(null);
     }
 
-    public ListLoader(HashMap<K, ListHolder<E>> listMap) {
+    public ListLoader(HashMap<K, List<E>> listMap) {
         this(listMap, Looper.getMainLooper());
     }
 
-    public ListLoader(HashMap<K, ListHolder<E>> listMap, Looper looper) {
+    public ListLoader(HashMap<K, List<E>> listMap, Looper looper) {
         if (listMap == null)
-            listMap = new ListMapHolder<>();
+            listMap = new HashMap<>();
         this.listMap = listMap;
 
         this.looper = looper;
@@ -85,7 +85,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         this.lastExecution = -1;
     }
 
-    public final HashMap<K, ListHolder<E>> getListMap() {
+    public final HashMap<K, List<E>> getListMap() {
         synchronized (listMap) {
             return listMap;
         }
@@ -190,18 +190,18 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
     }
 
     @Override
-    public final Iterator<Map.Entry<K, ListHolder<E>>> iterator() {
+    public final Iterator<Map.Entry<K, List<E>>> iterator() {
         synchronized (listMap) {
-            final Iterator<Map.Entry<K, ListHolder<E>>> mapIterator = listMap.entrySet().iterator();
+            final Iterator<Map.Entry<K, List<E>>> mapIterator = listMap.entrySet().iterator();
 
-            return new Iterator<Map.Entry<K, ListHolder<E>>>() {
+            return new Iterator<Map.Entry<K, List<E>>>() {
                 @Override
                 public boolean hasNext() {
                     return mapIterator != null ? mapIterator.hasNext() : false;
                 }
 
                 @Override
-                public Map.Entry<K, ListHolder<E>> next() {
+                public Map.Entry<K, List<E>> next() {
                     return mapIterator != null ? mapIterator.next() : null;
                 }
 
@@ -215,15 +215,15 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
     public final void clearLists() {
         synchronized (listMap) {
-            ListMapHolder<K, E> tempListMap = new ListMapHolder<>();
+            HashMap<K, List<E>> tempListMap = new HashMap<>();
             tempListMap.putAll(listMap);
             listMap.clear();
 
-            for (Map.Entry<K, ListHolder<E>> listEntry : tempListMap.entrySet()) {
+            for (Map.Entry<K, List<E>> listEntry : tempListMap.entrySet()) {
                 if (listEntry == null) continue;
 
                 K key = listEntry.getKey();
-                ListHolder<E> list = listEntry.getValue();
+                List<E> list = listEntry.getValue();
 
                 try {
                     onListRemoved(key, list);
@@ -242,13 +242,13 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         }
     }
 
-    public final ListHolder<E> getList(K key, boolean createIfNeeded) {
+    public final List<E> getList(K key, boolean createIfNeeded) {
         synchronized (listMap) {
-            ListHolder<E> list = null;
+            List<E> list = null;
             if (listMap.containsKey(key))
                 list = listMap.get(key);
             if (createIfNeeded && list == null) {
-                list = new ListHolder<>();
+                list = new ArrayList<>();
                 listMap.put(key, list);
 
                 try {
@@ -264,7 +264,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
     public final boolean removeList(K key) {
         synchronized (listMap) {
             if (listMap.containsKey(key)) {
-                ListHolder<E> list = listMap.remove(key);
+                List<E> list = listMap.remove(key);
 
                 try {
                     onListRemoved(key, list);
@@ -331,7 +331,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
             task = null;
 
             boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
-            ListHolder<E> list = getList(key, createListIfNeeded);
+            List<E> list = getList(key, createListIfNeeded);
 
             task = new Task(flags, key, value, list, comparator, onLoadingListener);
             try {
@@ -418,11 +418,11 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         return task.isLoaderThread();
     }
 
-    protected void onListCreated(K key, ListHolder<E> list) {
+    protected void onListCreated(K key, List<E> list) {
 
     }
 
-    protected void onListRemoved(K key, ListHolder<E> list) {
+    protected void onListRemoved(K key, List<E> list) {
 
     }
 
@@ -431,12 +431,12 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
             onLoadingListener.onListLoading(success, flags, key, value);
     }
 
-    protected void onListChanged(K key, V value, ListHolder<E> list) {
+    protected void onListChanged(K key, V value, List<E> list) {
         if (onLoadingListener != null)
             onLoadingListener.onListChanged(key, value, list);
     }
 
-    protected void onListLoaded(boolean success, K key, V value, ListHolder<E> list) {
+    protected void onListLoaded(boolean success, K key, V value, List<E> list) {
         if (onLoadingListener != null)
             onLoadingListener.onListLoaded(success, key, value, list);
     }
@@ -469,7 +469,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         return true;
     }
 
-    protected void addElementsToList(ListHolder<E> srcList, ListHolder<E> list, boolean makeStorable) {
+    protected void addElementsToList(List<E> srcList, List<E> list, boolean makeStorable) {
         if (list == null)
             return;
 
@@ -522,10 +522,10 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
         private final K key;
         private final V value;
 
-        private final ListHolder<E> srcList;
+        private final List<E> srcList;
 
-        private final ListHolder<E> list;
-        private final ListHolder<E> tempList;
+        private final List<E> list;
+        private final List<E> tempList;
 
         private final Comparator<E> comparator;
 
@@ -533,15 +533,15 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
         private OnLoadingListener<K, V, E> onLoadingListener;
 
-        private Task(int flags, K key, V value, ListHolder<E> srcList) {
+        private Task(int flags, K key, V value, List<E> srcList) {
             this(flags, key, value, srcList, null);
         }
 
-        private Task(int flags, K key, V value, ListHolder<E> srcList, Comparator<E> comparator) {
+        private Task(int flags, K key, V value, List<E> srcList, Comparator<E> comparator) {
             this(flags, key, value, srcList, comparator, null);
         }
 
-        private Task(int flags, K key, V value, ListHolder<E> srcList, Comparator<E> comparator, OnLoadingListener<K, V, E> onLoadingListener) {
+        private Task(int flags, K key, V value, List<E> srcList, Comparator<E> comparator, OnLoadingListener<K, V, E> onLoadingListener) {
             this.flags = flags;
 
             this.key = key;
@@ -549,8 +549,8 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
             this.srcList = srcList;
 
-            this.list = new ListHolder<E>();
-            this.tempList = new ListHolder<E>();
+            this.list = new ArrayList<>();
+            this.tempList = new ArrayList<>();
 
             this.comparator = comparator;
 
@@ -580,11 +580,11 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
             return value;
         }
 
-        public final ListHolder<E> getList() {
+        public final List<E> getList() {
             return list;
         }
 
-        public final ListHolder<E> getTempList() {
+        public final List<E> getTempList() {
             return tempList;
         }
 
@@ -740,7 +740,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
             }, lockDelay, lockIfRunning);
         }
 
-        private void onListChanged(K key, V value, ListHolder<E> list) {
+        private void onListChanged(K key, V value, List<E> list) {
             try {
                 if (onLoadingListener != null)
                     onLoadingListener.onListChanged(key, value, list);
@@ -755,7 +755,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
             }
         }
 
-        private void onListLoaded(boolean success, K key, V value, ListHolder<E> list) {
+        private void onListLoaded(boolean success, K key, V value, List<E> list) {
             try {
                 if (onLoadingListener != null)
                     onLoadingListener.onListLoaded(success, key, value, list);
@@ -1334,41 +1334,11 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
         protected abstract void onInvokeInterface();
     }
-
-    // Listloader listmap holder
-    public static class ListMapHolder<K, E> extends HashMap<K, ListHolder<E>> {
-        public ListMapHolder() {
-            super();
-        }
-
-        public ListMapHolder(Map<K, ListHolder<E>> map) {
-            super(map);
-        }
-
-        public ListMapHolder(ListMapHolder<K, E> src) {
-            super(src);
-        }
-    }
-
-    // Listloader list holder
-    public static class ListHolder<E> extends ArrayList<E> {
-        public ListHolder() {
-            super();
-        }
-
-        public ListHolder(Collection<E> collection) {
-            super(collection);
-        }
-
-        public ListHolder(ListHolder<E> src) {
-            super(src);
-        }
-    }
-
+    
     // Listloader loading listener
     public interface OnLoadingListener<K, V, E> {
         void onListLoading(boolean success, int flags, K key, V value);
-        void onListChanged(K key, V value, ListHolder<E> list);
-        void onListLoaded(boolean success, K key, V value, ListHolder<E> list);
+        void onListChanged(K key, V value, List<E> list);
+        void onListLoaded(boolean success, K key, V value, List<E> list);
     }
 }
