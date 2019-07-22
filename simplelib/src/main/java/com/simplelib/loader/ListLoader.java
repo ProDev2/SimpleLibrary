@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<E>>> {
+public abstract class ListLoader<K, V, E> {
     // Flags
     public static final int FLAG_NONE = 1;
     public static final int FLAG_LOAD = 2;
@@ -52,7 +52,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
     public static final long NO_EXECUTION_DELAY = -1;
 
     // ListLoader
-    private HashMap<K, List<E>> listMap;
+    private IMap<K, E> listMap;
 
     private Looper looper;
     private Handler handler;
@@ -68,13 +68,13 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
         this(null);
     }
 
-    public ListLoader(HashMap<K, List<E>> listMap) {
+    public ListLoader(IMap<K, E> listMap) {
         this(listMap, Looper.getMainLooper());
     }
 
-    public ListLoader(HashMap<K, List<E>> listMap, Looper looper) {
+    public ListLoader(IMap<K, E> listMap, Looper looper) {
         if (listMap == null)
-            listMap = new HashMap<>();
+            listMap = new ListMap<>();
         this.listMap = listMap;
 
         this.looper = looper;
@@ -85,10 +85,22 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
         this.lastExecution = -1;
     }
 
-    public final HashMap<K, List<E>> getListMap() {
+    public final IMap<K, E> getListMap() {
         synchronized (listMap) {
             return listMap;
         }
+    }
+
+    public void setListMap(IMap<K, E> listMap) {
+        if (listMap != null) {
+            synchronized (listMap) {
+                this.listMap = null;
+            }
+        }
+
+        if (listMap == null)
+            listMap = new ListMap<>();
+        this.listMap = listMap;
     }
 
     public final void setOnLoadingListener(OnLoadingListener<K, V, E> onLoadingListener) {
@@ -189,35 +201,15 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
         return false;
     }
 
-    @Override
-    public final Iterator<Map.Entry<K, List<E>>> iterator() {
-        synchronized (listMap) {
-            final Iterator<Map.Entry<K, List<E>>> mapIterator = listMap.entrySet().iterator();
-
-            return new Iterator<Map.Entry<K, List<E>>>() {
-                @Override
-                public boolean hasNext() {
-                    return mapIterator != null ? mapIterator.hasNext() : false;
-                }
-
-                @Override
-                public Map.Entry<K, List<E>> next() {
-                    return mapIterator != null ? mapIterator.next() : null;
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
-        }
-    }
-
     public final void clearLists() {
         synchronized (listMap) {
             HashMap<K, List<E>> tempListMap = new HashMap<>();
-            tempListMap.putAll(listMap);
-            listMap.clear();
+            try {
+                listMap.applyTo(tempListMap);
+                listMap.clear();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             for (Map.Entry<K, List<E>> listEntry : tempListMap.entrySet()) {
                 if (listEntry == null) continue;
@@ -238,18 +230,31 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
 
     public final boolean hasList(K key) {
         synchronized (listMap) {
-            return listMap.containsKey(key);
+            try {
+                return listMap.contains(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 
     public final List<E> getList(K key, boolean createIfNeeded) {
         synchronized (listMap) {
             List<E> list = null;
-            if (listMap.containsKey(key))
-                list = listMap.get(key);
+            try {
+                if (listMap.contains(key))
+                    list = listMap.getKey(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             if (createIfNeeded && list == null) {
                 list = new ArrayList<>();
-                listMap.put(key, list);
+                try {
+                    listMap.putKey(key, list);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 try {
                     onListCreated(key, list);
@@ -263,15 +268,22 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
 
     public final boolean removeList(K key) {
         synchronized (listMap) {
-            if (listMap.containsKey(key)) {
-                List<E> list = listMap.remove(key);
-
+            if (hasList(key)) {
+                List<E> list = null;
                 try {
-                    onListRemoved(key, list);
+                    list = listMap.removeKey(key);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return true;
+
+                if (list != null) {
+                    try {
+                        onListRemoved(key, list);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
             }
             return false;
         }
@@ -1333,6 +1345,182 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, List<
         }
 
         protected abstract void onInvokeInterface();
+    }
+
+    // Listloader map
+    public interface IMap<K, E> {
+        void applyTo(Map<K, List<E>> map);
+
+        boolean contains(K key);
+        void clear();
+        List<E> getKey(K key);
+        List<E> putKey(K key, List<E> list);
+        List<E> removeKey(K key);
+    }
+
+    // Listloader list map
+    public static class ListMap<K, E> extends HashMap<K, List<E>> implements IMap<K, E> {
+        public ListMap() {
+        }
+
+        public ListMap(Map<? extends K, ? extends List<E>> map) {
+            super(map);
+        }
+
+        @Override
+        public synchronized void applyTo(Map<K, List<E>> map) {
+            try {
+                if (map != null) {
+                    synchronized (map) {
+                        map.clear();
+                        map.putAll(this);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public synchronized boolean contains(K key) {
+            try {
+                return containsKey(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        public synchronized void clear() {
+            try {
+                clear();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public synchronized List<E> getKey(K key) {
+            try {
+                return get(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public List<E> putKey(K key, List<E> list) {
+            try {
+                return put(key, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public List<E> removeKey(K key) {
+            try {
+                return remove(key);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    // Listloader map wrapper
+    public static class ListMapWrapper<K, E> implements IMap<K, E> {
+        private final Map<K, List<E>> listMap;
+
+        public ListMapWrapper(Map<K, List<E>> listMap) {
+            if (listMap == null)
+                throw new NullPointerException("No list map");
+            this.listMap = listMap;
+        }
+
+        public Map<K, List<E>> getListMap() {
+            synchronized (listMap) {
+                return listMap;
+            }
+        }
+
+        @Override
+        public void applyTo(Map<K, List<E>> map) {
+            try {
+                if (map != null) {
+                    synchronized (listMap) {
+                        synchronized (map) {
+                            map.clear();
+                            map.putAll(listMap);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public boolean contains(K key) {
+            try {
+                synchronized (listMap) {
+                    return listMap.containsKey(key);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        public void clear() {
+            try {
+                synchronized (listMap) {
+                    listMap.clear();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public List<E> getKey(K key) {
+            try {
+                synchronized (listMap) {
+                    return listMap.get(key);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public List<E> putKey(K key, List<E> list) {
+            try {
+                synchronized (listMap) {
+                    return listMap.put(key, list);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        public List<E> removeKey(K key) {
+            try {
+                synchronized (listMap) {
+                    return listMap.remove(key);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
     
     // Listloader loading listener
