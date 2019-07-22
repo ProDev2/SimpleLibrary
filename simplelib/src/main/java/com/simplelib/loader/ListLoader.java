@@ -308,6 +308,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
     }
 
     public final synchronized Task load(K key, V value, int flags, Comparator<E> comparator, OnLoadingListener<K, V, E> onLoadingListener) {
+        boolean loading = true;
         try {
             flags = onModifyFlags(flags);
 
@@ -316,34 +317,49 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
             comparator = onModifyComparator(comparator);
 
-            if (!has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(key, value))
-                return null;
-            if (!has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(key, value))
-                return null;
+            if (loading && !has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(key, value))
+                loading = false;
+            if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(key, value))
+                loading = false;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            loading = false;
         }
 
-        cancel();
-
-        if (task != null)
-            return null;
-
-        boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
-        ListHolder<E> list = getList(key, createListIfNeeded);
-
-        task = new Task(flags, key, value, list, comparator, onLoadingListener);
-        try {
-            task.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-
+        if (loading) {
+            release();
             task = null;
-            return null;
+
+            boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
+            ListHolder<E> list = getList(key, createListIfNeeded);
+
+            task = new Task(flags, key, value, list, comparator, onLoadingListener);
+            try {
+                task.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                release();
+                task = null;
+
+                loading = false;
+            }
         }
 
-        return task;
+        try {
+            if (onLoadingListener != null)
+                onLoadingListener.onListLoading(loading, flags, key, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            ListLoader.this.onListLoading(loading, flags, key, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return loading ? task : null;
     }
 
     public final synchronized boolean cancel() {
@@ -408,6 +424,11 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
     protected void onListRemoved(K key, ListHolder<E> list) {
 
+    }
+
+    protected void onListLoading(boolean success, int flags, K key, V value) {
+        if (onLoadingListener != null)
+            onLoadingListener.onListLoading(success, flags, key, value);
     }
 
     protected void onListChanged(K key, V value, ListHolder<E> list) {
@@ -1346,6 +1367,7 @@ public abstract class ListLoader<K, V, E> implements Iterable<Map.Entry<K, ListL
 
     // Listloader loading listener
     public interface OnLoadingListener<K, V, E> {
+        void onListLoading(boolean success, int flags, K key, V value);
         void onListChanged(K key, V value, ListHolder<E> list);
         void onListLoaded(boolean success, K key, V value, ListHolder<E> list);
     }
