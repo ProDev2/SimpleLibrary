@@ -65,7 +65,15 @@ public abstract class ListLoader<K, V, E> {
     private OnLoadingListener<K, V, E> onLoadingListener;
 
     public ListLoader() {
-        this(null);
+        this((IMap<K, E>) null, null);
+    }
+
+    public ListLoader(HashMap<K, List<E>> listMap) {
+        this(listMap, Looper.getMainLooper());
+    }
+
+    public ListLoader(HashMap<K, List<E>> listMap, Looper looper) {
+        this(listMap != null ? new ListMapWrapper<>(listMap) : null, looper);
     }
 
     public ListLoader(IMap<K, E> listMap) {
