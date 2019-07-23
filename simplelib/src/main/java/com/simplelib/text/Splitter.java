@@ -9,7 +9,7 @@ public class Splitter implements Iterable<String>
         return new Splitter(text, separations);
     }
 
-    public static Splitter use(String text, ArrayList<String> separations) {
+    public static Splitter use(String text, List<String> separations) {
         return new Splitter(text, separations);
     }
 
@@ -17,23 +17,23 @@ public class Splitter implements Iterable<String>
         return new Splitter(text, keepSeparations, separations);
     }
 
-    public static Splitter use(String text, boolean keepSeparations, ArrayList<String> separations) {
+    public static Splitter use(String text, boolean keepSeparations, List<String> separations) {
         return new Splitter(text, keepSeparations, separations);
     }
 
     //Splitter
     private String text;
-    private ArrayList<String> separations;
+    private List<String> separations;
     private boolean keepSeparations;
 
-    private ArrayList<String> parts;
+    private List<String> parts;
 
     public Splitter(String text, String... separations) {
         setText(text);
         setSeparations(separations);
     }
 
-    public Splitter(String text, ArrayList<String> separations) {
+    public Splitter(String text, List<String> separations) {
         setText(text);
         setSeparations(separations);
     }
@@ -44,7 +44,7 @@ public class Splitter implements Iterable<String>
         setSeparations(separations);
     }
 
-    public Splitter(String text, boolean keepSeparations, ArrayList<String> separations) {
+    public Splitter(String text, boolean keepSeparations, List<String> separations) {
         setText(text);
         setKeepSeparations(keepSeparations);
         setSeparations(separations);
@@ -62,7 +62,7 @@ public class Splitter implements Iterable<String>
         return setSeparations(new ArrayList<String>(Arrays.asList(separations)));
     }
 
-    public Splitter setSeparations(ArrayList<String> separations) {
+    public Splitter setSeparations(List<String> separations) {
         if (this.separations == null)
             this.separations = new ArrayList<>();
 
@@ -99,9 +99,9 @@ public class Splitter implements Iterable<String>
     private void splitAt(String separation) {
         if (separation.length() <= 0) return;
 
-        ArrayList<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (String part : parts) {
-            ArrayList<String> splitParts = splitAt(part, separation);
+            List<String> splitParts = splitAt(part, separation);
 
             if (splitParts.size() <= 0)
                 splitParts.add(part);
@@ -113,8 +113,8 @@ public class Splitter implements Iterable<String>
         parts.addAll(list);
     }
 
-    private ArrayList<String> splitAt(String partText, String separation) {
-        ArrayList<String> list = new ArrayList<>();
+    private List<String> splitAt(String partText, String separation) {
+        List<String> list = new ArrayList<>();
         if (partText.contains(separation)) {
             int fPos = partText.indexOf(separation);
             if (fPos > 0)
@@ -141,7 +141,7 @@ public class Splitter implements Iterable<String>
     }
 
     private Integer[] getAllIndexes(String text, String keyword) {
-        ArrayList<Integer> indexes = new ArrayList<>();
+        List<Integer> indexes = new ArrayList<>();
         int index = text.indexOf(keyword);
         while (index >= 0) {
             indexes.add(index);
@@ -150,9 +150,9 @@ public class Splitter implements Iterable<String>
         return indexes.toArray(new Integer[indexes.size()]);
     }
 
-    public ArrayList<String> getList() {
+    public List<String> getList() {
         split();
-        ArrayList<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (String part : parts) {
             list.add(part);
         }

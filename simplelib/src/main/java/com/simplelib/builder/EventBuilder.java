@@ -5,6 +5,7 @@ import com.simplelib.events.EventGroup;
 import com.simplelib.events.IEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EventBuilder {
     public static final EventBuilder builder() {
@@ -113,7 +114,7 @@ public class EventBuilder {
 
         private Event.OnEventListener eventListener;
 
-        private ArrayList<IEvent> events;
+        private List<IEvent> events;
 
         private GroupB() {
             withNoKey();

@@ -19,6 +19,7 @@ import com.simplelib.container.SimpleMenuItem;
 import com.simplelib.tools.MathTools;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleMenuPopup extends SimplePopup {
     public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
@@ -30,7 +31,7 @@ public class SimpleMenuPopup extends SimplePopup {
 
     private static final int LAYOUT_MARGINS = 5;
 
-    private ArrayList<SimpleMenuItem> list;
+    private List<SimpleMenuItem> list;
 
     private CardView card;
 
@@ -49,7 +50,7 @@ public class SimpleMenuPopup extends SimplePopup {
         this(parentView, null);
     }
 
-    public SimpleMenuPopup(View parentView, ArrayList<SimpleMenuItem> list) {
+    public SimpleMenuPopup(View parentView, List<SimpleMenuItem> list) {
         super(parentView);
 
         if (this.list == null)
@@ -170,7 +171,7 @@ public class SimpleMenuPopup extends SimplePopup {
             list.clear();
     }
 
-    public ArrayList<SimpleMenuItem> getMenuItemList() {
+    public List<SimpleMenuItem> getMenuItemList() {
         return list;
     }
 
@@ -200,7 +201,7 @@ public class SimpleMenuPopup extends SimplePopup {
         public Adapter() {
         }
 
-        public Adapter(ArrayList<SimpleMenuItem> list) {
+        public Adapter(List<SimpleMenuItem> list) {
             super(list);
         }
 

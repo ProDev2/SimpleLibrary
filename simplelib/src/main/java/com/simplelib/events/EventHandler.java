@@ -2,13 +2,13 @@ package com.simplelib.events;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.simplelib.builder.PathBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class EventHandler implements Iterable<IEvent>, IEvent {
     public static final String DEFAULT_HANDLER_ID = "default_handler";
@@ -52,7 +52,7 @@ public class EventHandler implements Iterable<IEvent>, IEvent {
     }
 
     // EventHandler
-    private ArrayList<IEvent> events;
+    private List<IEvent> events;
 
     public EventHandler() {
         this.events = new ArrayList<>();
@@ -66,7 +66,7 @@ public class EventHandler implements Iterable<IEvent>, IEvent {
         }
     }
 
-    public final synchronized ArrayList<IEvent> getEvents() {
+    public final synchronized List<IEvent> getEvents() {
         return events;
     }
 

@@ -3,8 +3,8 @@ package com.simplelib.adapter;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     private RecyclerView recyclerView;
@@ -131,7 +131,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         }
     }
 
-    public void swapList(ArrayList<?> list, int fromPos, int toPos) {
+    public void swapList(List<?> list, int fromPos, int toPos) {
         if (fromPos < toPos) {
             for (int pos = fromPos; pos < toPos; pos++) {
                 Collections.swap(list, pos, pos + 1);

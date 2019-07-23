@@ -16,6 +16,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 
 public class Tools {
     @SuppressLint("MissingPermission")
@@ -35,7 +36,7 @@ public class Tools {
         }
     }
 
-    public static void swap(ArrayList<?> list, int fromPos, int toPos) {
+    public static void swap(List<?> list, int fromPos, int toPos) {
         if (fromPos < toPos) {
             for (int pos = fromPos; pos < toPos; pos++) {
                 Collections.swap(list, pos, pos + 1);
@@ -74,7 +75,7 @@ public class Tools {
     }
 
     public static Integer[] getAllIndexes(String text, String keyword) {
-        ArrayList<Integer> indexes = new ArrayList<>();
+        List<Integer> indexes = new ArrayList<>();
         int index = text.indexOf(keyword);
         while (index >= 0) {
             indexes.add(index);

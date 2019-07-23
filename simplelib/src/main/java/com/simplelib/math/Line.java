@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class Line {
     private Vector2 start, end;
@@ -456,14 +457,14 @@ public class Line {
         }
     }
 
-    public ArrayList<Intersection> intersects(Line... lines) {
-        ArrayList<Line> lineList = new ArrayList<>();
+    public List<Intersection> intersects(Line... lines) {
+        List<Line> lineList = new ArrayList<>();
         lineList.addAll(Arrays.asList(lines));
         return intersects(lineList);
     }
 
-    public ArrayList<Intersection> intersects(ArrayList<Line> lines) {
-        ArrayList<Intersection> intersectionList = new ArrayList<>();
+    public List<Intersection> intersects(List<Line> lines) {
+        List<Intersection> intersectionList = new ArrayList<>();
         for (Line line : lines) {
             if (!equals(line)) {
                 Vector2 pos = intersectsAt(line);
@@ -488,13 +489,13 @@ public class Line {
     }
 
     public Intersection intersectsFirst(Line... lines) {
-        ArrayList<Line> lineList = new ArrayList<>();
+        List<Line> lineList = new ArrayList<>();
         lineList.addAll(Arrays.asList(lines));
         return intersectsFirst(lineList);
     }
 
-    public Intersection intersectsFirst(ArrayList<Line> lines) {
-        ArrayList<Intersection> intersectionList = intersects(lines);
+    public Intersection intersectsFirst(List<Line> lines) {
+        List<Intersection> intersectionList = intersects(lines);
         if (intersectionList.size() > 0)
             return intersectionList.get(0);
         else

@@ -17,6 +17,7 @@ import android.view.View;
 import com.simplelib.tools.ImageTools;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FadeImageView extends View {
     private static final long DEFAULT_ANIMATION_DURATION = 1500;
@@ -145,7 +146,7 @@ public class FadeImageView extends View {
     public void setBlurredImageBitmap(Bitmap image, float sampleSize, float blurRadius, final boolean animate) {
         ImageTools.ImageBlur.blur(getContext(), new ImageTools.ImageBlur.OnBlurListener() {
             @Override
-            public void onFinish(ArrayList<Bitmap> images) {
+            public void onFinish(List<Bitmap> images) {
                 if (images != null && images.size() > 0) {
                     setImageBitmap(images.get(0), false, animate);
                 }

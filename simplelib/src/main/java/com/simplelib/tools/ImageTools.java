@@ -36,6 +36,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 public class ImageTools {
@@ -489,7 +490,7 @@ public class ImageTools {
             return new ImageBlur(context).setBlurListener(listener).blur(executor, sampleSize, blurRadius, images);
         }
 
-        private ArrayList<Bitmap> imageList;
+        private List<Bitmap> imageList;
 
         private float sampleSize;
         private float blurRadius;
@@ -640,7 +641,7 @@ public class ImageTools {
                 return image;
             }
 
-            public abstract void onFinish(ArrayList<Bitmap> images);
+            public abstract void onFinish(List<Bitmap> images);
         }
     }
 }

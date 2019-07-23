@@ -9,9 +9,10 @@ import com.simplelib.builder.PathBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class EventGroup extends Event implements Iterable<IEvent> {
-    private ArrayList<IEvent> events;
+    private List<IEvent> events;
 
     public EventGroup() {
         super();
@@ -25,7 +26,7 @@ public class EventGroup extends Event implements Iterable<IEvent> {
         this.events = new ArrayList<>();
     }
 
-    public EventGroup(ArrayList<IEvent> events) {
+    public EventGroup(List<IEvent> events) {
         super();
 
         if (events == null)
@@ -33,7 +34,7 @@ public class EventGroup extends Event implements Iterable<IEvent> {
         this.events = events;
     }
 
-    public EventGroup(String key, ArrayList<IEvent> events) {
+    public EventGroup(String key, List<IEvent> events) {
         super(key);
 
         if (events == null)
@@ -49,7 +50,7 @@ public class EventGroup extends Event implements Iterable<IEvent> {
         }
     }
 
-    public final synchronized ArrayList<IEvent> getEvents() {
+    public final synchronized List<IEvent> getEvents() {
         return events;
     }
 

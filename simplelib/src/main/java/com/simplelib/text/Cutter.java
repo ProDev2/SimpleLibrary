@@ -9,20 +9,20 @@ public class Cutter implements Iterable<Cutter.Part>
         return new Cutter(text, parts);
     }
 
-    public static Cutter use(String text, ArrayList<Part> parts) {
+    public static Cutter use(String text, List<Part> parts) {
         return new Cutter(text, parts);
     }
 
     //Cutter
     private String text;
-    private ArrayList<Part> parts;
+    private List<Part> parts;
 
     public Cutter(String text, Part... parts) {
         setText(text);
         setParts(parts);
     }
 
-    public Cutter(String text, ArrayList<Part> parts) {
+    public Cutter(String text, List<Part> parts) {
         setText(text);
         setParts(parts);
     }
@@ -39,7 +39,7 @@ public class Cutter implements Iterable<Cutter.Part>
         return setParts(new ArrayList<Part>(Arrays.asList(parts)));
     }
 
-    public Cutter setParts(ArrayList<Part> parts) {
+    public Cutter setParts(List<Part> parts) {
         if (this.parts == null)
             this.parts = new ArrayList<>();
 
@@ -123,9 +123,9 @@ public class Cutter implements Iterable<Cutter.Part>
         }
     }
 
-    public ArrayList<Part> getList() {
+    public List<Part> getList() {
         cut();
-        ArrayList<Part> list = new ArrayList<>();
+        List<Part> list = new ArrayList<>();
         for (Part part : parts) {
             list.add(part);
         }
@@ -161,10 +161,10 @@ public class Cutter implements Iterable<Cutter.Part>
 
         private String base;
 
-        private ArrayList<String> data;
-        private ArrayList<Part> subParts;
+        private List<String> data;
+        private List<Part> subParts;
 
-        private ArrayList<String> excludedData;
+        private List<String> excludedData;
 
         public Part(String start, String end) {
             this.start = start;
@@ -188,15 +188,15 @@ public class Cutter implements Iterable<Cutter.Part>
             return base;
         }
 
-        public ArrayList<String> getData() {
+        public List<String> getData() {
             return data;
         }
 
-        public ArrayList<Part> getSubParts() {
+        public List<Part> getSubParts() {
             return subParts;
         }
 
-        public ArrayList<String> getExcludedData() {
+        public List<String> getExcludedData() {
             return excludedData;
         }
 

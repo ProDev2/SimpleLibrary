@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 public class ImageLoader {
@@ -30,16 +31,16 @@ public class ImageLoader {
         loader.request(request);
     }
 
-    public static void requestImages(ArrayList<ImageRequest> requests) {
+    public static void requestImages(List<ImageRequest> requests) {
         init();
         loader.request(requests);
     }
 
     //Loader
-    private ArrayList<Loader> loaderList;
+    private List<Loader> loaderList;
     private int loaderCapacity;
 
-    private ArrayList<ImageRequest> imageList;
+    private List<ImageRequest> imageList;
     private int imageCapacity;
 
     private boolean autoRecycle;
@@ -88,15 +89,15 @@ public class ImageLoader {
     }
 
     public void request(ImageRequest request) {
-        ArrayList<ImageRequest> requests = new ArrayList<>();
+        List<ImageRequest> requests = new ArrayList<>();
         requests.add(request);
         request(requests);
     }
 
-    public void request(ArrayList<ImageRequest> requests) {
+    public void request(List<ImageRequest> requests) {
         try {
             if (requests != null) {
-                ArrayList<ImageRequest> requestList = new ArrayList<>();
+                List<ImageRequest> requestList = new ArrayList<>();
                 for (ImageRequest request : requests) {
                     if (request == null)
                         continue;
@@ -289,7 +290,7 @@ public class ImageLoader {
         try {
             if (loaderList != null) {
                 synchronized (loaderList) {
-                    ArrayList<Loader> stopList = new ArrayList<>();
+                    List<Loader> stopList = new ArrayList<>();
                     stopList.addAll(loaderList);
                     for (Loader loader : stopList) {
                         try {
@@ -309,7 +310,7 @@ public class ImageLoader {
         try {
             if (imageList != null) {
                 synchronized (imageList) {
-                    ArrayList<ImageRequest> clearList = new ArrayList<>();
+                    List<ImageRequest> clearList = new ArrayList<>();
                     clearList.addAll(imageList);
                     for (ImageRequest request : clearList) {
                         try {
@@ -330,7 +331,7 @@ public class ImageLoader {
         clearAll();
     }
 
-    private static void swap(ArrayList<?> list, int fromPos, int toPos) {
+    private static void swap(List<?> list, int fromPos, int toPos) {
         try {
             if (fromPos < toPos) {
                 for (int pos = fromPos; pos < toPos; pos++)
@@ -449,10 +450,10 @@ public class ImageLoader {
     private class Loader extends AsyncTask<Void, Void, Bitmap> {
         private boolean running;
 
-        private ArrayList<ImageRequest> requests;
-        private ArrayList<ImageRequest> mergeRequests;
+        private List<ImageRequest> requests;
+        private List<ImageRequest> mergeRequests;
 
-        public Loader(ArrayList<ImageRequest> requests) {
+        public Loader(List<ImageRequest> requests) {
             try {
                 if (loaderList != null) {
                     synchronized (loaderList) {

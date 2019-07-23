@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,15 +90,15 @@ public abstract class ViewsHolder<K> implements Iterable<Map.Entry<K, ViewHolder
         }
     }
 
-    public final void setKeys(ArrayList<K> keys) {
+    public final void setKeys(List<K> keys) {
         setKeys(keys, true);
     }
 
-    public final void setKeys(ArrayList<K> keys, boolean create) {
+    public final void setKeys(List<K> keys, boolean create) {
         setKeys(keys, create, false);
     }
 
-    public final void setKeys(ArrayList<K> keys, boolean create, boolean rebind) {
+    public final void setKeys(List<K> keys, boolean create, boolean rebind) {
         if (keys == null) return;
 
         synchronized (holderMap) {
