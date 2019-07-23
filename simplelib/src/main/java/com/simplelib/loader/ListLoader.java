@@ -1134,7 +1134,7 @@ public abstract class ListLoader<K, V, E> {
             return false;
         }
 
-        public final boolean contains(E element) {
+        public final boolean contains(Object element) {
             onInvokeInterface();
 
             if (list == null)
@@ -1150,7 +1150,7 @@ public abstract class ListLoader<K, V, E> {
             }
         }
 
-        public final int indexOf(E element) {
+        public final int indexOf(Object element) {
             onInvokeInterface();
 
             if (list == null)
@@ -1308,7 +1308,7 @@ public abstract class ListLoader<K, V, E> {
             }
         }
 
-        public final boolean remove(E element) {
+        public final boolean remove(Object element) {
             onInvokeInterface();
 
             if (list == null)
