@@ -380,13 +380,13 @@ public abstract class ListLoader<K, V, E> {
 
         try {
             if (onLoadingListener != null)
-                onLoadingListener.onListLoading(loading, flags, key, value);
+                onLoadingListener.onListLoadingStarted(loading, flags, key, value);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            ListLoader.this.onListLoading(loading, flags, key, value);
+            ListLoader.this.onListLoadingStarted(loading, flags, key, value);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -466,9 +466,14 @@ public abstract class ListLoader<K, V, E> {
         return list;
     }
 
-    protected void onListLoading(boolean success, int flags, K key, V value) {
+    protected void onListLoadingStarted(boolean success, int flags, K key, V value) {
         if (onLoadingListener != null)
-            onLoadingListener.onListLoading(success, flags, key, value);
+            onLoadingListener.onListLoadingStarted(success, flags, key, value);
+    }
+
+    protected void onListLoading(K key, V value, List<E> list) {
+        if (onLoadingListener != null)
+            onLoadingListener.onListLoading(key, value, list);
     }
 
     protected void onListChanged(K key, V value, List<E> list) {
@@ -523,7 +528,7 @@ public abstract class ListLoader<K, V, E> {
         }
     }
 
-    protected abstract boolean onLoad(Task task, K key, V value, ListInterface<E> listInterface);
+    protected abstract boolean onLoad(Task task, int flags, K key, V value, ListInterface<E> listInterface);
 
     protected final ListInterface<E> getListInterface() {
         throwIfNotLoaderThread();
@@ -678,7 +683,24 @@ public abstract class ListLoader<K, V, E> {
 
             if (isLoading() && canLoad) {
                 try {
-                    success = ListLoader.this.onLoad(this, key, value, listInterface);
+                    copyToTempList();
+
+                    runOnHandler(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                onListLoading(key, value, tempList);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    success = ListLoader.this.onLoad(this, flags, key, value, listInterface);
 
                     if (!success && !hasFlag(FLAG_IGNORE_FAILURE) && list != null) {
                         synchronized (list) {
@@ -734,6 +756,23 @@ public abstract class ListLoader<K, V, E> {
             });
         }
 
+        public final void copyToTempList() {
+            throwIfNotLoaderThread();
+
+            if (list != null && tempList != null) {
+                synchronized (list) {
+                    synchronized (tempList) {
+                        try {
+                            tempList.clear();
+                            tempList.addAll(list);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+
         public final boolean publish() {
             return publish(NO_EXECUTION_DELAY);
         }
@@ -752,18 +791,8 @@ public abstract class ListLoader<K, V, E> {
             if (!canExecute(lockDelay, lockIfRunning))
                 return false;
 
-            if (copyList && list != null && tempList != null) {
-                synchronized (list) {
-                    synchronized (tempList) {
-                        try {
-                            tempList.clear();
-                            tempList.addAll(list);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
+            if (copyList)
+                copyToTempList();
 
             return execute(new Runnable() {
                 @Override
@@ -778,6 +807,21 @@ public abstract class ListLoader<K, V, E> {
                     }
                 }
             }, lockDelay, lockIfRunning);
+        }
+
+        private void onListLoading(K key, V value, List<E> list) {
+            try {
+                if (onLoadingListener != null)
+                    onLoadingListener.onListLoading(key, value, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                ListLoader.this.onListLoading(key, value, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         private void onListChanged(K key, V value, List<E> list) {
@@ -1553,7 +1597,8 @@ public abstract class ListLoader<K, V, E> {
     
     // ListLoader loading listener
     public interface OnLoadingListener<K, V, E> {
-        void onListLoading(boolean success, int flags, K key, V value);
+        void onListLoadingStarted(boolean success, int flags, K key, V value);
+        void onListLoading(K key, V value, List<E> list);
         void onListChanged(K key, V value, List<E> list);
         void onListLoaded(boolean success, K key, V value, List<E> list);
     }
