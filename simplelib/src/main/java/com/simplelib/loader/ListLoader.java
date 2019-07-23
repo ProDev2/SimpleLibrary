@@ -337,9 +337,9 @@ public abstract class ListLoader<K, V, E> {
 
             comparator = onModifyComparator(comparator);
 
-            if (loading && !has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(key, value))
+            if (loading && !has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(flags, key, value))
                 loading = false;
-            if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(key, value))
+            if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(flags, key, value))
                 loading = false;
         } catch (Exception e) {
             e.printStackTrace();
@@ -350,8 +350,20 @@ public abstract class ListLoader<K, V, E> {
             release();
             task = null;
 
+            try {
+                onPrepareLoading(flags, key, value);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
             List<E> list = getList(key, createListIfNeeded);
+
+            try {
+                list = onPrepareList(flags, key, value, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             task = new Task(flags, key, value, list, comparator, onLoadingListener);
             try {
@@ -446,6 +458,14 @@ public abstract class ListLoader<K, V, E> {
 
     }
 
+    protected void onPrepareLoading(int flags, K key, V value) {
+
+    }
+
+    protected List<E> onPrepareList(int flags, K key, V value, List<E> list) {
+        return list;
+    }
+
     protected void onListLoading(boolean success, int flags, K key, V value) {
         if (onLoadingListener != null)
             onLoadingListener.onListLoading(success, flags, key, value);
@@ -481,11 +501,11 @@ public abstract class ListLoader<K, V, E> {
         return comparator;
     }
 
-    protected boolean isKeyLoadable(K key, V value) {
+    protected boolean isKeyLoadable(int flags, K key, V value) {
         return true;
     }
 
-    protected boolean isValueLoadable(K key, V value) {
+    protected boolean isValueLoadable(int flags, K key, V value) {
         return true;
     }
 

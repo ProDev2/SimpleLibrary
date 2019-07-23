@@ -3,6 +3,7 @@ package com.simplelib.container;
 import com.simplelib.adapter.SimpleRecyclerFilterAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class SimpleFilter<V> {
     private SimpleRecyclerFilterAdapter<V> adapter;
@@ -31,7 +32,7 @@ public abstract class SimpleFilter<V> {
         }
     }
 
-    public ArrayList<V> getList() {
+    public List<V> getList() {
         if (adapter != null)
             return adapter.getList();
         else

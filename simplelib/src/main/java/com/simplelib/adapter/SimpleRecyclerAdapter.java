@@ -1,8 +1,6 @@
 package com.simplelib.adapter;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,18 +11,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<SimpleRecyclerAdapter.ViewHolder> {
     private Context context;
     private RecyclerView recyclerView;
 
-    private ArrayList<V> list;
+    private List<V> list;
 
     public SimpleRecyclerAdapter() {
         this.list = new ArrayList<>();
     }
 
-    public SimpleRecyclerAdapter(ArrayList<V> list) {
+    public SimpleRecyclerAdapter(List<V> list) {
         if (list != null)
             this.list = list;
         else
@@ -62,11 +61,11 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
-    public ArrayList<V> getList() {
+    public List<V> getList() {
         return list;
     }
 
-    public void setList(ArrayList<V> list) {
+    public void setList(List<V> list) {
         if (list == null)
             list = new ArrayList<>();
         this.list = list;
@@ -74,7 +73,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         notifyDataSetChanged();
     }
 
-    public void setList(ArrayList<V> list, boolean update) {
+    public void setList(List<V> list, boolean update) {
         if (list == null)
             list = new ArrayList<>();
         this.list = list;
@@ -249,7 +248,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
-    public void swapList(ArrayList<?> list, int fromPos, int toPos) {
+    public void swapList(List<?> list, int fromPos, int toPos) {
         if (list != null && fromPos != toPos) {
             if (fromPos < toPos) {
                 for (int pos = fromPos; pos < toPos; pos++) {

@@ -7,18 +7,19 @@ import com.simplelib.container.SimpleFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapter<V> {
     private SimpleFilter<V> filter;
 
-    private ArrayList<V> unfilteredList;
-    private ArrayList<V> filteredList;
+    private List<V> unfilteredList;
+    private List<V> filteredList;
 
     public SimpleRecyclerFilterAdapter() {
         this (null);
     }
 
-    public SimpleRecyclerFilterAdapter(ArrayList<V> list) {
+    public SimpleRecyclerFilterAdapter(List<V> list) {
         super();
 
         init();
@@ -57,7 +58,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
                     srcFilterAdapter.filter = filter;
                 }
 
-                ArrayList<V> list = new ArrayList<>();
+                List<V> list = new ArrayList<>();
                 if (unfilteredList != null)
                     list.addAll(unfilteredList);
                 src.setList(unfilteredList, true);
@@ -76,7 +77,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
                     srcFilterAdapter.filter = filter;
                 }
 
-                ArrayList<V> list = new ArrayList<>();
+                List<V> list = new ArrayList<>();
                 if (unfilteredList != null)
                     list.addAll(unfilteredList);
                 src.setList(unfilteredList, update);
@@ -99,12 +100,12 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
-    public ArrayList<V> getList() {
+    public List<V> getList() {
         return unfilteredList;
     }
 
     @Override
-    public void setList(ArrayList<V> list) {
+    public void setList(List<V> list) {
         if (list == null)
             list = new ArrayList<>();
         unfilteredList = list;
@@ -114,7 +115,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
-    public void setList(ArrayList<V> list, boolean update) {
+    public void setList(List<V> list, boolean update) {
         if (list == null)
             list = new ArrayList<>();
         unfilteredList = list;
@@ -229,14 +230,20 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     public synchronized void reload() {
         try {
             filteredList.clear();
-            notifyDataSetChanged();
 
-            runAfterUpdate(new Runnable() {
-                @Override
-                public void run() {
-                    updateFilter(false);
+            if (filter != null) {
+                for (V item : unfilteredList) {
+                    try {
+                        boolean add = filter.filter(item);
+                        if (add) filteredList.add(item);
+                    } catch (Exception e) {
+                    }
                 }
-            });
+            } else {
+                filteredList.addAll(unfilteredList);
+            }
+
+            notifyDataSetChanged();
         } catch (Exception e) {
         }
     }
@@ -314,7 +321,7 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
             }
 
             try {
-                ArrayList<V> removeList = new ArrayList<>();
+                List<V> removeList = new ArrayList<>();
                 for (V item : filteredList) {
                     if (!unfilteredList.contains(item))
                         removeList.add(item);
