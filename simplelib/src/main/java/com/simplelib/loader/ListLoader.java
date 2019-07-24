@@ -762,7 +762,7 @@ public abstract class ListLoader<K, V, E> {
 
             if (error)
                 throw new RuntimeException("An error occurred while loading");
-            return success && !error;
+            return success && !error && isLoading();
         }
 
         @Override
@@ -931,6 +931,8 @@ public abstract class ListLoader<K, V, E> {
                 throw new IllegalStateException("Loader was never started");
             if ((!isStarted() && !isLoading()) || isEnded())
                 throw new IllegalStateException("Loader is not running");
+
+            state &= ~STATE_LOADING;
 
             try {
                 thread.interrupt();
