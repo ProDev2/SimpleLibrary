@@ -3,6 +3,8 @@ package com.simplelib.loader;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.simplelib.Logger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class ListLoader<K, V, E> {
+    // Logging
+    private static final String TAG = Logger.tagOf(ListLoader.class);
+
     // Flags
     public static final int FLAG_NONE = 1;
     public static final int FLAG_LOAD = 2;
@@ -128,7 +133,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     runnable.run();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to execute runnable", e);
                 }
 
                 lastExecutionRunning = false;
@@ -139,7 +144,7 @@ public abstract class ListLoader<K, V, E> {
         try {
             time = System.currentTimeMillis();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.wtf(TAG, "Failed to read the system time", e);
             return false;
         }
 
@@ -191,19 +196,19 @@ public abstract class ListLoader<K, V, E> {
                         try {
                             runnable.run();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.w(TAG, "Failed to execute runnable", e);
                         }
                     }
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to execute runnable on handler", e);
             }
         }
         if (!executedOnHandler) {
             try {
                 runnable.run();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to execute runnable", e);
             }
         }
         return false;
@@ -216,7 +221,7 @@ public abstract class ListLoader<K, V, E> {
                 map.applyTo(tempMap);
                 map.clear();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to clear map", e);
             }
 
             for (Map.Entry<K, List<E>> listEntry : tempMap.entrySet()) {
@@ -228,7 +233,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     onListRemoved(key, list);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to handle list removal", e);
                 }
             }
 
@@ -241,7 +246,7 @@ public abstract class ListLoader<K, V, E> {
             try {
                 return map.contains(key);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to check map for list", e);
                 return false;
             }
         }
@@ -254,20 +259,20 @@ public abstract class ListLoader<K, V, E> {
                 if (map.contains(key))
                     list = map.getKey(key);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to get list from map", e);
             }
             if (createIfNeeded && list == null) {
                 list = new ArrayList<>();
                 try {
                     map.putKey(key, list);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to set new list into map", e);
                 }
 
                 try {
                     onListCreated(key, list);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to handle list creation", e);
                 }
             }
             return list;
@@ -281,14 +286,14 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     list = map.removeKey(key);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to remove key from map", e);
                 }
 
                 if (list != null) {
                     try {
                         onListRemoved(key, list);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "Failed to handle list removal", e);
                     }
                     return true;
                 }
@@ -342,7 +347,7 @@ public abstract class ListLoader<K, V, E> {
             if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(flags, key, value))
                 loading = false;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.w(TAG, "Failed to prepare for loading", e);
             loading = false;
         }
 
@@ -353,7 +358,7 @@ public abstract class ListLoader<K, V, E> {
             try {
                 onPrepareLoading(flags, key, value);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to prepare loading", e);
             }
 
             boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
@@ -362,14 +367,14 @@ public abstract class ListLoader<K, V, E> {
             try {
                 list = onPrepareList(flags, key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to prepare list", e);
             }
 
             task = new Task(flags, key, value, list, comparator, onLoadingListener);
             try {
                 task.start();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed start the background loading task", e);
 
                 release();
                 task = null;
@@ -382,13 +387,13 @@ public abstract class ListLoader<K, V, E> {
             if (onLoadingListener != null)
                 onLoadingListener.onListLoadingStarted(loading, flags, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.w(TAG, "Failed to handle the list loading", e);
         }
 
         try {
             ListLoader.this.onListLoadingStarted(loading, flags, key, value);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.w(TAG, "Failed to handle the list loading", e);
         }
 
         return loading ? task : null;
@@ -404,7 +409,7 @@ public abstract class ListLoader<K, V, E> {
                 task.cancel();
                 canceled = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.wtf(TAG, "Failed to cancel the current loader", e);
             }
         }
 
@@ -419,7 +424,7 @@ public abstract class ListLoader<K, V, E> {
         try {
             released = cancel();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.w(TAG, "Failed to release the current loader", e);
         }
         task = null;
 
@@ -481,9 +486,9 @@ public abstract class ListLoader<K, V, E> {
             onLoadingListener.onListChanged(key, value, list);
     }
 
-    protected void onListLoaded(boolean success, K key, V value, List<E> list) {
+    protected void onListLoaded(boolean success, int state, K key, V value, List<E> list) {
         if (onLoadingListener != null)
-            onLoadingListener.onListLoaded(success, key, value, list);
+            onLoadingListener.onListLoaded(success, state, key, value, list);
     }
 
     protected void onDispatchLoader(K key, Task task) {
@@ -529,7 +534,13 @@ public abstract class ListLoader<K, V, E> {
         }
     }
 
-    protected abstract boolean onLoad(Task task, int flags, K key, V value, ListInterface<E> listInterface);
+    protected abstract boolean onLoad(Task task, int flags, K key, V value, ListInterface<E> listInterface) throws Exception;
+
+    protected final Task getTask() {
+        throwIfNotLoaderThread();
+
+        return task;
+    }
 
     protected final ListInterface<E> getListInterface() {
         throwIfNotLoaderThread();
@@ -538,25 +549,25 @@ public abstract class ListLoader<K, V, E> {
     }
 
     protected final boolean publish() {
-        throwIfNotLoaderThread();
+        throwIfInvalidThread();
 
         return task.publish();
     }
 
     protected final boolean publish(long lockDelay) {
-        throwIfNotLoaderThread();
+        throwIfInvalidThread();
 
         return task.publish(lockDelay);
     }
 
     protected final boolean publish(long lockDelay, boolean lockIfRunning) {
-        throwIfNotLoaderThread();
+        throwIfInvalidThread();
 
         return task.publish(lockDelay, lockIfRunning);
     }
 
     protected final boolean publish(long lockDelay, boolean lockIfRunning, boolean copyList) {
-        throwIfNotLoaderThread();
+        throwIfInvalidThread();
 
         return task.publish(lockDelay, lockIfRunning, copyList);
     }
@@ -603,7 +614,7 @@ public abstract class ListLoader<K, V, E> {
             this.listInterface = new ListInterface<E>(this.list, this.comparator) {
                 @Override
                 protected void onInvokeInterface() {
-                    throwIfNotLoaderThread();
+                    throwIfInvalidThread();
                 }
             };
 
@@ -647,7 +658,7 @@ public abstract class ListLoader<K, V, E> {
         }
 
         @Override
-        protected final boolean onLoad() {
+        protected final boolean onLoad() throws Exception {
             if (!isLoaderThread())
                 return false;
 
@@ -655,6 +666,7 @@ public abstract class ListLoader<K, V, E> {
                 return false;
 
             boolean success = true;
+            boolean error = false;
 
             final boolean canLoad = hasFlag(FLAG_LOAD) ||
                     (hasFlag(FLAG_LOAD_IF_EMPTY) && (srcList == null || srcList.isEmpty())) ||
@@ -675,7 +687,7 @@ public abstract class ListLoader<K, V, E> {
                             if (comparator != null)
                                 Collections.sort(list, comparator);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.w(TAG, "Failed to load list from source list", e);
                             list.clear();
                         }
                     }
@@ -692,16 +704,17 @@ public abstract class ListLoader<K, V, E> {
                             try {
                                 onListLoading(key, value, tempList);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.w(TAG, "Failed to handle list loading", e);
                             }
                         }
                     });
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Failed to handle list loading", e);
                 }
 
                 try {
                     success = ListLoader.this.onLoad(this, flags, key, value, listInterface);
+                    error = false;
 
                     if (!success && !hasFlag(FLAG_IGNORE_FAILURE) && list != null) {
                         synchronized (list) {
@@ -709,11 +722,13 @@ public abstract class ListLoader<K, V, E> {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    success = true;
+                    error = isLoading();
 
-                    success = false;
+                    if (error)
+                        Logger.w(TAG, "Error while list loading", e);
 
-                    if (!hasFlag(FLAG_IGNORE_ERROR) && list != null) {
+                    if (error && !hasFlag(FLAG_IGNORE_ERROR) && list != null) {
                         synchronized (list) {
                             list.clear();
                         }
@@ -727,31 +742,38 @@ public abstract class ListLoader<K, V, E> {
                 }
             }
 
-            if (!hasFlag(FLAG_DO_NOT_STORE) && (isLoading() || hasFlag(FLAG_IGNORE_ABORT)) && srcList != null && list != null) {
+            boolean canStore = !hasFlag(FLAG_DO_NOT_STORE) &&
+                    (isLoading() || hasFlag(FLAG_IGNORE_ABORT)) &&
+                    (success || hasFlag(FLAG_IGNORE_FAILURE)) &&
+                    (!error || hasFlag(FLAG_IGNORE_ERROR));
+
+            if (canStore && srcList != null && list != null) {
                 synchronized (srcList) {
                     synchronized (list) {
                         try {
                             ListLoader.this.addElementsToList(list, srcList, true);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.w(TAG, "Failed to save list to source list", e);
                             srcList.clear();
                         }
                     }
                 }
             }
 
-            return success;
+            if (error)
+                throw new RuntimeException("An error occurred while loading");
+            return success && !error;
         }
 
         @Override
-        protected final void onFinish(final boolean success) {
+        protected final void onFinish(final boolean success, final int state) {
             runOnHandler(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        onListLoaded(success, key, value, list);
+                        onListLoaded(success, state, key, value, list);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "Failed to handle the loaded list", e);
                     }
                 }
             });
@@ -767,7 +789,7 @@ public abstract class ListLoader<K, V, E> {
                             tempList.clear();
                             tempList.addAll(list);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.w(TAG, "Failed to copy list to temporary list", e);
                         }
                     }
                 }
@@ -787,7 +809,7 @@ public abstract class ListLoader<K, V, E> {
         }
 
         public final boolean publish(final long lockDelay, final boolean lockIfRunning, final boolean copyList) {
-            throwIfNotLoaderThread();
+            throwIfInvalidThread();
 
             if (!canExecute(lockDelay, lockIfRunning))
                 return false;
@@ -804,7 +826,7 @@ public abstract class ListLoader<K, V, E> {
                         else
                             onListChanged(key, value, tempList);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "Failed to publish the current progress", e);
                     }
                 }
             }, lockDelay, lockIfRunning);
@@ -815,13 +837,13 @@ public abstract class ListLoader<K, V, E> {
                 if (onLoadingListener != null)
                     onLoadingListener.onListLoading(key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle list loading", e);
             }
 
             try {
                 ListLoader.this.onListLoading(key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle list loading", e);
             }
         }
 
@@ -830,34 +852,34 @@ public abstract class ListLoader<K, V, E> {
                 if (onLoadingListener != null)
                     onLoadingListener.onListChanged(key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle a list change", e);
             }
 
             try {
                 ListLoader.this.onListChanged(key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle a list change", e);
             }
         }
 
-        private void onListLoaded(boolean success, K key, V value, List<E> list) {
+        private void onListLoaded(boolean success, int state, K key, V value, List<E> list) {
             try {
                 if (onLoadingListener != null)
-                    onLoadingListener.onListLoaded(success, key, value, list);
+                    onLoadingListener.onListLoaded(success, state, key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle the loaded list", e);
             }
 
             try {
-                ListLoader.this.onListLoaded(success, key, value, list);
+                ListLoader.this.onListLoaded(success, state, key, value, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle the loaded list", e);
             }
 
             try {
                 ListLoader.this.onDispatchLoader(key, this);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to handle the loaded list", e);
             }
         }
     }
@@ -882,7 +904,7 @@ public abstract class ListLoader<K, V, E> {
                 thread = new Thread(this);
                 state = STATE_NONE;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.wtf(TAG, "Failed to create loader", e);
 
                 state = STATE_ENDED | STATE_ERROR;
             }
@@ -898,7 +920,7 @@ public abstract class ListLoader<K, V, E> {
                 thread.start();
                 state = STATE_STARTED;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.wtf(TAG, "Failed to start loader", e);
 
                 state = STATE_ENDED | STATE_ERROR;
             }
@@ -914,7 +936,7 @@ public abstract class ListLoader<K, V, E> {
                 thread.interrupt();
                 state |= STATE_ENDED | STATE_CANCELED;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.wtf(TAG, "Failed to cancel loader", e);
 
                 state |= STATE_ENDED | STATE_ERROR;
             }
@@ -1001,7 +1023,7 @@ public abstract class ListLoader<K, V, E> {
                         }
                     }
                 } catch (OutOfMemoryError e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Loading resulted in an OutOfMemoryError", e);
 
                     try {
                         System.gc();
@@ -1010,7 +1032,7 @@ public abstract class ListLoader<K, V, E> {
 
                     state |= STATE_ENDED | STATE_ERROR;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "Loading resulted in an exception", e);
 
                     state |= STATE_ENDED | STATE_ERROR;
                 }
@@ -1022,14 +1044,14 @@ public abstract class ListLoader<K, V, E> {
                 return;
 
             try {
-                onFinish(isSuccess());
+                onFinish(isSuccess(), state);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed finish the loading successfully", e);
             }
         }
 
-        protected abstract boolean onLoad();
-        protected abstract void onFinish(boolean success);
+        protected abstract boolean onLoad() throws Exception;
+        protected abstract void onFinish(boolean success, int state);
     }
 
     // ListLoader list interface
@@ -1108,7 +1130,7 @@ public abstract class ListLoader<K, V, E> {
                     runnable.run();
                     return true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1129,7 +1151,7 @@ public abstract class ListLoader<K, V, E> {
                     Collections.sort(tempList, comparator);
                     return true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 } finally {
                     try {
@@ -1137,7 +1159,7 @@ public abstract class ListLoader<K, V, E> {
                         list.addAll(tempList);
                         tempList.clear();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "List modification failed", e);
                         return false;
                     }
                 }
@@ -1164,7 +1186,7 @@ public abstract class ListLoader<K, V, E> {
                         list.add(pos, element);
                         return true;
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "List modification failed", e);
                     }
                 }
 
@@ -1172,7 +1194,7 @@ public abstract class ListLoader<K, V, E> {
                     try {
                         return list.add(element);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, "List modification failed", e);
                     }
                 }
             }
@@ -1189,7 +1211,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.contains(element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List reading failed", e);
                     return false;
                 }
             }
@@ -1205,7 +1227,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.indexOf(element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List reading failed", e);
                     return -1;
                 }
             }
@@ -1221,7 +1243,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     list.clear();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                 }
             }
         }
@@ -1236,7 +1258,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.size();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List reading failed", e);
                     return 0;
                 }
             }
@@ -1252,7 +1274,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.isEmpty();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List reading failed", e);
                     return true;
                 }
             }
@@ -1268,7 +1290,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.get(index);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List reading failed", e);
                     return null;
                 }
             }
@@ -1284,7 +1306,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.add(element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1300,7 +1322,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     list.add(index, element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                 }
             }
         }
@@ -1315,7 +1337,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.addAll(elements);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1331,7 +1353,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.addAll(index, elements);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1347,7 +1369,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.set(index, element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return null;
                 }
             }
@@ -1363,7 +1385,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.remove(element);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1379,7 +1401,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.remove(index);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return null;
                 }
             }
@@ -1395,7 +1417,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.removeAll(elements);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1411,7 +1433,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     return list.retainAll(elements);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.w(TAG, "List modification failed", e);
                     return false;
                 }
             }
@@ -1450,16 +1472,16 @@ public abstract class ListLoader<K, V, E> {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to fill map", e);
             }
         }
 
         @Override
         public synchronized boolean contains(K key) {
             try {
-                return containsKey(key);
+                return super.containsKey(key);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to check map for key", e);
             }
             return false;
         }
@@ -1467,18 +1489,18 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public synchronized void clear() {
             try {
-                clear();
+                super.clear();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to clear map", e);
             }
         }
 
         @Override
         public synchronized List<E> getKey(K key) {
             try {
-                return get(key);
+                return super.get(key);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to get key from map", e);
             }
             return null;
         }
@@ -1486,9 +1508,9 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public List<E> putKey(K key, List<E> list) {
             try {
-                return put(key, list);
+                return super.put(key, list);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to set key into map", e);
             }
             return null;
         }
@@ -1496,9 +1518,9 @@ public abstract class ListLoader<K, V, E> {
         @Override
         public List<E> removeKey(K key) {
             try {
-                return remove(key);
+                return super.remove(key);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to remove key from map", e);
             }
             return null;
         }
@@ -1532,7 +1554,7 @@ public abstract class ListLoader<K, V, E> {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to fill map", e);
             }
         }
 
@@ -1543,7 +1565,7 @@ public abstract class ListLoader<K, V, E> {
                     return map.containsKey(key);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to check map for key", e);
             }
             return false;
         }
@@ -1555,7 +1577,7 @@ public abstract class ListLoader<K, V, E> {
                     map.clear();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to clear map", e);
             }
         }
 
@@ -1566,7 +1588,7 @@ public abstract class ListLoader<K, V, E> {
                     return map.get(key);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to get key from map", e);
             }
             return null;
         }
@@ -1578,7 +1600,7 @@ public abstract class ListLoader<K, V, E> {
                     return map.put(key, list);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to set key into map", e);
             }
             return null;
         }
@@ -1590,17 +1612,17 @@ public abstract class ListLoader<K, V, E> {
                     return map.remove(key);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.w(TAG, "Failed to remove key from map", e);
             }
             return null;
         }
     }
-    
+
     // ListLoader loading listener
     public interface OnLoadingListener<K, V, E> {
         void onListLoadingStarted(boolean success, int flags, K key, V value);
         void onListLoading(K key, V value, List<E> list);
         void onListChanged(K key, V value, List<E> list);
-        void onListLoaded(boolean success, K key, V value, List<E> list);
+        void onListLoaded(boolean success, int state, K key, V value, List<E> list);
     }
 }
