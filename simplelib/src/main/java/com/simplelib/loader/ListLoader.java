@@ -487,7 +487,8 @@ public abstract class ListLoader<K, V, E> {
     }
 
     protected void onDispatchLoader(K key, Task task) {
-        release();
+        if (this.task == task)
+            release();
     }
 
     protected int onModifyFlags(int flags) {
