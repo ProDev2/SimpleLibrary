@@ -487,9 +487,9 @@ public abstract class ListLoader<K, V, E> {
             onLoadingListener.onListChanged(key, value, list);
     }
 
-    protected void onListLoaded(boolean success, int state, K key, V value, List<E> list) {
+    protected void onListLoaded(boolean success, int state, int flags, K key, V value, List<E> list) {
         if (onLoadingListener != null)
-            onLoadingListener.onListLoaded(success, state, key, value, list);
+            onLoadingListener.onListLoaded(success, state, flags, key, value, list);
     }
 
     protected void onDispatchLoader(K key, Task task) {
@@ -796,7 +796,7 @@ public abstract class ListLoader<K, V, E> {
                 @Override
                 public void run() {
                     try {
-                        onListLoaded(success, state, key, value, list);
+                        onListLoaded(success, state, flags, key, value, list);
                     } catch (Exception e) {
                         Logger.w(TAG, "Failed to handle the loaded list", e);
                     }
@@ -887,16 +887,16 @@ public abstract class ListLoader<K, V, E> {
             }
         }
 
-        private void onListLoaded(boolean success, int state, K key, V value, List<E> list) {
+        private void onListLoaded(boolean success, int state, int flags, K key, V value, List<E> list) {
             try {
                 if (onLoadingListener != null)
-                    onLoadingListener.onListLoaded(success, state, key, value, list);
+                    onLoadingListener.onListLoaded(success, state, flags, key, value, list);
             } catch (Exception e) {
                 Logger.w(TAG, "Failed to handle the loaded list", e);
             }
 
             try {
-                ListLoader.this.onListLoaded(success, state, key, value, list);
+                ListLoader.this.onListLoaded(success, state, flags, key, value, list);
             } catch (Exception e) {
                 Logger.w(TAG, "Failed to handle the loaded list", e);
             }
@@ -1663,6 +1663,6 @@ public abstract class ListLoader<K, V, E> {
         void onListLoadingStarted(boolean success, int flags, K key, V value);
         void onListLoading(K key, V value, List<E> list);
         void onListChanged(K key, V value, List<E> list);
-        void onListLoaded(boolean success, int state, K key, V value, List<E> list);
+        void onListLoaded(boolean success, int state, int flags, K key, V value, List<E> list);
     }
 }
