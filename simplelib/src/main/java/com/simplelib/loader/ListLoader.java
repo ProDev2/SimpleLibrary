@@ -1441,6 +1441,10 @@ public abstract class ListLoader<K, V, E> {
             }
         }
 
+        public final void invoke() {
+            onInvokeInterface();
+        }
+
         protected abstract void onInvokeInterface();
     }
 
