@@ -31,9 +31,10 @@ public abstract class ListLoader<K, V, E> {
 
     public static final int FLAG_IGNORE_ABORT = 128;
     public static final int FLAG_IGNORE_ERROR = 256;
-    public static final int FLAG_IGNORE_FAILURE = 512;
+    public static final int FLAG_IGNORE_FATAL_ERROR = 512;
+    public static final int FLAG_IGNORE_FAILURE = 1024;
 
-    public static final int FLAG_DO_NOT_STORE = 1024;
+    public static final int FLAG_DO_NOT_STORE = 2048;
 
     // Flag usages
     public static final int USAGE_NONE = FLAG_NONE;
@@ -667,6 +668,7 @@ public abstract class ListLoader<K, V, E> {
 
             boolean success = true;
             boolean error = false;
+            boolean fatalError = false;
 
             final boolean canLoad = hasFlag(FLAG_LOAD) ||
                     (hasFlag(FLAG_LOAD_IF_EMPTY) && (srcList == null || srcList.isEmpty())) ||
@@ -715,6 +717,7 @@ public abstract class ListLoader<K, V, E> {
                 try {
                     success = ListLoader.this.onLoad(this, flags, key, value, listInterface);
                     error = false;
+                    fatalError = false;
 
                     if (!success && !hasFlag(FLAG_IGNORE_FAILURE) && list != null) {
                         synchronized (list) {
@@ -724,6 +727,7 @@ public abstract class ListLoader<K, V, E> {
                 } catch (Exception e) {
                     success = true;
                     error = isLoading();
+                    fatalError = false;
 
                     if (error)
                         Logger.w(TAG, "Error while list loading", e);
@@ -731,6 +735,24 @@ public abstract class ListLoader<K, V, E> {
                     if (error && !hasFlag(FLAG_IGNORE_ERROR) && list != null) {
                         synchronized (list) {
                             list.clear();
+                        }
+                    }
+                } catch (Throwable tr) {
+                    success = true;
+                    error = isLoading();
+                    fatalError = error;
+
+                    if (fatalError)
+                        Logger.e(TAG, "Fatal error while list loading", tr);
+
+                    if (fatalError && !hasFlag(FLAG_IGNORE_FATAL_ERROR) && list != null) {
+                        synchronized (list) {
+                            list.clear();
+                        }
+
+                        try {
+                            System.gc();
+                        } catch (Exception ge) {
                         }
                     }
                 }
@@ -745,7 +767,8 @@ public abstract class ListLoader<K, V, E> {
             boolean canStore = !hasFlag(FLAG_DO_NOT_STORE) &&
                     (isLoading() || hasFlag(FLAG_IGNORE_ABORT)) &&
                     (success || hasFlag(FLAG_IGNORE_FAILURE)) &&
-                    (!error || hasFlag(FLAG_IGNORE_ERROR));
+                    (!error || hasFlag(FLAG_IGNORE_ERROR)) &&
+                    (!fatalError || hasFlag(FLAG_IGNORE_FATAL_ERROR));
 
             if (canStore && srcList != null && list != null) {
                 synchronized (srcList) {
@@ -762,7 +785,9 @@ public abstract class ListLoader<K, V, E> {
 
             if (error)
                 throw new RuntimeException("An error occurred while loading");
-            return success && !error && isLoading();
+            if (fatalError)
+                throw new RuntimeException("A fatal error occurred while loading");
+            return success && !error && !fatalError && isLoading();
         }
 
         @Override
@@ -1035,6 +1060,15 @@ public abstract class ListLoader<K, V, E> {
                     state |= STATE_ENDED | STATE_ERROR;
                 } catch (Exception e) {
                     Logger.w(TAG, "Loading resulted in an exception", e);
+
+                    state |= STATE_ENDED | STATE_ERROR;
+                } catch (Throwable tr) {
+                    Logger.e(TAG, "Loading resulted in a fatal exception", tr);
+
+                    try {
+                        System.gc();
+                    } catch (Exception ge) {
+                    }
 
                     state |= STATE_ENDED | STATE_ERROR;
                 }

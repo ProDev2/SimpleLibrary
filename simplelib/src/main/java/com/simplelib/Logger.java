@@ -102,8 +102,8 @@ public class Logger {
     public static final String tagOf(Class<?> targetClass) {
         try {
             return targetClass.getSimpleName();
-        } catch (Exception e) {
-            e(TAG, "Tag for target class could not be found", e);
+        } catch (Throwable tr) {
+            e(TAG, "Tag for target class could not be found", tr);
             return TAG;
         }
     }
