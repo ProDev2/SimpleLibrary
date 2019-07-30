@@ -123,13 +123,26 @@ public class BubbleCardView extends ViewGroup {
         }
 
         //Add events
+        /*
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                if (drawable != null)
-                    drawable.redraw(true);
+                boolean changed = false;
+                try {
+                    if (pointer != null)
+                        changed = pointer.update();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    if (!changed && drawable != null)
+                        drawable.redraw(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
+        */
 
         //Update
         update();
@@ -181,11 +194,10 @@ public class BubbleCardView extends ViewGroup {
 
     public void setPointer(Pointer pointer) {
         if (this.pointer != null)
-            this.pointer.setContentView(null);
+            this.pointer.setContentView(null, false);
         this.pointer = pointer;
-        if (this.pointer != null) {
-            this.pointer.setContentView(this);
-        }
+        if (this.pointer != null)
+            this.pointer.setContentView(this, this.pointer.isAttached());
         if (drawable != null)
             drawable.setArrowTarget(this.pointer);
     }
@@ -435,12 +447,15 @@ public class BubbleCardView extends ViewGroup {
     }
 
     public static class Pointer extends Vector2 implements ViewTreeObserver.OnGlobalLayoutListener {
+        private boolean attached;
+
         private View contentView;
 
         private int pointerId;
         private View pointerView;
 
         public Pointer() {
+            super();
             update();
         }
 
@@ -473,12 +488,14 @@ public class BubbleCardView extends ViewGroup {
             if (attach) attach();
         }
 
-        private void setContentView(View contentView) {
+        private synchronized void setContentView(View contentView, boolean attach) {
+            detach();
             this.contentView = contentView;
             update();
+            if (attach) attach();
         }
 
-        public void setPointerId(int pointerId, boolean attach) {
+        public synchronized void setPointerId(int pointerId, boolean attach) {
             detach();
             this.pointerId = pointerId;
             this.pointerView = null;
@@ -486,14 +503,14 @@ public class BubbleCardView extends ViewGroup {
             if (attach) attach();
         }
 
-        public void setPointerView(View pointerView, boolean attach) {
+        public synchronized void setPointerView(View pointerView, boolean attach) {
             detach();
             this.pointerView = pointerView;
             update();
             if (attach) attach();
         }
 
-        public void update() {
+        public synchronized boolean update() {
             boolean changed = false;
 
             if (pointerView != null) {
@@ -533,26 +550,40 @@ public class BubbleCardView extends ViewGroup {
                 BubbleCardView cardView = (BubbleCardView) contentView;
                 cardView.redraw(true);
             }
+
+            return changed;
         }
 
         @Override
-        public void onGlobalLayout() {
+        public synchronized void onGlobalLayout() {
             try {
                 update();
             } catch (Exception e) {
             }
         }
 
-        public void attach() {
+        public synchronized boolean isAttached() {
+            return attached;
+        }
+
+        public synchronized void attach() {
+            attached = true;
+
             try {
+                if (contentView != null)
+                    contentView.getViewTreeObserver().addOnGlobalLayoutListener(this);
                 if (pointerView != null)
                     pointerView.getViewTreeObserver().addOnGlobalLayoutListener(this);
             } catch (Exception e) {
             }
         }
 
-        public void detach() {
+        public synchronized void detach() {
+            attached = false;
+
             try {
+                if (contentView != null)
+                    contentView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 if (pointerView != null)
                     pointerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             } catch (Exception e) {
