@@ -193,11 +193,14 @@ public class BubbleCardView extends ViewGroup {
     }
 
     public void setPointer(Pointer pointer) {
-        if (this.pointer != null)
+        if (this.pointer != null) {
             this.pointer.setContentView(null, false);
+            this.pointer.detach();
+        }
         this.pointer = pointer;
-        if (this.pointer != null)
+        if (this.pointer != null) {
             this.pointer.setContentView(this, this.pointer.isAttached());
+        }
         if (drawable != null)
             drawable.setArrowTarget(this.pointer);
     }
