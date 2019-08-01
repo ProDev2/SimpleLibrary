@@ -8,6 +8,32 @@
 
     </declare-styleable>
 
+    <declare-styleable name="BoundLayout">
+
+        <attr name="bl_minWidth" format="dimension" />
+        <attr name="bl_minHeight" format="dimension" />
+
+        <attr name="bl_maxWidth" format="dimension" />
+        <attr name="bl_maxHeight" format="dimension" />
+
+        <attr name="bl_widthMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+        <attr name="bl_heightMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+    </declare-styleable>
+
     <declare-styleable name="BubbleCardView">
 
         <attr name="bcv_noArrow" format="boolean" />
