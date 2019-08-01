@@ -136,6 +136,18 @@ public class BoundLayout extends ViewGroup {
     }
 
     @Override
+    protected int getSuggestedMinimumWidth() {
+        int suggestedMinimumWidth = super.getSuggestedMinimumWidth();
+        return Math.max(minWidth, suggestedMinimumWidth);
+    }
+
+    @Override
+    protected int getSuggestedMinimumHeight() {
+        int suggestedMinimumHeight = super.getSuggestedMinimumHeight();
+        return Math.max(minHeight, suggestedMinimumHeight);
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         //Make measure spec
         widthMeasureSpec = getMeasureSpec(widthMeasureSpec, this.widthMode, this.maxWidth);
