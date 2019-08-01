@@ -6,8 +6,11 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.AttrRes;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.StyleRes;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,26 +56,26 @@ public class BubbleCardView extends ViewGroup {
 
     public BubbleCardView(Context context) {
         super(context);
-        initialize(null, 0);
+        initialize(null, 0, 0);
     }
 
     public BubbleCardView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initialize(attrs, 0);
+        initialize(attrs, 0, 0);
     }
 
     public BubbleCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initialize(attrs, defStyleAttr);
+        initialize(attrs, defStyleAttr, 0);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public BubbleCardView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        initialize(attrs, defStyleAttr);
+        initialize(attrs, defStyleAttr, defStyleRes);
     }
 
-    private void initialize(AttributeSet attrs, int defStyleAttr) {
+    private void initialize(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         //Setup
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
@@ -97,7 +100,7 @@ public class BubbleCardView extends ViewGroup {
 
         //Fetch styled attributes
         if (attrs != null) {
-            TypedArray attributes = getContext().obtainStyledAttributes(attrs, R.styleable.BubbleCardView, defStyleAttr, 0);
+            TypedArray attributes = getContext().obtainStyledAttributes(attrs, R.styleable.BubbleCardView, defStyleAttr, defStyleRes);
 
             roundCorners = attributes.getBoolean(R.styleable.BubbleCardView_bcv_roundCorners, roundCorners);
             cornerRadius = attributes.getDimension(R.styleable.BubbleCardView_bcv_cornerRadius, cornerRadius);

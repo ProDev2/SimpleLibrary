@@ -34,6 +34,32 @@
 
     </declare-styleable>
 
+    <declare-styleable name="BoundRelativeLayout">
+
+        <attr name="brl_minWidth" format="dimension" />
+        <attr name="brl_minHeight" format="dimension" />
+
+        <attr name="brl_maxWidth" format="dimension" />
+        <attr name="brl_maxHeight" format="dimension" />
+
+        <attr name="brl_widthMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+        <attr name="brl_heightMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+    </declare-styleable>
+
     <declare-styleable name="BubbleCardView">
 
         <attr name="bcv_noArrow" format="boolean" />
