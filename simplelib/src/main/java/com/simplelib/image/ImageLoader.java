@@ -13,29 +13,6 @@ public class ImageLoader {
     private static final int DEFAULT_LOADER_CAPACITY = 10;
     private static final int DEFAULT_IMAGE_CAPACITY = 100;
 
-    //Statics
-    private static ImageLoader loader;
-
-    public static void init() {
-        if (loader == null)
-            loader = new ImageLoader();
-    }
-
-    public static ImageLoader get() {
-        init();
-        return loader;
-    }
-
-    public static void requestImage(ImageRequest request) {
-        init();
-        loader.request(request);
-    }
-
-    public static void requestImages(List<ImageRequest> requests) {
-        init();
-        loader.request(requests);
-    }
-
     //Loader
     private List<Loader> loaderList;
     private int loaderCapacity;
