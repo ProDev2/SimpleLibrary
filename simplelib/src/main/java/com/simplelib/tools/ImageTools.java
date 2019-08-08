@@ -273,39 +273,59 @@ public class ImageTools {
     }
 
     public static Bitmap cutOutSquare(Bitmap bitmap) {
-        int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
 
-        int x = (bitmap.getWidth() / 2) - (size / 2);
-        int y = (bitmap.getHeight() / 2) - (size / 2);
+        int size = Math.min(srcWidth, srcHeight);
+
+        int x = (srcWidth / 2) - (size / 2);
+        int y = (srcHeight / 2) - (size / 2);
 
         return Bitmap.createBitmap(bitmap, x, y, size, size);
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap) {
-        return cropBitmap(bitmap, 0);
+        return cropBitmap(bitmap, true);
     }
 
-    public static Bitmap cropBitmap(Bitmap bitmap, int imageOffset) {
+    public static Bitmap cropBitmap(Bitmap bitmap, boolean round) {
+        return cropBitmap(bitmap, round, 0);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int imageOffset) {
         bitmap = cutOutSquare(bitmap);
 
-        int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
+
+        int size = Math.min(srcWidth, srcHeight);
+
+        int srcOffsetXHalf = (srcWidth - size) / 2;
+        int srcOffsetYHalf = (srcHeight - size) / 2;
 
         Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
         canvas.drawARGB(0, 0, 0, 0);
 
-        int color = 0xff424242;
         Paint paint = new Paint();
-
         paint.setAntiAlias(true);
-        paint.setColor(color);
-        canvas.drawCircle(size / 2, size / 2, size / 2, paint);
 
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        if (round) {
+            int color = 0xff424242;
+
+            paint.setColor(color);
+            canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        }
 
         int dpImageOffset = imageOffset != 0 ? dpToPx(imageOffset) : 0;
 
-        Rect rect = new Rect(dpImageOffset, dpImageOffset, size - dpImageOffset, size - dpImageOffset);
+        Rect rect = new Rect(
+                dpImageOffset - srcOffsetXHalf,
+                dpImageOffset - srcOffsetYHalf,
+                size - dpImageOffset + srcOffsetXHalf,
+                size - dpImageOffset + srcOffsetYHalf);
         canvas.drawBitmap(bitmap, null, rect, paint);
 
         return output;
