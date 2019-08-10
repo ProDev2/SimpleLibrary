@@ -235,7 +235,7 @@ public class SimpleMenuPopup extends SimplePopup {
             ImageView imageView = new ImageView(getContext());
             imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            imageParams.width = imageParams.height = MathTools.dpToPx(50);
+            imageParams.width = imageParams.height = MathTools.dpToPx(45);
             imageParams.setMargins(0, 0, margins * 2, 0);
             imageView.setLayoutParams(imageParams);
             imageView.setId(1);
