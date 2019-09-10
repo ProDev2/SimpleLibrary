@@ -84,7 +84,7 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
                 animator.start();
             } else {
                 try {
-                    onSelectedSideShown();
+                    onSelectedSideShown(false);
                 } catch (Exception e) {
                 }
                 currentPos = 180;
@@ -115,7 +115,7 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
                 animator.start();
             } else {
                 try {
-                    onUnselectedSideShown();
+                    onUnselectedSideShown(false);
                 } catch (Exception e) {
                 }
                 currentPos = 0;
@@ -147,9 +147,9 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
 
             try {
                 if (value <= 90)
-                    onUnselectedSideShown();
+                    onUnselectedSideShown(true);
                 else
-                    onSelectedSideShown();
+                    onSelectedSideShown(true);
             } catch (Exception e) {
             }
 
@@ -181,10 +181,10 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
         return false;
     }
 
-    protected void onSelectedSideShown() {
+    protected void onSelectedSideShown(boolean animate) {
     }
 
-    protected void onUnselectedSideShown() {
+    protected void onUnselectedSideShown(boolean animate) {
     }
 
     @Override
