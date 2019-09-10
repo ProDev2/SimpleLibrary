@@ -58,6 +58,10 @@ public class IconButtonView extends IconView implements ValueAnimator.AnimatorUp
             animator.setInterpolator(interpolator);
     }
 
+    public boolean isIconSelected() {
+        return selected;
+    }
+
     public void select() {
         select(true);
     }
