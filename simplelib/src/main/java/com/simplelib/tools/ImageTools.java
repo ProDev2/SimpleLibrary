@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -293,6 +294,10 @@ public class ImageTools {
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int imageOffset) {
+        return cropBitmap(bitmap, round, -1, imageOffset);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int cornerRadius, int imageOffset) {
         bitmap = cutOutSquare(bitmap);
 
         int srcWidth = bitmap.getWidth();
@@ -314,7 +319,10 @@ public class ImageTools {
             int color = 0xff424242;
 
             paint.setColor(color);
-            canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+            if (cornerRadius < 0)
+                canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+            else
+                canvas.drawRoundRect(new RectF(0, 0, size, size), cornerRadius, cornerRadius, paint);
 
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         }
