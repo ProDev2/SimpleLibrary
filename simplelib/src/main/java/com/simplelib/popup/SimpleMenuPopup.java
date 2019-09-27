@@ -2,10 +2,9 @@ package com.simplelib.popup;
 
 import android.annotation.SuppressLint;
 import android.content.res.TypedArray;
-import android.support.v7.appcompat.R;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -219,7 +218,7 @@ public class SimpleMenuPopup extends SimplePopup {
             layout.setPadding(margins, margins + distance, margins, margins + distance);
             layout.setId(0);
 
-            int[] attrs = new int[] {R.attr.selectableItemBackgroundBorderless};
+            int[] attrs = new int[] {com.google.android.material.R.attr.selectableItemBackgroundBorderless};
             TypedArray typedArray = getContext().obtainStyledAttributes(attrs);
             int backgroundResource = typedArray.getResourceId(0, 0);
             layout.setBackgroundResource(backgroundResource);

@@ -3,9 +3,8 @@ package com.simplelib.animator;
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.graphics.Color;
 import android.os.Build;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 public class SimpleColorAnimator implements ValueAnimator.AnimatorUpdateListener {
     private ValueAnimator animator;

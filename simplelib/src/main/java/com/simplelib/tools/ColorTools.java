@@ -1,7 +1,7 @@
 package com.simplelib.tools;
 
 import android.graphics.Color;
-import android.support.v4.graphics.ColorUtils;
+import androidx.core.graphics.ColorUtils;
 
 public class ColorTools {
     public static int manipulateColor(int color, float manipulateValue) {

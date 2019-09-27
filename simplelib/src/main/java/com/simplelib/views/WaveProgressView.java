@@ -14,7 +14,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -428,7 +428,7 @@ public class WaveProgressView extends View implements Runnable {
     private int fetchColorPrimary() {
         try {
             TypedValue typedValue = new TypedValue();
-            TypedArray typedArray = getContext().obtainStyledAttributes(typedValue.data, new int[] {android.support.design.R.attr.colorPrimary});
+            TypedArray typedArray = getContext().obtainStyledAttributes(typedValue.data, new int[] {com.google.android.material.R.attr.colorPrimary});
 
             int color = typedArray.getColor(0, 0);
             typedArray.recycle();

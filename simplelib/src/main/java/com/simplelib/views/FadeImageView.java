@@ -10,13 +10,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.simplelib.tools.ImageTools;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FadeImageView extends View {

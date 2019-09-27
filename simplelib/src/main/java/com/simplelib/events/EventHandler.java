@@ -1,7 +1,7 @@
 package com.simplelib.events;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.simplelib.builder.PathBuilder;
 

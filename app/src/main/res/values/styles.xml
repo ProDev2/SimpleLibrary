@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <style name="AppTheme" parent="Theme.MaterialComponents">
 
 		<item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -10,7 +10,7 @@
 		
 	</style>
 	
-	<style name="AppThemeLight" parent="Theme.AppCompat.Light">
+	<style name="AppThemeLight" parent="Theme.MaterialComponents.Light">
 
 		<item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -20,7 +20,7 @@
 
 	</style>
 	
-	<style name="AppThemeDark" parent="Theme.AppCompat">
+	<style name="AppThemeDark" parent="Theme.MaterialComponents">
 
 		<item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
@@ -30,7 +30,7 @@
 
 	</style>
 
-    <style name="AppTransparent" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTransparent" parent="Theme.MaterialComponents.NoActionBar">
 
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -42,7 +42,7 @@
 		
     </style>
 
-	<style name="ToolBarStyle" parent="Theme.AppCompat">
+	<style name="ToolBarStyle" parent="Theme.MaterialComponents">
 
 		<item name="android:textColorPrimary">@color/toolbarTextColorPrimary</item>
 		<item name="android:textColorSecondary">@color/toolbarTextColorSecondary</item>

@@ -3,7 +3,7 @@ package com.simplelib.container;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import com.simplelib.tools.ImageTools;
 

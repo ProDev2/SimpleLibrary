@@ -2,13 +2,14 @@ package com.simplelib.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.design.R;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+
+import com.simplelib.R;
 
 public abstract class CustomDialog {
     public static final int LIGHT_THEME = R.style.Theme_AppCompat_Light_Dialog_Alert;

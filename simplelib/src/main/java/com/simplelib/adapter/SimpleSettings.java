@@ -1,6 +1,6 @@
 package com.simplelib.adapter;
 
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 public class SimpleSettings {
     public static final int DRAG_UP_DOWN = ItemTouchHelper.UP | ItemTouchHelper.DOWN;

@@ -2,7 +2,7 @@ package com.simplelib.animator;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 public class SimpleAnimator implements ValueAnimator.AnimatorUpdateListener {
     private ValueAnimator animator;
