@@ -294,16 +294,37 @@ public class ImageTools {
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int imageOffset) {
-        return cropBitmap(bitmap, round, -1, imageOffset);
-    }
-
-    public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int cornerRadius, int imageOffset) {
-        bitmap = cutOutSquare(bitmap);
+        if (bitmap == null)
+            throw new NullPointerException("Image cannot be null");
 
         int srcWidth = bitmap.getWidth();
         int srcHeight = bitmap.getHeight();
 
         int size = Math.min(srcWidth, srcHeight);
+
+        return cropBitmap(bitmap, size, round, -1, imageOffset);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, int size) {
+        return cropBitmap(bitmap, size, true);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round) {
+        return cropBitmap(bitmap, size, round, 0);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round, int imageOffset) {
+        return cropBitmap(bitmap, size, round, -1, imageOffset);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round, int cornerRadius, int imageOffset) {
+        if (bitmap == null)
+            throw new NullPointerException("Image cannot be null");
+
+        bitmap = cutOutSquare(bitmap);
+
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
 
         int srcOffsetXHalf = (srcWidth - size) / 2;
         int srcOffsetYHalf = (srcHeight - size) / 2;
