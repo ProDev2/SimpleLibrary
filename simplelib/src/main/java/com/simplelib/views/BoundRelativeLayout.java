@@ -93,15 +93,16 @@ public class BoundRelativeLayout extends RelativeLayout {
     }
 
     private int getMeasureSpec(int measureSpec, int mode, int maxSize) {
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
 
-        boolean noBoundary = maxSize == UNDEFINED_SIZE;
+        final boolean noBoundary = maxSize == UNDEFINED_SIZE;
 
-        int resultSize = 0;
-        int resultMode = 0;
+        final int resultSize;
+        final int resultMode;
 
         switch (specMode) {
+            default:
             case MeasureSpec.EXACTLY:
             case MeasureSpec.AT_MOST:
                 resultSize = noBoundary ? specSize : Math.min(specSize, maxSize);
@@ -116,7 +117,7 @@ public class BoundRelativeLayout extends RelativeLayout {
                 break;
 
             case MeasureSpec.UNSPECIFIED:
-                resultSize = noBoundary ? specSize : Math.min(specSize, maxSize);
+                resultSize = noBoundary ? specSize : (specSize > 0 ? Math.min(specSize, maxSize) : maxSize);
 
                 if (noBoundary) {
                     resultMode = MeasureSpec.UNSPECIFIED;
