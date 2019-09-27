@@ -300,36 +300,28 @@ public class ImageTools {
         int srcWidth = bitmap.getWidth();
         int srcHeight = bitmap.getHeight();
 
-        int size = Math.min(srcWidth, srcHeight);
-
-        return cropBitmap(bitmap, size, round, -1, imageOffset);
+        return cropBitmap(bitmap, srcWidth, srcHeight, round, -1, imageOffset);
     }
 
-    public static Bitmap cropBitmap(Bitmap bitmap, int size) {
-        return cropBitmap(bitmap, size, true);
+    public static Bitmap cropBitmap(Bitmap bitmap, int width, int height) {
+        return cropBitmap(bitmap, width, height, true);
     }
 
-    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round) {
-        return cropBitmap(bitmap, size, round, 0);
+    public static Bitmap cropBitmap(Bitmap bitmap, int width, int height, boolean round) {
+        return cropBitmap(bitmap, width, height, round, 0);
     }
 
-    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round, int imageOffset) {
-        return cropBitmap(bitmap, size, round, -1, imageOffset);
+    public static Bitmap cropBitmap(Bitmap bitmap, int width, int height, boolean round, int imageOffset) {
+        return cropBitmap(bitmap, width, height, round, -1, imageOffset);
     }
 
-    public static Bitmap cropBitmap(Bitmap bitmap, int size, boolean round, int cornerRadius, int imageOffset) {
+    public static Bitmap cropBitmap(Bitmap bitmap, int width, int height, boolean round, int cornerRadius, int imageOffset) {
         if (bitmap == null)
             throw new NullPointerException("Image cannot be null");
 
-        bitmap = cutOutSquare(bitmap);
+        int size = Math.min(width, height);
 
-        int srcWidth = bitmap.getWidth();
-        int srcHeight = bitmap.getHeight();
-
-        int srcOffsetXHalf = (srcWidth - size) / 2;
-        int srcOffsetYHalf = (srcHeight - size) / 2;
-
-        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
         canvas.drawARGB(0, 0, 0, 0);
 
@@ -341,20 +333,29 @@ public class ImageTools {
 
             paint.setColor(color);
             if (cornerRadius < 0)
-                canvas.drawCircle(size / 2, size / 2, size / 2, paint);
+                canvas.drawCircle(width / 2, height / 2, size / 2, paint);
             else
-                canvas.drawRoundRect(new RectF(0, 0, size, size), cornerRadius, cornerRadius, paint);
+                canvas.drawRoundRect(new RectF(0, 0, width, height), cornerRadius, cornerRadius, paint);
 
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         }
 
-        int dpImageOffset = imageOffset != 0 ? dpToPx(imageOffset) : 0;
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
 
-        Rect rect = new Rect(
-                dpImageOffset - srcOffsetXHalf,
-                dpImageOffset - srcOffsetYHalf,
-                size - dpImageOffset + srcOffsetXHalf,
-                size - dpImageOffset + srcOffsetYHalf);
+        int oversize = getCropOversize(
+                srcWidth,
+                srcHeight,
+                size - imageOffset,
+                size - imageOffset);
+
+        int nextWidth = srcWidth - oversize;
+        int nextHeight = srcHeight - oversize;
+
+        Rect rect = new Rect((width / 2) - (nextWidth / 2),
+                (height / 2) - (nextHeight / 2),
+                (width / 2) + (nextWidth / 2),
+                (height / 2) + (nextHeight / 2));
         canvas.drawBitmap(bitmap, null, rect, paint);
 
         return output;
