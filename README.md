@@ -138,7 +138,7 @@ allprojects {
 
 Add the dependency:
 ```
-implementation 'com.github.ProDev2:SimpleLibrary:14.3'
+implementation 'com.github.ProDev2:SimpleLibrary:14.4'
 ```
 
 Alternatively add the last version without AndroidX instead:
