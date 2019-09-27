@@ -141,6 +141,11 @@ Add the dependency:
 implementation 'com.github.ProDev2:SimpleLibrary:13.9'
 ```
 
+Alternatively add the last version without AndroidX instead:
+```
+implementation 'com.github.ProDev2:SimpleLibrary:14.0'
+```
+
 ## Details
 #License Copyright (C) by Pascal Gerner
 ```
