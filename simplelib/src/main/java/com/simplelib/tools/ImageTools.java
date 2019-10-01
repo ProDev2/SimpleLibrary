@@ -191,9 +191,9 @@ public class ImageTools {
                 int drawableWidth = drawable.getIntrinsicWidth();
                 int drawableHeight = drawable.getIntrinsicHeight();
 
-                int oversize = getOversize(drawableWidth, drawableHeight, reqWidth, reqHeight);
-                int width = drawableWidth - oversize;
-                int height = drawableHeight - oversize;
+                double ratio = getInsideRatio(drawableWidth, drawableHeight, reqWidth, reqHeight);
+                int width = (int) ((double) drawableWidth * ratio);
+                int height = (int) ((double) drawableHeight * ratio);
 
                 if (width <= 0 || height <= 0) {
                     width = reqWidth;
@@ -211,48 +211,6 @@ public class ImageTools {
             }
         }
         return null;
-    }
-
-    public static Bitmap fitImageIn(Bitmap image, int reqWidth, int reqHeight) {
-        return fitImageIn(image, reqWidth, reqHeight, true);
-    }
-
-    public static Bitmap fitImageIn(Bitmap image, int reqWidth, int reqHeight, boolean filter) {
-        if (image != null) {
-            int oversize = getOversize(image, reqWidth, reqHeight);
-            int width = image.getWidth() - oversize;
-            int height = image.getHeight() - oversize;
-
-            if (width > 0 && height > 0)
-                return Bitmap.createScaledBitmap(image, width, height, filter);
-        }
-        return image;
-    }
-
-    public static int getOversize(Bitmap image, int widthTo, int heightTo) {
-        if (image != null)
-            return getOversize(image.getWidth(), image.getHeight(), widthTo, heightTo);
-        return 0;
-    }
-
-    public static int getOversize(int width, int height, int widthTo, int heightTo) {
-        int oversizeX = width - widthTo;
-        int oversizeY = height - heightTo;
-
-        return Math.max(oversizeX, oversizeY);
-    }
-
-    public static int getCropOversize(Bitmap image, int widthTo, int heightTo) {
-        if (image != null)
-            return getCropOversize(image.getWidth(), image.getHeight(), widthTo, heightTo);
-        return 0;
-    }
-
-    public static int getCropOversize(int width, int height, int widthTo, int heightTo) {
-        int oversizeX = width - widthTo;
-        int oversizeY = height - heightTo;
-
-        return Math.min(oversizeX, oversizeY);
     }
 
     public static Bitmap resizeBitmapInDp(Bitmap bitmap, int newWidthDp, int newHeightDp) {
@@ -283,6 +241,84 @@ public class ImageTools {
         int y = (srcHeight / 2) - (size / 2);
 
         return Bitmap.createBitmap(bitmap, x, y, size, size);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap) {
+        return fitImageIn(bitmap, true);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, boolean round) {
+        return fitImageIn(bitmap, round, 0);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, boolean round, int imageOffset) {
+        if (bitmap == null)
+            throw new NullPointerException("Image cannot be null");
+
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
+
+        return fitImageIn(bitmap, srcWidth, srcHeight, round, -1, imageOffset);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, int width, int height) {
+        return fitImageIn(bitmap, width, height, true);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, int width, int height, boolean round) {
+        return fitImageIn(bitmap, width, height, round, 0);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, int width, int height, boolean round, int imageOffset) {
+        return fitImageIn(bitmap, width, height, round, -1, imageOffset);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, int width, int height, boolean round, int cornerRadius, int imageOffset) {
+        if (bitmap == null)
+            throw new NullPointerException("Image cannot be null");
+
+        int size = Math.min(width, height);
+
+        Bitmap output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        canvas.drawARGB(0, 0, 0, 0);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+        if (round) {
+            int color = 0xff424242;
+
+            paint.setColor(color);
+            if (cornerRadius < 0)
+                canvas.drawCircle(width / 2, height / 2, size / 2, paint);
+            else
+                canvas.drawRoundRect(new RectF(0, 0, width, height), cornerRadius, cornerRadius, paint);
+
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        }
+
+        int srcWidth = bitmap.getWidth();
+        int srcHeight = bitmap.getHeight();
+
+        double ratio = getInsideRatio(
+                srcWidth,
+                srcHeight,
+                width - imageOffset,
+                height - imageOffset);
+
+        int nextWidth = (int) ((double) srcWidth * ratio);
+        int nextHeight = (int) ((double) srcHeight * ratio);
+
+        if (nextWidth > 0 && nextHeight > 0) {
+            Rect rect = new Rect((width / 2) - (nextWidth / 2),
+                    (height / 2) - (nextHeight / 2),
+                    (width / 2) + (nextWidth / 2),
+                    (height / 2) + (nextHeight / 2));
+            canvas.drawBitmap(bitmap, null, rect, paint);
+        }
+
+        return output;
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap) {
@@ -343,22 +379,38 @@ public class ImageTools {
         int srcWidth = bitmap.getWidth();
         int srcHeight = bitmap.getHeight();
 
-        int oversize = getCropOversize(
+        double ratio = getOutsideRatio(
                 srcWidth,
                 srcHeight,
-                size - imageOffset,
-                size - imageOffset);
+                width - imageOffset,
+                height - imageOffset);
 
-        int nextWidth = srcWidth - oversize;
-        int nextHeight = srcHeight - oversize;
+        int nextWidth = (int) ((double) srcWidth * ratio);
+        int nextHeight = (int) ((double) srcHeight * ratio);
 
-        Rect rect = new Rect((width / 2) - (nextWidth / 2),
-                (height / 2) - (nextHeight / 2),
-                (width / 2) + (nextWidth / 2),
-                (height / 2) + (nextHeight / 2));
-        canvas.drawBitmap(bitmap, null, rect, paint);
+        if (nextWidth > 0 && nextHeight > 0) {
+            Rect rect = new Rect((width / 2) - (nextWidth / 2),
+                    (height / 2) - (nextHeight / 2),
+                    (width / 2) + (nextWidth / 2),
+                    (height / 2) + (nextHeight / 2));
+            canvas.drawBitmap(bitmap, null, rect, paint);
+        }
 
         return output;
+    }
+
+    public static double getInsideRatio(int width, int height, int widthTo, int heightTo) {
+        double widthRatio = width != 0 ? (double) widthTo / (double) width : 1d;
+        double heightRatio = height != 0 ? (double) heightTo / (double) height : 1d;
+
+        return Math.min(widthRatio, heightRatio);
+    }
+
+    public static double getOutsideRatio(int width, int height, int widthTo, int heightTo) {
+        double widthRatio = width != 0 ? (double) widthTo / (double) width : 1d;
+        double heightRatio = height != 0 ? (double) heightTo / (double) height : 1d;
+
+        return Math.max(widthRatio, heightRatio);
     }
 
     private static Bitmap createImage(int width, int height, int color, Paint textPaint, String text) {

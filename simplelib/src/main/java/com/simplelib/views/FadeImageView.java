@@ -269,13 +269,13 @@ public class FadeImageView extends View {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        int oversize = ImageTools.getCropOversize(imageWidth, imageHeight, reqWidth, reqHeight);
+        double ratio = ImageTools.getOutsideRatio(imageWidth, imageHeight, reqWidth, reqHeight);
 
-        int boundsPosX = (reqWidth / 2) - (imageWidth / 2) + (oversize / 2);
-        int boundsPosY = (reqHeight / 2) - (imageHeight / 2) + (oversize / 2);
+        int boundsWidth = (int) ((double) imageWidth * ratio);
+        int boundsHeight = (int) ((double) imageHeight * ratio);
 
-        int boundsWidth = imageWidth - oversize;
-        int boundsHeight = imageHeight - oversize;
+        int boundsPosX = (reqWidth / 2) - (boundsWidth / 2);
+        int boundsPosY = (reqHeight / 2) - (boundsHeight / 2);
 
         if (boundsWidth <= 0 || boundsHeight <= 0) return null;
 
