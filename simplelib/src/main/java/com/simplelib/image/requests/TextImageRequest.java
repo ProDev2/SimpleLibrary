@@ -128,7 +128,7 @@ public abstract class TextImageRequest extends ImageLoader.ImageRequest {
 
         Bitmap image = createImage(sizeX, sizeY, backColor, textPaint, text);
         if (cropRound)
-            image = ImageTools.cropBitmap(image);
+            image = ImageTools.cropBitmap(image, true);
         return image;
     }
 

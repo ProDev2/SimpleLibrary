@@ -52,7 +52,7 @@ public abstract class UriImageRequest extends ImageLoader.ImageRequest {
     public Bitmap onLoad() {
         Bitmap image = ImageLoaderTools.loadInReqSize(context, uri, reqWidth, reqHeight);
         if (cropRound)
-            image = ImageTools.cropBitmap(image);
+            image = ImageTools.cropBitmap(image, true);
         return image;
     }
 

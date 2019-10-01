@@ -183,7 +183,7 @@ public class ImageTools {
             if (drawable instanceof BitmapDrawable) {
                 Bitmap image = ((BitmapDrawable) drawable).getBitmap();
                 if (image != null)
-                    return fitImageIn(image, reqWidth, reqHeight);
+                    return fitImageIn(image, reqWidth, reqHeight, false, -1, 0);
                 return image;
             }
 
@@ -244,7 +244,7 @@ public class ImageTools {
     }
 
     public static Bitmap fitImageIn(Bitmap bitmap) {
-        return fitImageIn(bitmap, true);
+        return fitImageIn(bitmap, false);
     }
 
     public static Bitmap fitImageIn(Bitmap bitmap, boolean round) {
@@ -252,17 +252,21 @@ public class ImageTools {
     }
 
     public static Bitmap fitImageIn(Bitmap bitmap, boolean round, int imageOffset) {
+        return fitImageIn(bitmap, round, -1, imageOffset);
+    }
+
+    public static Bitmap fitImageIn(Bitmap bitmap, boolean round, int cornerRadius, int imageOffset) {
         if (bitmap == null)
             throw new NullPointerException("Image cannot be null");
 
         int srcWidth = bitmap.getWidth();
         int srcHeight = bitmap.getHeight();
 
-        return fitImageIn(bitmap, srcWidth, srcHeight, round, -1, imageOffset);
+        return fitImageIn(bitmap, srcWidth, srcHeight, round, cornerRadius, imageOffset);
     }
 
     public static Bitmap fitImageIn(Bitmap bitmap, int width, int height) {
-        return fitImageIn(bitmap, width, height, true);
+        return fitImageIn(bitmap, width, height, false);
     }
 
     public static Bitmap fitImageIn(Bitmap bitmap, int width, int height, boolean round) {
@@ -322,7 +326,7 @@ public class ImageTools {
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap) {
-        return cropBitmap(bitmap, true);
+        return cropBitmap(bitmap, false);
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, boolean round) {
@@ -330,17 +334,21 @@ public class ImageTools {
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int imageOffset) {
+        return cropBitmap(bitmap, round, -1, imageOffset);
+    }
+
+    public static Bitmap cropBitmap(Bitmap bitmap, boolean round, int cornerRadius, int imageOffset) {
         if (bitmap == null)
             throw new NullPointerException("Image cannot be null");
 
         int srcWidth = bitmap.getWidth();
         int srcHeight = bitmap.getHeight();
 
-        return cropBitmap(bitmap, srcWidth, srcHeight, round, -1, imageOffset);
+        return cropBitmap(bitmap, srcWidth, srcHeight, round, cornerRadius, imageOffset);
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, int width, int height) {
-        return cropBitmap(bitmap, width, height, true);
+        return cropBitmap(bitmap, width, height, false);
     }
 
     public static Bitmap cropBitmap(Bitmap bitmap, int width, int height, boolean round) {
@@ -434,7 +442,7 @@ public class ImageTools {
     }
 
     public static Bitmap addRoundBackground(Bitmap bitmap, int color, int borderWidth) {
-        bitmap = cropBitmap(bitmap);
+        bitmap = cropBitmap(bitmap, true);
 
         int size = Math.max(bitmap.getWidth(), bitmap.getHeight());
 
@@ -455,7 +463,7 @@ public class ImageTools {
         Rect rect = new Rect(dpBorderWidth, dpBorderWidth, size - dpBorderWidth, size - dpBorderWidth);
         canvas.drawBitmap(bitmap, null, rect, null);
 
-        output = cropBitmap(output);
+        output = cropBitmap(output, true);
 
         return output;
     }
@@ -465,7 +473,7 @@ public class ImageTools {
     }
 
     public static Bitmap addRoundBorder(Bitmap bitmap, int color, int borderColor, int borderWidth, int imageOffset) {
-        bitmap = cropBitmap(bitmap);
+        bitmap = cropBitmap(bitmap, true);
 
         int size = Math.max(bitmap.getWidth(), bitmap.getHeight());
 
@@ -501,7 +509,7 @@ public class ImageTools {
         Rect rect = new Rect(start, start, end, end);
         canvas.drawBitmap(bitmap, null, rect, null);
 
-        output = cropBitmap(output);
+        output = cropBitmap(output, true);
 
         return output;
     }
@@ -515,7 +523,7 @@ public class ImageTools {
         Canvas canvas = new Canvas(output);
         canvas.drawColor(color);
 
-        output = cropBitmap(output);
+        output = cropBitmap(output, true);
 
         return output;
     }

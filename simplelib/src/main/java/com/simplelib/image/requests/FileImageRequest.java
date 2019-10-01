@@ -48,7 +48,7 @@ public abstract class FileImageRequest extends ImageLoader.ImageRequest {
     public Bitmap onLoad() {
         Bitmap image = ImageLoaderTools.loadInReqSize(file, reqWidth, reqHeight);
         if (cropRound)
-            image = ImageTools.cropBitmap(image);
+            image = ImageTools.cropBitmap(image, true);
         return image;
     }
 

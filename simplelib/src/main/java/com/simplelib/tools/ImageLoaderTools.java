@@ -86,7 +86,7 @@ public class ImageLoaderTools {
 
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            Bitmap image = ImageTools.fitImageIn(bitmap, reqWidth, reqHeight);
+            Bitmap image = ImageTools.fitImageIn(bitmap, reqWidth, reqHeight, false, -1, 0);
 
             try {
                 if (!bitmap.isRecycled())

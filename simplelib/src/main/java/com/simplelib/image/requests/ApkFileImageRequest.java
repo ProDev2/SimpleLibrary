@@ -80,7 +80,7 @@ public abstract class ApkFileImageRequest extends ImageLoader.ImageRequest {
             Drawable iconDrawable = packageInfo.applicationInfo.loadIcon(packageManager);
             Bitmap image = convertToBitmap(iconDrawable, reqWidth, reqHeight);
             if (cropRound)
-                image = ImageTools.cropBitmap(image);
+                image = ImageTools.cropBitmap(image, true);
             return image;
         }
 

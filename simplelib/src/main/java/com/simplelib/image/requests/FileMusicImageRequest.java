@@ -54,7 +54,7 @@ public abstract class FileMusicImageRequest extends ImageLoader.ImageRequest {
 
         Bitmap image = ImageLoaderTools.loadInReqSize(imageBytes, reqWidth, reqHeight);
         if (cropRound)
-            image = ImageTools.cropBitmap(image);
+            image = ImageTools.cropBitmap(image, true);
         return image;
     }
 

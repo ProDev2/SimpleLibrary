@@ -44,7 +44,7 @@ public abstract class FileVideoThumbnailRequest extends ImageLoader.ImageRequest
     public Bitmap onLoad() {
         Bitmap image = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), type);
         if (cropRound)
-            image = ImageTools.cropBitmap(image);
+            image = ImageTools.cropBitmap(image, true);
         return image;
     }
 
