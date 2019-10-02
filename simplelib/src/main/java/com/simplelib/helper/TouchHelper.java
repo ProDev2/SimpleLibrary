@@ -130,7 +130,6 @@ public class TouchHelper extends BasicTouchHelper {
                 }
                 break;
 
-            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 touchX = event.getRawX();
                 touchY = event.getRawY();
