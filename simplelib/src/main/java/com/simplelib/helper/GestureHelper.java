@@ -21,45 +21,45 @@ public class GestureHelper extends TouchHelper implements GestureDetector.OnGest
     }
 
     @Override
-    public boolean onSingleTapUp(android.view.MotionEvent e) {
+    public boolean onSingleTapUp(MotionEvent event) {
         return false;
     }
 
     @Override
-    public void onLongPress(android.view.MotionEvent e) {
+    public void onLongPress(MotionEvent event) {
     }
 
     @Override
-    public boolean onScroll(android.view.MotionEvent e1, android.view.MotionEvent e2, float distanceX, float distanceY) {
+    public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {
         return false;
     }
 
     @Override
-    public boolean onFling(android.view.MotionEvent e1, android.view.MotionEvent e2, float velocityX, float velocityY) {
+    public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX, float velocityY) {
         return false;
     }
 
     @Override
-    public void onShowPress(android.view.MotionEvent e) {
+    public void onShowPress(MotionEvent event) {
     }
 
     @Override
-    public boolean onDown(android.view.MotionEvent e) {
+    public boolean onDown(MotionEvent event) {
         return false;
     }
 
     @Override
-    public boolean onDoubleTap(android.view.MotionEvent e) {
+    public boolean onDoubleTap(MotionEvent event) {
         return false;
     }
 
     @Override
-    public boolean onDoubleTapEvent(android.view.MotionEvent e) {
+    public boolean onDoubleTapEvent(MotionEvent event) {
         return false;
     }
 
     @Override
-    public boolean onSingleTapConfirmed(android.view.MotionEvent e) {
+    public boolean onSingleTapConfirmed(MotionEvent event) {
         return false;
     }
 }

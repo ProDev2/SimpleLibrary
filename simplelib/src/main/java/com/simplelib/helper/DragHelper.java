@@ -113,15 +113,15 @@ public class DragHelper implements View.OnTouchListener {
         return true;
     }
 
-    public void onStartMoving() {
+    protected void onStartMoving() {
     }
 
-    public void onStopMoving() {
+    protected void onStopMoving() {
     }
 
-    public void onClick(float x, float y) {
+    protected void onClick(float x, float y) {
     }
 
-    public void onDragBy(float x, float y) {
+    protected void onDragBy(float x, float y) {
     }
 }

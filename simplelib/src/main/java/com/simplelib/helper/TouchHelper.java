@@ -40,35 +40,35 @@ public class TouchHelper extends BasicTouchHelper {
         this.minMovement = minMovement;
     }
 
-    public boolean isPressed() {
+    protected boolean isPressed() {
         return pressed;
     }
 
-    public boolean isMoved() {
+    protected boolean isMoved() {
         return moved;
     }
 
-    public float getStartX() {
+    protected float getStartX() {
         return startX;
     }
 
-    public float getStartY() {
+    protected float getStartY() {
         return startY;
     }
 
-    public float getTouchX() {
+    protected float getTouchX() {
         return touchX;
     }
 
-    public float getTouchY() {
+    protected float getTouchY() {
         return touchY;
     }
 
-    public float getDistX() {
+    protected float getDistX() {
         return distX;
     }
 
-    public float getDistY() {
+    protected float getDistY() {
         return distY;
     }
 
@@ -80,7 +80,8 @@ public class TouchHelper extends BasicTouchHelper {
 
         handled |= super.onTouch(view, event);
 
-        switch (event.getAction()) {
+        int action = event.getAction();
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (!pressed) {
                     pressed = true;
@@ -130,17 +131,23 @@ public class TouchHelper extends BasicTouchHelper {
                 }
                 break;
 
+            case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 touchX = event.getRawX();
                 touchY = event.getRawY();
 
                 if (pressed) {
-                    handled |= onRelease(view, touchX, touchY, distX, distY);
+                    boolean canceled = action == MotionEvent.ACTION_CANCEL;
+
+                    if (canceled)
+                        handled |= onCancel(view);
+
+                    handled |= onRelease(view, canceled, touchX, touchY, distX, distY);
 
                     if (moved)
-                        onStopMoving(view, touchX, touchY, distX, distY);
+                        onStopMoving(view, canceled, touchX, touchY, distX, distY);
                     else
-                        onClick(view, touchX, touchY);
+                        onClick(view, canceled, touchX, touchY);
                 }
 
                 pressed = false;
@@ -164,26 +171,30 @@ public class TouchHelper extends BasicTouchHelper {
         return handled;
     }
 
-    public boolean onPress(View view, float x, float y) {
+    protected boolean onPress(View view, float x, float y) {
         return false;
     }
 
-    public boolean onRelease(View view, float x, float y, float distX, float distY) {
+    protected boolean onRelease(View view, boolean canceled, float x, float y, float distX, float distY) {
         return false;
     }
 
-    public void onStartMoving(View view, float x, float y) {
+    protected boolean onCancel(View view) {
+        return false;
     }
 
-    public void onStopMoving(View view, float x, float y, float distX, float distY) {
+    protected void onStartMoving(View view, float x, float y) {
     }
 
-    public void onClick(View view, float x, float y) {
+    protected void onStopMoving(View view, boolean canceled, float x, float y, float distX, float distY) {
     }
 
-    public void onCancelDrag(View view, float x, float y) {
+    protected void onClick(View view, boolean canceled, float x, float y) {
     }
 
-    public void onDragBy(View view, float moveByX, float moveByY, float distX, float distY) {
+    protected void onCancelDrag(View view, float x, float y) {
+    }
+
+    protected void onDragBy(View view, float moveByX, float moveByY, float distX, float distY) {
     }
 }

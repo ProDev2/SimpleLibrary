@@ -151,8 +151,8 @@ public class ScrollHelper extends GestureHelper implements Runnable {
     }
 
     @Override
-    public boolean onRelease(View view, float x, float y, float distX, float distY) {
-        super.onRelease(view, x, y, distX, distY);
+    public boolean onRelease(View view, boolean canceled, float x, float y, float distX, float distY) {
+        super.onRelease(view, canceled, x, y, distX, distY);
 
         stopScroll();
 
