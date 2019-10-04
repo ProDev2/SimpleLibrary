@@ -13,7 +13,7 @@ import com.simplelib.interfaces.NameableAdapter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class FragmentPagerAdapter extends SimpleFragmentPagerAdapter {
+public class FragmentStatePagerAdapter extends SimpleFragmentStatePagerAdapter {
     private ViewPager viewPager;
     private Context context;
 
@@ -24,11 +24,11 @@ public class FragmentPagerAdapter extends SimpleFragmentPagerAdapter {
 
     private Data data;
 
-    public FragmentPagerAdapter(ViewPager viewPager, FragmentManager fm) {
+    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm) {
         this(viewPager, fm, true);
     }
 
-    public FragmentPagerAdapter(ViewPager viewPager, FragmentManager fm, boolean attach) {
+    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm, boolean attach) {
         super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
         if (viewPager == null)

@@ -21,6 +21,8 @@ import com.simplelib.interfaces.OnEvent;
 import com.simplelib.interfaces.UpdateAdapter;
 import com.simplelib.interfaces.VisibilityAdapter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class SimpleFragment extends Fragment
         implements OnEvent, InitializeAdapter, UpdateAdapter, VisibilityAdapter {
     private int id;
@@ -35,7 +37,7 @@ public abstract class SimpleFragment extends Fragment
     private Menu menu;
 
     public boolean willResumeOnlyCurrentFragment = true;
-    private boolean resumed;
+    private AtomicBoolean resumed;
 
     public SimpleFragment(int id) {
         setInitialized(false);
@@ -236,11 +238,15 @@ public abstract class SimpleFragment extends Fragment
         }
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public boolean getUserVisibleHint() {
         return super.getUserVisibleHint();
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
@@ -252,11 +258,18 @@ public abstract class SimpleFragment extends Fragment
         super.onStart();
 
         if (willResumeOnlyCurrentFragment) {
-            resumed = false;
+            if (this.resumed != null) {
+                this.resumed.set(true);
+                this.resumed = null;
+            }
+
+            final AtomicBoolean resumed = new AtomicBoolean(false);
+            this.resumed = resumed;
+
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    if (resumed) return;
+                    if (resumed.get()) return;
 
                     setVisibility(false, false);
 
@@ -272,7 +285,10 @@ public abstract class SimpleFragment extends Fragment
         super.onResume();
 
         if (willResumeOnlyCurrentFragment) {
-            resumed = true;
+            if (this.resumed != null) {
+                this.resumed.set(true);
+                this.resumed = null;
+            }
 
             setVisibility(true, false);
 

@@ -21,6 +21,8 @@ import com.simplelib.interfaces.OnEvent;
 import com.simplelib.interfaces.UpdateAdapter;
 import com.simplelib.interfaces.VisibilityAdapter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         implements OnEvent, InitializeAdapter, UpdateAdapter, VisibilityAdapter {
     private int preferencesId;
@@ -35,7 +37,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
     private Menu menu;
 
     public boolean willResumeOnlyCurrentFragment = true;
-    private boolean resumed;
+    private AtomicBoolean resumed;
 
     public SimplePreferencesFragment(int preferencesId) {
         setInitialized(false);
@@ -244,11 +246,15 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         }
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public boolean getUserVisibleHint() {
         return super.getUserVisibleHint();
     }
 
+    @SuppressWarnings("deprecation")
+    @Deprecated
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
@@ -260,11 +266,18 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         super.onStart();
 
         if (willResumeOnlyCurrentFragment) {
-            resumed = false;
+            if (this.resumed != null) {
+                this.resumed.set(true);
+                this.resumed = null;
+            }
+
+            final AtomicBoolean resumed = new AtomicBoolean(false);
+            this.resumed = resumed;
+
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    if (resumed) return;
+                    if (resumed.get()) return;
 
                     setVisibility(false, false);
 
@@ -280,7 +293,10 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         super.onResume();
 
         if (willResumeOnlyCurrentFragment) {
-            resumed = true;
+            if (this.resumed != null) {
+                this.resumed.set(true);
+                this.resumed = null;
+            }
 
             setVisibility(true, false);
 
