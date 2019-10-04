@@ -11,6 +11,7 @@ import android.view.View;
 import com.simplelib.SimpleFragment;
 import com.simplelib.interfaces.NameableAdapter;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
@@ -25,7 +26,11 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
     private Data data;
 
     public FragmentPagerAdapter(ViewPager viewPager, FragmentManager fm) {
-        super(fm);
+        this(viewPager, fm, true);
+    }
+
+    public FragmentPagerAdapter(ViewPager viewPager, FragmentManager fm, boolean attach) {
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
         if (viewPager == null)
             throw new NullPointerException("No view pager");
@@ -39,6 +44,9 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
         this.makeAllPagesSwipeable = true;
 
         this.data = new Data(pages);
+
+        if (attach)
+            attach();
     }
 
     public void setViewPager(ViewPager viewPager) {
@@ -46,17 +54,41 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
             throw new NullPointerException("No view pager");
 
         try {
-            if (this.viewPager != null)
-                this.viewPager.setAdapter(null);
+            if (this.viewPager != viewPager)
+                detach();
         } catch (Exception e) {
         }
 
         this.viewPager = viewPager;
 
         try {
-            this.viewPager.setAdapter(this);
+            attach();
         } catch (Exception e) {
         }
+    }
+
+    public boolean attach() {
+        try {
+            if (this.viewPager != null &&
+                    this.viewPager.getAdapter() != this) {
+                this.viewPager.setAdapter(this);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
+    }
+
+    public boolean detach() {
+        try {
+            if (this.viewPager != null &&
+                    this.viewPager.getAdapter() == this) {
+                this.viewPager.setAdapter(null);
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
     }
 
     public Data getData() {
@@ -151,25 +183,25 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     public void update() {
-        notifyDataSetChanged();
-
         try {
             onUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        notifyDataSetChanged();
     }
 
     public void updateEntirely() {
-        noPosition = true;
-        notifyDataSetChanged();
-        noPosition = false;
-
         try {
             onUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        noPosition = true;
+        notifyDataSetChanged();
+        noPosition = false;
     }
 
     public ArrayList<Page> getPages() {
@@ -291,7 +323,33 @@ public class FragmentPagerAdapter extends FragmentStatePagerAdapter {
         return -1;
     }
 
-    public void onUpdate() {
+    protected void onUpdate() {
+        try {
+            for (Page page : pages) {
+                if (page == null) continue;
+
+                Fragment fragment = page.getFragment();
+                if (fragment == null) continue;
+
+                try {
+                    Class<?> fragmentClass = fragment.getClass();
+                    Field field = fragmentClass.getDeclaredField("willResumeOnlyCurrentFragment");
+                    if (field == null) continue;
+
+                    try {
+                        field.setAccessible(true);
+                    } catch (Exception e) {
+                    }
+
+                    field.set(fragment, true);
+                } catch (Exception e) {
+                } catch (Throwable tr) {
+                    tr.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+        }
+
         //Override this method if needed
     }
 

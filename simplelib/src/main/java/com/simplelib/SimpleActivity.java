@@ -9,8 +9,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Lifecycle;
+
 import android.view.KeyEvent;
 import android.view.View;
+
+import com.simplelib.interfaces.OnEvent;
 
 import java.util.List;
 
@@ -80,9 +84,9 @@ public class SimpleActivity extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK && sendBackEvent) {
             try {
                 Fragment fragment = getVisibleFragment();
-                if (fragment instanceof SimpleFragment) {
-                    SimpleFragment simpleFragment = (SimpleFragment) fragment;
-                    if (!simpleFragment.back()) {
+                if (fragment instanceof OnEvent) {
+                    OnEvent eventListener = (OnEvent) fragment;
+                    if (!eventListener.onBack()) {
                         return false;
                     }
                 }
@@ -125,6 +129,7 @@ public class SimpleActivity extends AppCompatActivity {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         ft.replace(containerViewId, fragment, tag);
+        ft.setMaxLifecycle(fragment, Lifecycle.State.RESUMED);
         ft.commit();
     }
 

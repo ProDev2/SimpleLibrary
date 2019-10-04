@@ -2,9 +2,13 @@ package com.simplelib;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,7 +16,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-public abstract class SimpleFragment extends Fragment {
+import com.simplelib.interfaces.InitializeAdapter;
+import com.simplelib.interfaces.OnEvent;
+import com.simplelib.interfaces.UpdateAdapter;
+import com.simplelib.interfaces.VisibilityAdapter;
+
+public abstract class SimpleFragment extends Fragment
+        implements OnEvent, InitializeAdapter, UpdateAdapter, VisibilityAdapter {
     private int id;
     private View contentView;
 
@@ -24,10 +34,26 @@ public abstract class SimpleFragment extends Fragment {
     private int menuId;
     private Menu menu;
 
+    public boolean willResumeOnlyCurrentFragment = true;
+    private boolean resumed;
+
     public SimpleFragment(int id) {
+        setInitialized(false);
+
         this.id = id;
 
         resetToolbar();
+
+        setNeedsUpdate(true);
+        setDefVisibility(true);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (!willResumeOnlyCurrentFragment)
+            setInitialized(true);
     }
 
     @Override
@@ -40,6 +66,11 @@ public abstract class SimpleFragment extends Fragment {
 
         create(view);
 
+        if (!willResumeOnlyCurrentFragment) {
+            setInitialized(true);
+            update(false);
+        }
+
         return view;
     }
 
@@ -47,9 +78,10 @@ public abstract class SimpleFragment extends Fragment {
         return contentView;
     }
 
-    public View findViewById(int id) {
+    @SuppressWarnings("unchecked")
+    public <T extends View> T findViewById(int id) {
         try {
-            return getContentView().findViewById(id);
+            return (T) getContentView().findViewById(id);
         } catch (Exception e) {
         }
         return null;
@@ -57,8 +89,31 @@ public abstract class SimpleFragment extends Fragment {
 
     public abstract void create(View view);
 
-    public boolean back() {
-        return true;
+    @Override
+    public void onUpdate() {
+        updateVisibility();
+    }
+
+    @Override
+    public void onVisibilitySet(boolean visible) {
+        try {
+            if (visible && overrideActivityDefaults) {
+                if (menuId < 0)
+                    disableOptionsMenu();
+                else
+                    enableOptionsMenu(menuId);
+
+                if (title != null) setTitle(title);
+                if (subtitle != null) setSubtitle(subtitle);
+
+                setBackButtonEnabled(backButton);
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void onVisibilityChanged(boolean visible) {
     }
 
     public void setToolbar(int toolbarId) {
@@ -126,7 +181,7 @@ public abstract class SimpleFragment extends Fragment {
                 title = "";
 
             this.title = title;
-            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
+            if (getVisibility() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.setTitle(title);
             }
@@ -146,7 +201,7 @@ public abstract class SimpleFragment extends Fragment {
                 subtitle = "";
 
             this.subtitle = subtitle;
-            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
+            if (getVisibility() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.setSubtitle(subtitle);
             }
@@ -161,7 +216,7 @@ public abstract class SimpleFragment extends Fragment {
     public void setBackButtonEnabled(boolean enabled) {
         try {
             this.backButton = enabled;
-            if (getUserVisibleHint() && getActivity() instanceof SimpleActivity) {
+            if (getVisibility() && getActivity() instanceof SimpleActivity) {
                 SimpleActivity activity = (SimpleActivity) getActivity();
                 activity.setBackButtonEnabled(enabled);
             }
@@ -182,32 +237,48 @@ public abstract class SimpleFragment extends Fragment {
     }
 
     @Override
+    public boolean getUserVisibleHint() {
+        return super.getUserVisibleHint();
+    }
+
+    @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        setVisibility(isVisibleToUser, false);
+    }
 
-        try {
-            if (isVisibleToUser && overrideActivityDefaults) {
-                if (menuId < 0)
-                    disableOptionsMenu();
-                else
-                    enableOptionsMenu(menuId);
+    @Override
+    public void onStart() {
+        super.onStart();
 
-                if (title != null) setTitle(title);
-                if (subtitle != null) setSubtitle(subtitle);
+        if (willResumeOnlyCurrentFragment) {
+            resumed = false;
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    if (resumed) return;
 
-                setBackButtonEnabled(backButton);
-            }
-        } catch (Exception e) {
-        }
+                    setVisibility(false, false);
 
-        try {
-            if (isVisibleToUser)
-                onBecomeVisible();
-        } catch (Exception e) {
+                    setInitialized(true);
+                    update(false);
+                }
+            });
         }
     }
 
-    public void onBecomeVisible() {
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (willResumeOnlyCurrentFragment) {
+            resumed = true;
+
+            setVisibility(true, false);
+
+            setInitialized(true);
+            update(false);
+        }
     }
 
     public void enableOptionsMenu(int menu) {
