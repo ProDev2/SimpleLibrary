@@ -128,17 +128,26 @@ simpleItemTouchHelper.getSettings().setDragFlags(SimpleSettings.DRAG);
 ## Installation
 Add this to your build.gradle:
 ```
-allprojects {
-    repositories {
-        jcenter()
-        maven { url 'https://jitpack.io' }
+repositories {
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
+```
+
+**If you're using this library with AndroidX make sure to add the following to your build.gradle:**
+```
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 ```
 
-Add the dependency:
+
+Add the dependency (**for AndroidX**):
 ```
-implementation 'com.github.ProDev2:SimpleLibrary:14.8'
+implementation 'com.github.ProDev2:SimpleLibrary:14.9'
 ```
 
 Alternatively add the last version without AndroidX instead:
