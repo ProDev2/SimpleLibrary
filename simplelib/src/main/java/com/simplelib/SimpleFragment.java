@@ -45,7 +45,7 @@ public abstract class SimpleFragment extends Fragment
         resetToolbar();
 
         setNeedsUpdate(true);
-        setDefVisibility(true);
+        setDefVisibility(false);
     }
 
     @Override

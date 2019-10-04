@@ -46,7 +46,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
             resetToolbar();
 
         setNeedsUpdate(true);
-        setDefVisibility(true);
+        setDefVisibility(false);
     }
 
     @Override
