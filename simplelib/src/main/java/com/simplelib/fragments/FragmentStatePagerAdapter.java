@@ -24,12 +24,12 @@ public class FragmentStatePagerAdapter extends SimpleFragmentStatePagerAdapter {
 
     private Data data;
 
-    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm) {
-        this(viewPager, fm, true);
+    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm, int behavior) {
+        this(viewPager, fm, behavior, true);
     }
 
-    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm, boolean attach) {
-        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+    public FragmentStatePagerAdapter(ViewPager viewPager, FragmentManager fm, int behavior, boolean attach) {
+        super(fm, behavior);
 
         if (viewPager == null)
             throw new NullPointerException("No view pager");

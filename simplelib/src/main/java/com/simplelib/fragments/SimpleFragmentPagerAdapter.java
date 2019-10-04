@@ -23,8 +23,7 @@ public abstract class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
         if (instantiatedObj instanceof VisibilityAdapter) {
             VisibilityAdapter visibilityAdapter = (VisibilityAdapter) instantiatedObj;
-            if (visibilityAdapter.getVisibility())
-                visibilityAdapter.setVisibility(false, false);
+            visibilityAdapter.setVisibility(false, false);
         }
 
         return instantiatedObj;

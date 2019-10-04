@@ -31,6 +31,7 @@ public class FragmentPageChangeListener implements ViewPager.OnAdapterChangeList
 
     public FragmentPageChangeListener attach() {
         try {
+            pager.addOnAdapterChangeListener(this);
             pager.addOnPageChangeListener(this);
         } catch (Exception e) {
         }
@@ -39,6 +40,7 @@ public class FragmentPageChangeListener implements ViewPager.OnAdapterChangeList
 
     public FragmentPageChangeListener detach() {
         try {
+            pager.removeOnAdapterChangeListener(this);
             pager.removeOnPageChangeListener(this);
         } catch (Exception e) {
         }
