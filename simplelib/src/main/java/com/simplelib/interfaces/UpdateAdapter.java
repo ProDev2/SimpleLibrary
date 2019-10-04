@@ -1,16 +1,26 @@
 package com.simplelib.interfaces;
 
+import androidx.annotation.NonNull;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface UpdateAdapter extends Updatable {
-    AtomicBoolean needsUpdate = new AtomicBoolean(true);
+    String exceptionText = "The current state cannot be null";
 
     default boolean needsUpdate() {
-        return this.needsUpdate.get();
+        AtomicBoolean state = getNeedsUpdateState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        return state.get();
     }
 
     default void setNeedsUpdate(boolean needsUpdate) {
-        this.needsUpdate.set(needsUpdate);
+        AtomicBoolean state = getNeedsUpdateState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        state.set(needsUpdate);
     }
 
     default void update() {
@@ -18,9 +28,15 @@ public interface UpdateAdapter extends Updatable {
     }
 
     default void update(boolean notify) {
-        if (!notify && !this.needsUpdate.get()) return;
-        this.needsUpdate.set(false);
+        AtomicBoolean state = getNeedsUpdateState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        if (!notify && !state.get()) return;
+        state.set(false);
 
         onUpdate();
     }
+
+    @NonNull AtomicBoolean getNeedsUpdateState();
 }

@@ -1,12 +1,18 @@
 package com.simplelib.interfaces;
 
+import androidx.annotation.NonNull;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface InitializeAdapter {
-    AtomicBoolean initialized = new AtomicBoolean(true);
+    String exceptionText = "The current state cannot be null";
 
     default boolean isInitialized() {
-        return this.initialized.get();
+        AtomicBoolean state = getInitializedState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        return state.get();
     }
 
     default void setInitialized() {
@@ -14,6 +20,12 @@ public interface InitializeAdapter {
     }
 
     default void setInitialized(boolean initialized) {
-        this.initialized.set(initialized);
+        AtomicBoolean state = getInitializedState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        state.set(initialized);
     }
+
+    @NonNull AtomicBoolean getInitializedState();
 }

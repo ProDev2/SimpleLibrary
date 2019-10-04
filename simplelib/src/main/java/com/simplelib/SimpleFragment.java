@@ -25,6 +25,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SimpleFragment extends Fragment
         implements OnEvent, InitializeAdapter, UpdateAdapter, VisibilityAdapter {
+    // States
+    private AtomicBoolean stateInitialized;
+    private AtomicBoolean stateNeedsUpdate;
+    private AtomicBoolean stateVisibility;
+
+    // General
     private int id;
     private View contentView;
 
@@ -40,14 +46,31 @@ public abstract class SimpleFragment extends Fragment
     private AtomicBoolean resumed;
 
     public SimpleFragment(int id) {
-        setInitialized(false);
-
         this.id = id;
 
         resetToolbar();
 
+        setInitialized(false);
         setNeedsUpdate(true);
         setDefVisibility(false);
+    }
+
+    public final AtomicBoolean getInitializedState() {
+        if (stateInitialized == null)
+            stateInitialized = new AtomicBoolean();
+        return stateInitialized;
+    }
+
+    public final AtomicBoolean getNeedsUpdateState() {
+        if (stateNeedsUpdate == null)
+            stateNeedsUpdate = new AtomicBoolean();
+        return stateNeedsUpdate;
+    }
+
+    public final AtomicBoolean getVisibleState() {
+        if (stateVisibility == null)
+            stateVisibility = new AtomicBoolean();
+        return stateVisibility;
     }
 
     @Override

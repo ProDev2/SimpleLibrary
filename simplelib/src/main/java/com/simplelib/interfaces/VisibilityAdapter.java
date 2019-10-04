@@ -1,28 +1,50 @@
 package com.simplelib.interfaces;
 
+import androidx.annotation.NonNull;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface VisibilityAdapter extends InitializeAdapter {
-    AtomicBoolean visible = new AtomicBoolean(true);
+    String exceptionText = "The current state cannot be null";
 
     default void setDefVisibility(boolean visible) {
-        this.visible.set(visible);
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        state.set(visible);
     }
 
     default boolean isShown() {
-        return this.visible.get() && isInitialized();
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        return state.get() && isInitialized();
     }
 
     default boolean isHidden() {
-        return !this.visible.get() || !isInitialized();
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        return !state.get() || !isInitialized();
     }
 
     default boolean getVisibility() {
-        return this.visible.get();
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        return state.get();
     }
 
     default void updateVisibility() {
-        setVisibility(this.visible.get(), true);
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        setVisibility(state.get(), true);
     }
 
     default void setVisibility(boolean visible) {
@@ -30,8 +52,12 @@ public interface VisibilityAdapter extends InitializeAdapter {
     }
 
     default void setVisibility(boolean visible, boolean notify) {
-        boolean changed = this.visible.get() != visible;
-        this.visible.set(visible);
+        AtomicBoolean state = getVisibleState();
+        if (state == null)
+            throw new NullPointerException(exceptionText);
+
+        boolean changed = state.get() != visible;
+        state.set(visible);
 
         if (!isInitialized()) return;
 
@@ -40,6 +66,8 @@ public interface VisibilityAdapter extends InitializeAdapter {
         if (changed || notify)
             onVisibilityChanged(visible);
     }
+
+    @NonNull AtomicBoolean getVisibleState();
 
     void onVisibilitySet(boolean visible);
     void onVisibilityChanged(boolean visible);
