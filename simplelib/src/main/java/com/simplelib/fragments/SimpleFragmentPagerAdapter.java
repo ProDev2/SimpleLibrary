@@ -10,6 +10,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.simplelib.interfaces.VisibilityAdapter;
 
 public abstract class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
+    public boolean CHANGE_VISIBILITY = true;
+
     private Fragment currentItem;
 
     public SimpleFragmentPagerAdapter(@NonNull FragmentManager fm, int behavior) {
@@ -21,7 +23,7 @@ public abstract class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         Object instantiatedObj = super.instantiateItem(container, position);
 
-        if (instantiatedObj instanceof VisibilityAdapter) {
+        if (CHANGE_VISIBILITY && instantiatedObj instanceof VisibilityAdapter) {
             VisibilityAdapter visibilityAdapter = (VisibilityAdapter) instantiatedObj;
             visibilityAdapter.setVisibility(false, false);
         }
@@ -39,17 +41,23 @@ public abstract class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+        if (object instanceof Fragment && object != currentItem) {
+            Fragment fragment = (Fragment) object;
+
+            if (CHANGE_VISIBILITY && currentItem instanceof VisibilityAdapter) {
+                VisibilityAdapter visibilityAdapter = (VisibilityAdapter) currentItem;
+                visibilityAdapter.setVisibility(false, false);
+            }
+
+            currentItem = null;
+        }
+
         super.setPrimaryItem(container, position, object);
 
         if (object instanceof Fragment && object != currentItem) {
             Fragment fragment = (Fragment) object;
 
-            if (currentItem instanceof VisibilityAdapter) {
-                VisibilityAdapter visibilityAdapter = (VisibilityAdapter) currentItem;
-                visibilityAdapter.setVisibility(false, false);
-            }
-
-            if (fragment instanceof VisibilityAdapter) {
+            if (CHANGE_VISIBILITY && fragment instanceof VisibilityAdapter) {
                 VisibilityAdapter visibilityAdapter = (VisibilityAdapter) fragment;
                 visibilityAdapter.setVisibility(true, false);
             }
