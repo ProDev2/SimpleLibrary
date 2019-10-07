@@ -129,7 +129,6 @@ simpleItemTouchHelper.getSettings().setDragFlags(SimpleSettings.DRAG);
 Add this to your build.gradle:
 ```
 repositories {
-    jcenter()
     maven { url 'https://jitpack.io' }
 }
 ```
