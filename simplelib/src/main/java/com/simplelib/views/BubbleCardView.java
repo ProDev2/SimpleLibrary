@@ -159,39 +159,48 @@ public class BubbleCardView extends ViewGroup {
     }
 
     public void setColor(int backgroundColor) {
+        boolean changed = this.backgroundColor != backgroundColor;
         this.backgroundColor = backgroundColor;
-        update();
+        if (changed) update();
     }
 
     public void setRoundCorners(boolean roundCorners) {
+        boolean changed = this.roundCorners != roundCorners;
         this.roundCorners = roundCorners;
-        update();
+        if (changed) update();
     }
 
     public void setCornerRadius(float cornerRadius) {
+        boolean changed = this.cornerRadius != cornerRadius;
         this.cornerRadius = cornerRadius;
-        update();
+        if (changed) update();
     }
 
     public void setNoArrow(boolean noArrow) {
+        boolean changed = this.noArrow != noArrow;
         this.noArrow = noArrow;
-        update();
-        requestLayout();
+        if (changed) {
+            update();
+            requestLayout();
+        }
     }
 
     public void setArrowSize(float arrowSize) {
+        boolean changed = this.arrowSize != arrowSize;
         this.arrowSize = arrowSize;
-        update();
+        if (changed) update();
     }
 
     public void setArrowLength(float arrowLength) {
+        boolean changed = this.arrowLength != arrowLength;
         this.arrowLength = arrowLength;
-        update();
+        if (changed) update();
     }
 
     public void setArrowCornerRadius(float arrowCornerRadius) {
+        boolean changed = this.arrowCornerRadius != arrowCornerRadius;
         this.arrowCornerRadius = arrowCornerRadius;
-        update();
+        if (changed) update();
     }
 
     public Pointer getPointer() {
