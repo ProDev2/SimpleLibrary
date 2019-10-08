@@ -19,7 +19,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.simplelib.adapter.SimpleRecyclerAdapter;
+import com.simplelib.adapter.SimpleRecyclerFilterAdapter;
+import com.simplelib.container.SimpleFilter;
 import com.simplelib.container.SimpleMenuItem;
 import com.simplelib.math.Line;
 import com.simplelib.tools.ColorTools;
@@ -49,6 +50,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private RecyclerView recyclerView;
     private LinearLayoutManager manager;
     private Adapter adapter;
+    private SimpleFilter<SimpleMenuItem> filter;
 
     private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
     private int backgroundColorSelected = DEFAULT_BACKGROUND_COLOR;
@@ -124,85 +126,54 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
 
         adapter = new Adapter(list);
+        if (filter != null)
+            adapter.setFilter(filter, false);
         recyclerView.setAdapter(adapter);
     }
 
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setBackgroundColorSelected(int backgroundColorSelected, float backgroundColorSelectedManipulation) {
         this.backgroundColorSelected = backgroundColorSelected;
         this.backgroundColorSelectedManipulation = backgroundColorSelectedManipulation;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setBackgroundCornerRadius(float backgroundCornerRadius) {
         this.backgroundCornerRadius = backgroundCornerRadius;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setItemOverlap(int itemOverlap) {
         this.itemOverlap = itemOverlap;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setItemDistance(int itemDistance) {
         this.itemDistance = itemDistance;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setLayoutMargins(int layoutMargins) {
         this.layoutMargins = layoutMargins;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setLayoutImageSize(int layoutImageSize) {
         this.layoutImageSize = layoutImageSize;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setLayoutTextSize(int layoutTextSize) {
         this.layoutTextSize = layoutTextSize;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setTextColor(int color) {
         this.textColor = color;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setTextColorHighlighted(int color) {
         this.textColorHighlighted = color;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setTextSize(int size) {
         this.textSize = size;
-
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
     }
 
     public void setCloseOnClick(boolean closeOnClick) {
@@ -234,9 +205,21 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         return list;
     }
 
+    public void setFilter(SimpleFilter<SimpleMenuItem> filter) {
+        this.filter = filter;
+
+        if (adapter != null)
+            adapter.setFilter(filter, false);
+    }
+
     public void update() {
         if (adapter != null)
-            adapter.notifyDataSetChanged();
+            adapter.updateFilter();
+    }
+
+    public void reload() {
+        if (adapter != null)
+            adapter.reload();
     }
 
     public void select(String text) {
@@ -254,7 +237,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             adapter.unselect();
     }
 
-    public void onModifyItemLayout(SimpleRecyclerAdapter<SimpleMenuItem>.ViewHolder holder, SimpleMenuItem menuItem, int pos) {
+    public void onModifyItemLayout(SimpleRecyclerFilterAdapter<SimpleMenuItem>.ViewHolder holder, SimpleMenuItem menuItem, int pos) {
         if (holder == null) return;
 
         View itemView = holder.itemView;
@@ -386,7 +369,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
     }
 
-    private class Adapter extends SimpleRecyclerAdapter<SimpleMenuItem> {
+    private class Adapter extends SimpleRecyclerFilterAdapter<SimpleMenuItem> {
         private SimpleMenuItem selected;
 
         public Adapter() {
@@ -477,7 +460,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
 
         @Override
-        public void bindHolder(final SimpleRecyclerAdapter<SimpleMenuItem>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        public void bindHolder(final SimpleRecyclerFilterAdapter<SimpleMenuItem>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
             final BubbleCardView layout = (BubbleCardView) holder.findViewById(0);
             final LinearLayout layoutSub = (LinearLayout) holder.findViewById(1);
             final LinearLayout layoutContent = (LinearLayout) holder.findViewById(2);
@@ -639,7 +622,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
                     try {
                         if (getRecyclerView() != null)
-                            notifyDataSetChanged();
+                            reload();
                     } catch (Exception e) {
                     }
                 } else {
