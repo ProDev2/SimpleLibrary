@@ -33,14 +33,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleBubbleMenuPopup extends SimplePopup {
-    public static final float DEFAULT_ELEVATION = MathTools.dpToPx(5);
+    public static final float DEFAULT_ELEVATION = MathTools.dpToPx(3);
     public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
     public static final float DEFAULT_BACKGROUND_COLOR_SELECTED_MANIPULATION = 0.8f;
     public static final float DEFAULT_BACKGROUND_CORNER_RADIUS = -1;
     public static final int DEFAULT_ITEM_OVERLAP = MathTools.dpToPx(5);
     public static final int DEFAULT_ITEM_DISTANCE = MathTools.dpToPx(2);
     public static final int DEFAULT_LAYOUT_MARGINS = MathTools.dpToPx(5);
-    public static final int DEFAULT_LAYOUT_IMAGE_SIZE = MathTools.dpToPx(45);
+    public static final int DEFAULT_IMAGE_MARGINS = MathTools.dpToPx(3);
+    public static final int DEFAULT_TEXT_MARGINS = MathTools.dpToPx(5);
+    public static final int DEFAULT_LAYOUT_IMAGE_SIZE = MathTools.dpToPx(42);
     public static final int DEFAULT_LAYOUT_TEXT_SIZE = MathTools.dpToPx(130);
     public static final ColorFilter DEFAULT_IMAGE_COLOR_FILTER = null;
     public static final int DEFAULT_TEXT_COLOR = 0xFF757575;
@@ -63,6 +65,8 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private int itemOverlap = DEFAULT_ITEM_OVERLAP;
     private int itemDistance = DEFAULT_ITEM_DISTANCE;
     private int layoutMargins = DEFAULT_LAYOUT_MARGINS;
+    private int imageMargins = DEFAULT_IMAGE_MARGINS;
+    private int textMargins = DEFAULT_TEXT_MARGINS;
     private int layoutImageSize = DEFAULT_LAYOUT_IMAGE_SIZE;
     private int layoutTextSize = DEFAULT_LAYOUT_TEXT_SIZE;
     private ColorFilter imageColorFilter = DEFAULT_IMAGE_COLOR_FILTER;
@@ -164,6 +168,14 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
     public void setLayoutMargins(int layoutMargins) {
         this.layoutMargins = layoutMargins;
+    }
+
+    public void setImageMargins(int imageMargins) {
+        this.imageMargins = imageMargins;
+    }
+
+    public void setTextMargins(int textMargins) {
+        this.textMargins = textMargins;
     }
 
     public void setLayoutImageSize(int layoutImageSize) {
@@ -397,6 +409,8 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         @Override
         public View createHolder(ViewGroup parent, int viewType) {
             int margins = layoutMargins > 0 ? layoutMargins : 0;
+            int marginsImage = imageMargins > 0 ? imageMargins : 0;
+            int marginsText = textMargins > 0 ? textMargins : 0;
             int distance = itemDistance > 0 ? itemDistance : 0;
             int imageLayoutSize = layoutImageSize >= 0 ? layoutImageSize : ViewGroup.LayoutParams.WRAP_CONTENT;
             int textLayoutSize = layoutTextSize >= 0 ? layoutTextSize : ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -436,7 +450,11 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             layoutContent.setGravity(Gravity.CENTER_VERTICAL);
             LinearLayout.LayoutParams layoutParamsContent = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             layoutContent.setLayoutParams(layoutParamsContent);
-            layoutContent.setPadding(margins, margins, margins, margins);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                layoutContent.setPaddingRelative(margins, margins, margins, margins);
+            } else {
+                layoutContent.setPadding(margins, margins, margins, margins);
+            }
             layoutContent.setId(2);
             layoutSub.addView(layoutContent);
 
@@ -452,6 +470,11 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             imageParams.width = imageParams.height = imageLayoutSize;
+            imageParams.setMargins(marginsImage, marginsImage, marginsImage, marginsImage);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                imageParams.setMarginStart(marginsImage);
+                imageParams.setMarginEnd(marginsImage);
+            }
             imageView.setLayoutParams(imageParams);
             imageView.setId(4);
             layoutContent.addView(imageView);
@@ -461,10 +484,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             textParams.width = textLayoutSize;
-            textParams.setMargins(margins, margins, margins, margins);
+            textParams.setMargins(marginsText, marginsText, marginsText, marginsText);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                textParams.setMarginStart(margins);
-                textParams.setMarginEnd(margins);
+                textParams.setMarginStart(marginsText);
+                textParams.setMarginEnd(marginsText);
             }
             textView.setLayoutParams(textParams);
             textView.setId(5);
@@ -484,6 +507,8 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
             try {
                 int margins = layoutMargins > 0 ? layoutMargins : 0;
+                int marginsImage = imageMargins > 0 ? imageMargins : 0;
+                int marginsText = textMargins > 0 ? textMargins : 0;
                 int distance = itemDistance > 0 ? itemDistance : 0;
                 int imageLayoutSize = layoutImageSize >= 0 ? layoutImageSize : ViewGroup.LayoutParams.WRAP_CONTENT;
                 int textLayoutSize = layoutTextSize >= 0 ? layoutTextSize : ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -496,18 +521,27 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
                 }
                 layout.setLayoutParams(layoutParams);
 
-                layoutContent.setPadding(margins, margins, margins, margins);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    layoutContent.setPaddingRelative(margins, margins, margins, margins);
+                } else {
+                    layoutContent.setPadding(margins, margins, margins, margins);
+                }
 
                 LinearLayout.LayoutParams imageParams = (LinearLayout.LayoutParams) imageView.getLayoutParams();
                 imageParams.width = imageParams.height = imageLayoutSize;
+                imageParams.setMargins(marginsImage, marginsImage, marginsImage, marginsImage);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    imageParams.setMarginStart(marginsImage);
+                    imageParams.setMarginEnd(marginsImage);
+                }
                 imageView.setLayoutParams(imageParams);
 
                 LinearLayout.LayoutParams textParams = (LinearLayout.LayoutParams) textView.getLayoutParams();
                 textParams.width = textLayoutSize;
-                textParams.setMargins(margins, margins, margins, margins);
+                textParams.setMargins(marginsText, marginsText, marginsText, marginsText);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    textParams.setMarginStart(margins);
-                    textParams.setMarginEnd(margins);
+                    textParams.setMarginStart(marginsText);
+                    textParams.setMarginEnd(marginsText);
                 }
                 textView.setLayoutParams(textParams);
             } catch (Exception e) {
