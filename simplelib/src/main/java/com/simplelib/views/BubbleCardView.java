@@ -118,12 +118,15 @@ public class BubbleCardView extends ViewGroup {
 
         //Set background
         drawable = new BubbleCardDrawable(backgroundColor, roundCorners, cornerRadius, arrowSize, arrowLength, arrowCornerRadius);
+        setBackground(drawable);
 
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setBackground(drawable);
         } else {
             setBackgroundDrawable(drawable);
         }
+        */
 
         //Add events
         /*
@@ -531,23 +534,27 @@ public class BubbleCardView extends ViewGroup {
 
             if (contentView != null && pointerView != null) {
                 try {
-                    Rect contentViewBounds = new Rect();
-                    contentView.getGlobalVisibleRect(contentViewBounds);
+                    Rect contentViewBounds = getViewBounds(contentView);
+                    Rect pointerViewBounds = getViewBounds(pointerView);
 
-                    Rect pointerViewBounds = new Rect();
-                    pointerView.getGlobalVisibleRect(pointerViewBounds);
+                    if (contentViewBounds != null && pointerViewBounds != null) {
+                        Line line = new Line(
+                                contentViewBounds.left,
+                                contentViewBounds.top,
+                                pointerViewBounds.centerX(),
+                                pointerViewBounds.centerY()
+                        );
 
-                    Line line = new Line(
-                            contentViewBounds.left,
-                            contentViewBounds.top,
-                            pointerViewBounds.centerX(),
-                            pointerViewBounds.centerY()
-                    );
+                        Vector2 nextPointer = line.getDelta();
+                        changed |= !isEqualTo(nextPointer);
 
-                    Vector2 nextPointer = line.getDelta();
-                    changed |= !isEqualTo(nextPointer);
+                        set(nextPointer);
+                    } else {
+                        Vector2 nextPointer = new Vector2(0d, 0d);
+                        changed |= !isEqualTo(nextPointer);
 
-                    set(nextPointer);
+                        set(nextPointer);
+                    }
                 } catch (Exception e) {
                 }
             }
@@ -593,6 +600,35 @@ public class BubbleCardView extends ViewGroup {
                 if (pointerView != null)
                     pointerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             } catch (Exception e) {
+            }
+        }
+
+        public static final Rect getViewBounds(View view) {
+            if (view == null)
+                return null;
+
+            try {
+                int[] pos = new int[2];
+                view.getLocationOnScreen(pos);
+
+                int width = view.getWidth();
+                int height = view.getHeight();
+
+                if (width <= 0)
+                    width = view.getMeasuredWidth();
+                if (height <= 0)
+                    height = view.getMeasuredHeight();
+
+                if (width <= 0 || height <= 0)
+                    return null;
+
+                return new Rect(pos[0],
+                        pos[1],
+                        pos[0] + width,
+                        pos[1] + height);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
             }
         }
     }
