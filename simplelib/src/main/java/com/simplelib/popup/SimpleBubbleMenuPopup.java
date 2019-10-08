@@ -34,6 +34,7 @@ import java.util.List;
 
 public class SimpleBubbleMenuPopup extends SimplePopup {
     public static final float DEFAULT_ELEVATION = MathTools.dpToPx(3);
+    public static final boolean DEFAULT_SHOW_ARROW = true;
     public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
     public static final float DEFAULT_BACKGROUND_COLOR_SELECTED_MANIPULATION = 0.8f;
     public static final float DEFAULT_BACKGROUND_CORNER_RADIUS = -1;
@@ -58,6 +59,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private SimpleFilter<SimpleMenuItem> filter;
 
     private float elevation = DEFAULT_ELEVATION;
+    private boolean showArrow = DEFAULT_SHOW_ARROW;
     private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
     private int backgroundColorSelected = DEFAULT_BACKGROUND_COLOR;
     private float backgroundColorSelectedManipulation = DEFAULT_BACKGROUND_COLOR_SELECTED_MANIPULATION;
@@ -143,6 +145,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     @Override
     public void setElevation(float elevation) {
         this.elevation = elevation;
+    }
+
+    public void setShowArrow(boolean showArrow) {
+        this.showArrow = showArrow;
     }
 
     public void setBackgroundColor(int backgroundColor) {
@@ -284,7 +290,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         try {
             final View targetView = getParentView();
 
-            if (targetView != null && manager != null) {
+            if (showArrow && targetView != null && manager != null) {
                 final int firstVisibleItemPos = manager.findFirstVisibleItemPosition();
                 final int lastVisibleItemPos = manager.findLastVisibleItemPosition();
 
@@ -311,14 +317,17 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
                             BubbleCardView.Pointer pointer = bubbleCardView.getPointer();
                             pointer.setPointerView(targetView, false);
                         }
+                        bubbleCardView.setNoArrow(false);
                     } else {
                         if (bubbleCardView.getDrawable().getArrowTarget() != null)
                             bubbleCardView.getDrawable().setArrowTarget(null);
+                        bubbleCardView.setNoArrow(true);
                     }
                 }
             } else {
                 if (bubbleCardView.getDrawable().getArrowTarget() != null)
                     bubbleCardView.getDrawable().setArrowTarget(null);
+                bubbleCardView.setNoArrow(true);
             }
         } catch (Exception e) {
         }
@@ -590,6 +599,8 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
                         elevation = 0;
                     layout.setElevation(elevation);
                 }
+
+                layout.setNoArrow(!showArrow);
 
                 layout.setColor(backgroundColor);
                 layout.setCornerRadius(backgroundCornerRadius);
