@@ -1,6 +1,7 @@
 package com.simplelib.popup;
 
 import android.annotation.SuppressLint;
+import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleBubbleMenuPopup extends SimplePopup {
+    public static final float DEFAULT_ELEVATION = MathTools.dpToPx(5);
     public static final int DEFAULT_BACKGROUND_COLOR = 0xFFFFFFFF;
     public static final float DEFAULT_BACKGROUND_COLOR_SELECTED_MANIPULATION = 0.8f;
     public static final float DEFAULT_BACKGROUND_CORNER_RADIUS = -1;
@@ -40,6 +42,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     public static final int DEFAULT_LAYOUT_MARGINS = MathTools.dpToPx(5);
     public static final int DEFAULT_LAYOUT_IMAGE_SIZE = MathTools.dpToPx(45);
     public static final int DEFAULT_LAYOUT_TEXT_SIZE = MathTools.dpToPx(130);
+    public static final ColorFilter DEFAULT_IMAGE_COLOR_FILTER = null;
     public static final int DEFAULT_TEXT_COLOR = 0xFF757575;
     public static final int DEFAULT_TEXT_COLOR_HIGHLIGHTED = 0xFF03A9F4;
     public static final int DEFAULT_TEXT_SIZE = 17;
@@ -52,6 +55,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private Adapter adapter;
     private SimpleFilter<SimpleMenuItem> filter;
 
+    private float elevation = DEFAULT_ELEVATION;
     private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
     private int backgroundColorSelected = DEFAULT_BACKGROUND_COLOR;
     private float backgroundColorSelectedManipulation = DEFAULT_BACKGROUND_COLOR_SELECTED_MANIPULATION;
@@ -61,6 +65,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private int layoutMargins = DEFAULT_LAYOUT_MARGINS;
     private int layoutImageSize = DEFAULT_LAYOUT_IMAGE_SIZE;
     private int layoutTextSize = DEFAULT_LAYOUT_TEXT_SIZE;
+    private ColorFilter imageColorFilter = DEFAULT_IMAGE_COLOR_FILTER;
     private int textColor = DEFAULT_TEXT_COLOR;
     private int textColorHighlighted = DEFAULT_TEXT_COLOR_HIGHLIGHTED;
     private int textSize = DEFAULT_TEXT_SIZE;
@@ -131,6 +136,11 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         recyclerView.setAdapter(adapter);
     }
 
+    @Override
+    public void setElevation(float elevation) {
+        this.elevation = elevation;
+    }
+
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
@@ -162,6 +172,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
     public void setLayoutTextSize(int layoutTextSize) {
         this.layoutTextSize = layoutTextSize;
+    }
+
+    public void setImageColorFilter(ColorFilter imageColorFilter) {
+        this.imageColorFilter = imageColorFilter;
     }
 
     public void setTextColor(int color) {
@@ -460,7 +474,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
 
         @Override
-        public void bindHolder(final SimpleRecyclerFilterAdapter<SimpleMenuItem>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        public void bindHolder(final ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
             final BubbleCardView layout = (BubbleCardView) holder.findViewById(0);
             final LinearLayout layoutSub = (LinearLayout) holder.findViewById(1);
             final LinearLayout layoutContent = (LinearLayout) holder.findViewById(2);
@@ -500,6 +514,14 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             }
 
             try {
+                if (imageColorFilter != null)
+                    imageView.setColorFilter(imageColorFilter);
+                else
+                    imageView.clearColorFilter();
+            } catch (Exception e) {
+            }
+
+            try {
                 if (menuItem.hasImage()) {
                     imageView.setVisibility(View.VISIBLE);
                     imageView.setImageBitmap(menuItem.getImage());
@@ -528,6 +550,13 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             }
 
             try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    float elevation = SimpleBubbleMenuPopup.this.elevation;
+                    if (elevation < 0)
+                        elevation = 0;
+                    layout.setElevation(elevation);
+                }
+
                 layout.setColor(backgroundColor);
                 layout.setCornerRadius(backgroundCornerRadius);
 
