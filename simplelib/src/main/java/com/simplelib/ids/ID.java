@@ -24,18 +24,26 @@ public final class ID {
     }
 
     public static Pool<Object> registerPool(String poolId) {
+        return registerPool(poolId, -1, -1);
+    }
+
+    public static Pool<Object> registerPool(String poolId, int min, int max) {
         if (poolId == null)
             return null;
 
-        Pool<Object> pool = new Pool<>();
+        Pool<Object> pool = new Pool<>(min, max);
         return registerPool(poolId, pool);
     }
 
     public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls) {
+        return registerPool(poolId, poolCls, -1, -1);
+    }
+
+    public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls, int min, int max) {
         if (poolId == null || poolCls == null)
             return null;
 
-        Pool<E> pool = new Pool<>();
+        Pool<E> pool = new Pool<>(min, max);
         return registerPool(poolId, pool);
     }
 
@@ -91,7 +99,8 @@ public final class ID {
         }
     }
 
-    public static Pool getPool(String poolId) {
+    @SuppressWarnings("unchecked")
+    public static <E> Pool<E> getPool(String poolId) {
         if (poolId == null)
             return null;
 
@@ -100,6 +109,18 @@ public final class ID {
         synchronized (poolMap) {
             return poolMap.get(poolId);
         }
+    }
+
+    public static boolean has(String poolId, int id) {
+        Pool pool = null;
+        try {
+            pool = getPool(poolId);
+        } catch (Throwable tr) {
+            tr.printStackTrace();
+        }
+        if (pool == null)
+            return false;
+        return pool.hasId(id);
     }
 
     @SuppressWarnings("unchecked")
@@ -171,12 +192,26 @@ public final class ID {
     }
 
     public static final class Pool<E> implements Iterable<Pool.Entry<E>> {
+        private final int min, max;
+
         private final List<Entry<E>> list;
-        private int cursor;
+        private int cursor, lastCursor;
 
         public Pool() {
+            this(-1, -1);
+        }
+
+        public Pool(int min, int max) {
+            if (min < 0) min = -1;
+            if (max < 0) max = -1;
+            if (max < min && max >= 0) max = min;
+
+            this.min = min;
+            this.max = max;
+
             this.list = new ArrayList<>();
             this.cursor = 0;
+            this.lastCursor = 0;
         }
 
         @Override
@@ -211,6 +246,7 @@ public final class ID {
         public synchronized void clear() {
             this.list.clear();
             this.cursor = 0;
+            this.lastCursor = 0;
         }
 
         public synchronized boolean hasId(int id) {
@@ -220,26 +256,41 @@ public final class ID {
 
         public synchronized E get(int id) {
             Entry<E> entry = getEntry(id);
-            return entry != null ? entry.getArg() : null;
+            return entry != null && !entry.isEmpty() ? entry.getArg() : null;
         }
 
         public synchronized Entry<E> getEntry(int id) {
-            if (id < 0 || id >= list.size())
+            int pos = id - Math.max(min, 0);
+            if (pos < 0 || pos >= list.size())
                 return null;
-            return list.get(id);
+            return list.get(pos);
         }
 
         public synchronized E remove(int id) {
             Entry<E> entry = removeEntry(id);
-            return entry != null ? entry.getArg() : null;
+            return entry != null && !entry.isEmpty() ? entry.getArg() : null;
         }
 
         public synchronized Entry<E> removeEntry(int id) {
-            if (id < 0 || id >= list.size())
+            int pos = id - Math.max(min, 0);
+            if (pos < 0 || pos >= list.size())
                 return null;
-            Entry<E> entry = list.remove(id);
-            cursor = Math.min(cursor, id);
-            return entry;
+
+            Entry<E> removedEntry = list.set(pos, null);
+
+            cursor = Math.max(Math.max(min, 0), Math.min(cursor, id));
+            for (Entry<E> entry;
+                 ((entry = getEntry(lastCursor)) == null ||
+                         entry.isEmpty()) &&
+                         lastCursor >= Math.max(min, 0) &&
+                         (max < 0 || lastCursor <= max);
+                 lastCursor--) {
+                int lastPos = lastCursor - Math.max(min, 0);
+                if (lastPos >= 0 && lastPos < list.size())
+                    list.remove(lastPos);
+            }
+
+            return removedEntry;
         }
 
         public synchronized int next() {
@@ -251,23 +302,46 @@ public final class ID {
         }
 
         public synchronized int next(E arg, Entry.Listener<E> listener) {
-            int id = Math.max(0, cursor);
-            for (Entry<E> entry; (entry = getEntry(id)) != null && !entry.isEmpty(); id++);
+            int id = Math.max(Math.max(min, 0), cursor);
+            for (Entry<E> entry;
+                 (entry = getEntry(id)) != null &&
+                         !entry.isEmpty() &&
+                         (max < 0 || id <= max);
+                 id++);
+
             cursor = id + 1;
-            for (Entry<E> entry; (entry = getEntry(cursor)) != null && !entry.isEmpty(); cursor++);
+            for (Entry<E> entry;
+                 (entry = getEntry(cursor)) != null
+                         && !entry.isEmpty() &&
+                         (max < 0 || cursor <= max);
+                 cursor++);
 
-            Entry<E> newEntry = new Entry<>();
-            newEntry.setEmpty(false);
-            newEntry.setArg(arg);
-            newEntry.setListener(listener);
-            list.add(id, newEntry);
+            if ((min < 0 || id >= min) && (max < 0 || id <= max)) {
+                lastCursor = Math.max(lastCursor, id);
 
-            return id;
+                int pos = id - Math.max(min, 0);
+
+                if (pos >= 0 && pos <= list.size()) {
+                    Entry<E> newEntry = new Entry<>();
+                    newEntry.setEmpty(false);
+                    newEntry.setArg(arg);
+                    newEntry.setListener(listener);
+                    list.add(pos, newEntry);
+
+                    return id;
+                } else {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
         }
 
         public synchronized boolean invoke(int id) {
-            if (id < 0 || id >= list.size())
+            int pos = id - Math.max(min, 0);
+            if (pos < 0 || pos >= list.size())
                 return false;
+
             Entry<E> entry = list.get(id);
             if (entry == null || entry.isEmpty())
                 return false;
@@ -276,7 +350,7 @@ public final class ID {
 
         public synchronized E removeAndInvoke(int id) {
             Entry<E> entry = removeAndInvokeEntry(id);
-            return entry != null ? entry.getArg() : null;
+            return entry != null && !entry.isEmpty() ? entry.getArg() : null;
         }
 
         public synchronized Entry<E> removeAndInvokeEntry(int id) {
