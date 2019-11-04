@@ -40,7 +40,7 @@ public class MainFragment extends SimpleFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (adapter != null) adapter.updateFilter();
+                if (adapter != null) adapter.update();
             }
 
             @Override

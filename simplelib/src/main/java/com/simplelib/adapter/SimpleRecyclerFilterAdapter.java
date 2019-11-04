@@ -128,13 +128,13 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     @Override
     public void add(V value) {
         unfilteredList.add(value);
-        updateFilter();
+        update();
     }
 
     @Override
     public void add(int index, V value) {
         unfilteredList.add(index, value);
-        updateFilter();
+        update();
     }
 
     @Override
@@ -194,20 +194,20 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     public void remove(int pos) {
         if (pos >= 0 && pos < unfilteredList.size())
             unfilteredList.remove(pos);
-        updateFilter();
+        update();
     }
 
     @Override
     public void remove(V value) {
         if (unfilteredList.contains(value))
             unfilteredList.remove(value);
-        updateFilter();
+        update();
     }
 
     @Override
     public void clear() {
         unfilteredList.clear();
-        updateFilter();
+        update();
     }
 
     @Override
@@ -301,7 +301,7 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
         super.scrollToPosition(item, animate);
     }
 
-    public synchronized void updateFilter() {
+    public synchronized void update() {
         try {
             if (filter != null)
                 filter.setAdapter(this);
@@ -409,6 +409,9 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     }
 
     public void setFilter(SimpleFilter<V, E> filter, boolean update) {
+        if (this.filter == filter)
+            return;
+
         try {
             if (this.filter != null)
                 this.filter.setAdapter(null);
@@ -424,6 +427,6 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
         }
 
         if (update)
-            updateFilter();
+            update();
     }
 }

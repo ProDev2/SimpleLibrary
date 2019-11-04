@@ -19,17 +19,17 @@ public abstract class SimpleFilter<V, E> {
         return adapter;
     }
 
-    public void update() {
-        if (adapter != null) {
-            adapter.setFilter(this, false);
-            adapter.updateFilter();
-        }
-    }
-
     public void reload() {
         if (adapter != null) {
             adapter.setFilter(this, false);
             adapter.reload();
+        }
+    }
+
+    public void update() {
+        if (adapter != null) {
+            adapter.setFilter(this, false);
+            adapter.update();
         }
     }
 

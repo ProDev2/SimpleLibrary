@@ -242,7 +242,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
     public void update() {
         if (adapter != null)
-            adapter.updateFilter();
+            adapter.update();
     }
 
     public void reload() {
