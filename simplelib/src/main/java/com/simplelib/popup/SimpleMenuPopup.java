@@ -2,6 +2,9 @@ package com.simplelib.popup;
 
 import android.annotation.SuppressLint;
 import android.content.res.TypedArray;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -194,7 +197,7 @@ public class SimpleMenuPopup extends SimplePopup {
             adapter.unselect();
     }
 
-    private class Adapter extends SimpleRecyclerAdapter<SimpleMenuItem> {
+    private class Adapter extends SimpleRecyclerAdapter<SimpleMenuItem, Void> {
         private SimpleMenuItem selected;
 
         public Adapter() {
@@ -204,9 +207,10 @@ public class SimpleMenuPopup extends SimplePopup {
             super(list);
         }
 
+        @NonNull
         @SuppressLint("ResourceType")
         @Override
-        public View createHolder(ViewGroup parent, int viewType) {
+        public View createHolder(@NonNull ViewGroup parent, int viewType) {
             int margins = MathTools.dpToPx(LAYOUT_MARGINS);
 
             int distance = itemDistance > 0 ? (MathTools.dpToPx(itemDistance) / 2) : 0;
@@ -252,7 +256,7 @@ public class SimpleMenuPopup extends SimplePopup {
         }
 
         @Override
-        public void bindHolder(final SimpleRecyclerAdapter<SimpleMenuItem>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        protected void bindHolder(@NonNull final SimpleRecyclerAdapter<SimpleMenuItem, Void>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
             LinearLayout layout = (LinearLayout) holder.findViewById(0);
             ImageView imageView = (ImageView) holder.findViewById(1);
             TextView textView = (TextView) holder.findViewById(2);
@@ -307,6 +311,10 @@ public class SimpleMenuPopup extends SimplePopup {
                     menuItem.click();
                 }
             });
+        }
+
+        @Override
+        protected void bindHolder(@NonNull ViewHolder holder, SimpleMenuItem value, @Nullable Void element, int pos) {
         }
 
         public void select(String text) {

@@ -1,6 +1,9 @@
 package com.simplelib.adapter;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +16,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<SimpleRecyclerAdapter.ViewHolder> {
+public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<SimpleRecyclerAdapter.ViewHolder> {
     private Context context;
     private RecyclerView recyclerView;
 
     private List<V> list;
+    private Provider<V, E> provider;
 
     public SimpleRecyclerAdapter() {
         this.list = new ArrayList<>();
@@ -30,7 +34,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
             this.list = new ArrayList<>();
     }
 
-    public void applyTo(SimpleRecyclerAdapter<V> src) {
+    public void applyTo(SimpleRecyclerAdapter<V, E> src) {
         try {
             if (src != null) {
                 if (src.list == null)
@@ -38,6 +42,12 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
                 src.list.clear();
                 if (list != null)
                     src.list.addAll(list);
+
+                try {
+                    src.provider = provider.get();
+                } catch (Exception e) {
+                    src.provider = null;
+                }
 
                 src.notifyDataSetChanged();
             }
@@ -45,7 +55,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         }
     }
 
-    public void applyTo(SimpleRecyclerAdapter<V> src, boolean update) {
+    public void applyTo(SimpleRecyclerAdapter<V, E> src, boolean update) {
         try {
             if (src != null) {
                 if (src.list == null)
@@ -53,6 +63,12 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
                 src.list.clear();
                 if (list != null)
                     src.list.addAll(list);
+
+                try {
+                    src.provider = provider.get();
+                } catch (Exception e) {
+                    src.provider = null;
+                }
 
                 if (update)
                     src.notifyDataSetChanged();
@@ -77,6 +93,23 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         if (list == null)
             list = new ArrayList<>();
         this.list = list;
+
+        if (update)
+            notifyDataSetChanged();
+    }
+
+    public Provider<V, E> getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider<V, E> provider) {
+        this.provider = provider;
+
+        notifyDataSetChanged();
+    }
+
+    public void setProvider(Provider<V, E> provider, boolean update) {
+        this.provider = provider;
 
         if (update)
             notifyDataSetChanged();
@@ -281,23 +314,46 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public @NonNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = createHolder(parent, viewType);
 
         this.context = itemView.getContext();
 
         ViewHolder holder = new ViewHolder(itemView);
-        bindViews(holder);
+        try {
+            bindViews(holder);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return holder;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onBindViewHolder(SimpleRecyclerAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SimpleRecyclerAdapter.ViewHolder holder, int position) {
+        if (holder == null)
+            return;
+
         try {
             int posInList = holder.getAdapterPosition();
-            if (posInList >= 0 && posInList < list.size())
-                bindHolder(holder, list.get(posInList), position);
+            if (posInList < 0 || posInList >= list.size())
+                return;
+
+            V value = list.get(posInList);
+
+            E element = null;
+            if (provider != null) {
+                try {
+                    element = provider.provide(value, position);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            bindHolder((ViewHolder) holder, value, position);
+            bindHolder((ViewHolder) holder, value, element, position);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -312,12 +368,15 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
         return 0;
     }
 
-    public void bindViews(ViewHolder holder) {
+    protected void bindViews(@NonNull ViewHolder holder) {
     }
 
-    public abstract View createHolder(ViewGroup parent, int viewType);
+    protected abstract @NonNull View createHolder(@NonNull ViewGroup parent, int viewType);
 
-    public abstract void bindHolder(ViewHolder holder, V value, int pos);
+    protected void bindHolder(@NonNull ViewHolder holder, V value, int pos) {
+    }
+
+    protected abstract void bindHolder(@NonNull ViewHolder holder, V value, @Nullable E element, int pos);
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private View view;
@@ -348,7 +407,7 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
 
         public void addViews(View... views) {
             for (View view : views) {
-                addViews(view);
+                addView(view);
             }
         }
 
@@ -377,6 +436,14 @@ public abstract class SimpleRecyclerAdapter<V> extends RecyclerView.Adapter<Simp
 
         public View getItemView() {
             return itemView;
+        }
+    }
+
+    public interface Provider<V, R> {
+        @Nullable R provide(V value, int pos);
+
+        default Provider<V, R> get() {
+            return this;
         }
     }
 }

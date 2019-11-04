@@ -1,5 +1,6 @@
 package com.simplelib.adapter;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
@@ -58,15 +59,16 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         int dragFlags = settings.getDragFlags();
         int swipeFlags = settings.getSwipeFlags();
 
         return makeMovementFlags(dragFlags, swipeFlags);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         fetch();
 
         if (adapter == null) return true;
@@ -86,8 +88,9 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         fetch();
 
         if (adapter == null) return;
@@ -143,12 +146,12 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         }
     }
 
-    public void onSwipeItem(int position, int direction) {
+    protected void onSwipeItem(int position, int direction) {
     }
 
-    public void onRemoveItem(int position, int direction) {
+    protected void onRemoveItem(int position, int direction) {
     }
 
-    public void onMoveItem(int fromPos, int toPos) {
+    protected void onMoveItem(int fromPos, int toPos) {
     }
 }

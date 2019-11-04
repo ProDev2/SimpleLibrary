@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -55,7 +57,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
     private RecyclerView recyclerView;
     private LinearLayoutManager manager;
     private Adapter adapter;
-    private SimpleFilter<SimpleMenuItem> filter;
+    private SimpleFilter<SimpleMenuItem, Void> filter;
 
     private float elevation = DEFAULT_ELEVATION;
     private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
@@ -231,7 +233,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         return list;
     }
 
-    public void setFilter(SimpleFilter<SimpleMenuItem> filter) {
+    public void setFilter(SimpleFilter<SimpleMenuItem, Void> filter) {
         this.filter = filter;
 
         if (adapter != null)
@@ -263,7 +265,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             adapter.unselect();
     }
 
-    public void onModifyItemLayout(SimpleRecyclerFilterAdapter<SimpleMenuItem>.ViewHolder holder, SimpleMenuItem menuItem, int pos) {
+    public void onModifyItemLayout(SimpleRecyclerFilterAdapter<SimpleMenuItem, Void>.ViewHolder holder, SimpleMenuItem menuItem, int pos) {
         if (holder == null) return;
 
         View itemView = holder.itemView;
@@ -395,7 +397,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
     }
 
-    private class Adapter extends SimpleRecyclerFilterAdapter<SimpleMenuItem> {
+    private class Adapter extends SimpleRecyclerFilterAdapter<SimpleMenuItem, Void> {
         private SimpleMenuItem selected;
 
         public Adapter() {
@@ -405,9 +407,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             super(list);
         }
 
+        @NonNull
         @SuppressLint("ResourceType")
         @Override
-        public View createHolder(ViewGroup parent, int viewType) {
+        public View createHolder(@NonNull ViewGroup parent, int viewType) {
             int margins = layoutMargins > 0 ? layoutMargins : 0;
             int marginsImage = imageMargins > 0 ? imageMargins : 0;
             int marginsText = textMargins > 0 ? textMargins : 0;
@@ -497,7 +500,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
 
         @Override
-        public void bindHolder(final ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        protected void bindHolder(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
             final BubbleCardView layout = (BubbleCardView) holder.findViewById(0);
             final LinearLayout layoutSub = (LinearLayout) holder.findViewById(1);
             final LinearLayout layoutContent = (LinearLayout) holder.findViewById(2);
@@ -644,6 +647,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        protected void bindHolder(@NonNull ViewHolder holder, SimpleMenuItem value, @Nullable Void element, int pos) {
         }
 
         private void setRippleBackground(View view) {

@@ -1,5 +1,6 @@
 package com.prodev.simple.fragments;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
@@ -12,6 +13,7 @@ import com.prodev.simple.adapter.MainAdapter;
 import com.prodev.simple.container.Item;
 import com.simplelib.SimpleFragment;
 import com.simplelib.adapter.SimpleItemTouchHelper;
+import com.simplelib.adapter.SimpleRecyclerAdapter;
 import com.simplelib.container.SimpleFilter;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
 public class MainFragment extends SimpleFragment {
     private EditText searchView;
 
-    private SimpleFilter<Item> filter;
+    private SimpleFilter<String, Item> filter;
 
     private RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
@@ -45,21 +47,24 @@ public class MainFragment extends SimpleFragment {
             public void afterTextChanged(Editable s) {}
         });
 
-        filter = new SimpleFilter<Item>() {
+        filter = new SimpleFilter<String, Item>() {
             @Override
-            public boolean filter(Item value) {
+            public boolean filter(String value) {
+                if (value == null)
+                    return false;
+
                 String searchText = searchView.getText().toString().toLowerCase();
 
-                if (searchText.length() > 0)
-                    return value.getText().toLowerCase().contains(searchText);
+                if (searchText != null && searchText.length() > 0)
+                    return value.toLowerCase().contains(searchText);
                 else
                     return true;
             }
         };
 
-        ArrayList<Item> itemList = new ArrayList<>();
+        ArrayList<String> itemList = new ArrayList<>();
         for (int x = 0; x < 100; x++) {
-            itemList.add(new Item("Item" + Integer.toString(x)));
+            itemList.add("Item" + Integer.toString(x));
         }
 
         recyclerView = (RecyclerView) findViewById(R.id.main_fragment_recyclerView);
@@ -68,6 +73,14 @@ public class MainFragment extends SimpleFragment {
         recyclerView.setLayoutManager(layoutManager);
 
         adapter = new MainAdapter(itemList);
+        adapter.setProvider(new SimpleRecyclerAdapter.Provider<String, Item>() {
+            @Nullable
+            @Override
+            public Item provide(String value, int pos) {
+                return new Item(value);
+            }
+        });
+
         adapter.setFilter(filter);
         recyclerView.setAdapter(adapter);
 

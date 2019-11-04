@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapter<V> {
-    private SimpleFilter<V> filter;
+public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAdapter<V, E> {
+    private SimpleFilter<V, E> filter;
 
     private List<V> unfilteredList;
     private List<V> filteredList;
@@ -44,16 +44,16 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         filteredList = new ArrayList<>();
     }
 
-    public SimpleFilter<V> applyFilter() {
+    public SimpleFilter<V, E> applyFilter() {
         return null;
     }
 
     @Override
-    public void applyTo(SimpleRecyclerAdapter<V> src) {
+    public void applyTo(SimpleRecyclerAdapter<V, E> src) {
         try {
             if (src != null) {
                 if (src instanceof SimpleRecyclerFilterAdapter) {
-                    SimpleRecyclerFilterAdapter<V> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V>) src;
+                    SimpleRecyclerFilterAdapter<V, E> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V, E>) src;
 
                     srcFilterAdapter.filter = filter;
                 }
@@ -68,11 +68,11 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
     }
 
     @Override
-    public void applyTo(SimpleRecyclerAdapter<V> src, boolean update) {
+    public void applyTo(SimpleRecyclerAdapter<V, E> src, boolean update) {
         try {
             if (src != null) {
                 if (src instanceof SimpleRecyclerFilterAdapter) {
-                    SimpleRecyclerFilterAdapter<V> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V>) src;
+                    SimpleRecyclerFilterAdapter<V, E> srcFilterAdapter = (SimpleRecyclerFilterAdapter<V, E>) src;
 
                     srcFilterAdapter.filter = filter;
                 }
@@ -413,22 +413,30 @@ public abstract class SimpleRecyclerFilterAdapter<V> extends SimpleRecyclerAdapt
         }
     }
 
-    public SimpleFilter<V> getFilter() {
+    public SimpleFilter<V, E> getFilter() {
         if (filter != null) filter.setAdapter(this);
         return filter;
     }
 
-    public void setFilter(SimpleFilter<V> filter) {
+    public void setFilter(SimpleFilter<V, E> filter) {
         setFilter(filter, true);
     }
 
-    public void setFilter(SimpleFilter<V> filter, boolean update) {
+    public void setFilter(SimpleFilter<V, E> filter, boolean update) {
+        try {
+            if (this.filter != null)
+                this.filter.setAdapter(null);
+        } catch (Exception e) {
+        }
+
         this.filter = filter;
+
         try {
             if (this.filter != null)
                 this.filter.setAdapter(this);
         } catch (Exception e) {
         }
+
         if (update)
             updateFilter();
     }
