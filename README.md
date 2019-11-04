@@ -146,7 +146,7 @@ android {
 
 Add the dependency (**for AndroidX**):
 ```
-implementation 'com.github.ProDev2:SimpleLibrary:16.4'
+implementation 'com.github.ProDev2:SimpleLibrary:16.5'
 ```
 
 Alternatively add the last version without AndroidX instead:
