@@ -256,7 +256,7 @@ public class SimpleMenuPopup extends SimplePopup {
         }
 
         @Override
-        protected void bindHolder(@NonNull final SimpleRecyclerAdapter<SimpleMenuItem, Void>.ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        protected void bindHolder(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, @Nullable final Void element, final int pos) {
             LinearLayout layout = (LinearLayout) holder.findViewById(0);
             ImageView imageView = (ImageView) holder.findViewById(1);
             TextView textView = (TextView) holder.findViewById(2);
@@ -311,10 +311,6 @@ public class SimpleMenuPopup extends SimplePopup {
                     menuItem.click();
                 }
             });
-        }
-
-        @Override
-        protected void bindHolder(@NonNull ViewHolder holder, SimpleMenuItem value, @Nullable Void element, int pos) {
         }
 
         public void select(String text) {

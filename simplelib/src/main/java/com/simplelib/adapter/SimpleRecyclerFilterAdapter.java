@@ -36,7 +36,7 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
         } catch (Exception e) {
         }
 
-        updateFilter(false);
+        reload();
     }
 
     private void init() {
@@ -94,7 +94,7 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
 
         try {
             if (setup && recyclerView != null)
-                updateFilter(false);
+                reload();
         } catch (Exception e) {
         }
     }
@@ -211,11 +211,13 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     }
 
     @Override
-    public void sort(Comparator<? super V> comparator) {
+    public void sort(Comparator<? super V> comparator, boolean update) {
         try {
             if (comparator != null) {
                 Collections.sort(unfilteredList, comparator);
-                updateFilter();
+
+                if (update)
+                    reload();
             }
         } catch (Exception e) {
         }
@@ -228,6 +230,12 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
 
     @Override
     public synchronized void reload() {
+        try {
+            if (filter != null)
+                filter.setAdapter(this);
+        } catch (Exception e) {
+        }
+
         try {
             filteredList.clear();
 
@@ -293,60 +301,38 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
         super.scrollToPosition(item, animate);
     }
 
-    public void updateFilter() {
-        updateFilter(true);
-    }
-
-    public synchronized void updateFilter(boolean animate) {
+    public synchronized void updateFilter() {
         try {
             if (filter != null)
                 filter.setAdapter(this);
         } catch (Exception e) {
         }
 
-        if (animate) {
-            try {
-                for (V item : unfilteredList) {
-                    boolean add = true;
-                    if (filter != null) add = filter.filter(item);
+        try {
+            for (V item : unfilteredList) {
+                boolean add = true;
+                if (filter != null) add = filter.filter(item);
 
-                    if (add && !filteredList.contains(item))
-                        addItemToList(item);
-                    else if (!add && filteredList.contains(item))
-                        removeItemFromList(item);
-                    else if (filteredList.contains(item))
-                        moveItemInList(item);
-                }
-            } catch (Exception e) {
+                if (add && !filteredList.contains(item))
+                    addItemToList(item);
+                else if (!add && filteredList.contains(item))
+                    removeItemFromList(item);
+                else if (filteredList.contains(item))
+                    moveItemInList(item);
             }
+        } catch (Exception e) {
+        }
 
-            try {
-                List<V> removeList = new ArrayList<>();
-                for (V item : filteredList) {
-                    if (!unfilteredList.contains(item))
-                        removeList.add(item);
-                }
-                for (V removeItem : removeList)
-                    super.remove(removeItem);
-                removeList.clear();
-            } catch (Exception e) {
+        try {
+            List<V> removeList = new ArrayList<>();
+            for (V item : filteredList) {
+                if (!unfilteredList.contains(item))
+                    removeList.add(item);
             }
-        } else {
-            try {
-                filteredList.clear();
-                notifyDataSetChanged();
-
-                for (V item : unfilteredList) {
-                    boolean add = true;
-                    if (filter != null) add = filter.filter(item);
-
-                    if (add)
-                        filteredList.add(item);
-                }
-
-                notifyDataSetChanged();
-            } catch (Exception e) {
-            }
+            for (V removeItem : removeList)
+                super.remove(removeItem);
+            removeList.clear();
+        } catch (Exception e) {
         }
     }
 

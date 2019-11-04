@@ -500,7 +500,7 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         }
 
         @Override
-        protected void bindHolder(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, final int pos) {
+        protected void bindHolder(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, @Nullable final Void element, final int pos) {
             final BubbleCardView layout = (BubbleCardView) holder.findViewById(0);
             final LinearLayout layoutSub = (LinearLayout) holder.findViewById(1);
             final LinearLayout layoutContent = (LinearLayout) holder.findViewById(2);
@@ -647,10 +647,6 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
-        @Override
-        protected void bindHolder(@NonNull ViewHolder holder, SimpleMenuItem value, @Nullable Void element, int pos) {
         }
 
         private void setRippleBackground(View view) {

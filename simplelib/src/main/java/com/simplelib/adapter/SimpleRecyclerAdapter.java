@@ -201,11 +201,13 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         }
     }
 
-    public void sort(Comparator<? super V> comparator) {
+    public void sort(Comparator<? super V> comparator, boolean update) {
         try {
             if (comparator != null) {
                 Collections.sort(list, comparator);
-                notifyDataSetChanged();
+
+                if (update)
+                    notifyDataSetChanged();
             }
         } catch (Exception e) {
         }
@@ -350,7 +352,6 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 }
             }
 
-            bindHolder((ViewHolder) holder, value, position);
             bindHolder((ViewHolder) holder, value, element, position);
         } catch (Exception e) {
             e.printStackTrace();
@@ -372,9 +373,6 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
     }
 
     protected abstract @NonNull View createHolder(@NonNull ViewGroup parent, int viewType);
-
-    protected void bindHolder(@NonNull ViewHolder holder, V value, int pos) {
-    }
 
     protected abstract void bindHolder(@NonNull ViewHolder holder, V value, @Nullable E element, int pos);
 
