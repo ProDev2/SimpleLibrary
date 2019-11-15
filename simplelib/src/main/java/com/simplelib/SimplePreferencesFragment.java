@@ -97,7 +97,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
 
         resetToolbar();
 
-        create(view);
+        create(view, savedInstanceState);
 
         if (!willResumeOnlyCurrentFragment) {
             setInitialized(true);
@@ -120,7 +120,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         return null;
     }
 
-    public abstract void create(View view);
+    public abstract void create(View view, Bundle savedInstanceState);
 
     @Override
     public void onUpdate() {

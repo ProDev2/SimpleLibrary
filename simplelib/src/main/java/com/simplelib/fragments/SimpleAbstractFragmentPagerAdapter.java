@@ -5,16 +5,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.simplelib.interfaces.VisibilityAdapter;
 
-public abstract class SimpleFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+public abstract class SimpleAbstractFragmentPagerAdapter extends FragmentPagerAdapter {
     public boolean CHANGE_VISIBILITY = true;
 
     private Fragment currentItem;
 
-    public SimpleFragmentStatePagerAdapter(@NonNull FragmentManager fm, int behavior) {
+    public SimpleAbstractFragmentPagerAdapter(@NonNull FragmentManager fm, int behavior) {
         super(fm, behavior);
     }
 

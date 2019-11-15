@@ -13,7 +13,8 @@ import com.simplelib.interfaces.NameableAdapter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class FragmentStatePagerAdapter extends SimpleFragmentStatePagerAdapter {
+@Deprecated
+public class FragmentStatePagerAdapter extends SimpleAbstractFragmentStatePagerAdapter {
     private ViewPager viewPager;
     private Context context;
 

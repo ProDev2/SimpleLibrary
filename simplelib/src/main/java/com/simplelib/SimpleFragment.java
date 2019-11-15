@@ -3,6 +3,7 @@ package com.simplelib;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.ActionBar;
@@ -86,10 +87,12 @@ public abstract class SimpleFragment extends Fragment
         View view = inflater.inflate(id, container, false);
         this.contentView = view;
 
+        onRestoreInstanceState(savedInstanceState);
+
         if (overrideActivityDefaults || getActivity() == null)
             resetToolbar();
 
-        create(view);
+        create(view, savedInstanceState);
 
         if (!willResumeOnlyCurrentFragment) {
             setInitialized(true);
@@ -97,6 +100,37 @@ public abstract class SimpleFragment extends Fragment
         }
 
         return view;
+    }
+
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null)
+            return;
+
+        overrideActivityDefaults = savedInstanceState.getBoolean("overrideActivityDefaults", overrideActivityDefaults);
+
+        title = savedInstanceState.getString("title", title);
+        subtitle = savedInstanceState.getString("subtitle", subtitle);
+
+        menuId = savedInstanceState.getInt("menuId", menuId);
+
+        willResumeOnlyCurrentFragment = savedInstanceState.getBoolean("willResumeOnlyCurrentFragment", willResumeOnlyCurrentFragment);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (outState == null)
+            return;
+
+        outState.putBoolean("overrideActivityDefaults", overrideActivityDefaults);
+
+        outState.putString("title", title);
+        outState.putString("subtitle", subtitle);
+
+        outState.putInt("menuId", menuId);
+
+        outState.putBoolean("willResumeOnlyCurrentFragment", willResumeOnlyCurrentFragment);
     }
 
     public View getContentView() {
@@ -112,7 +146,7 @@ public abstract class SimpleFragment extends Fragment
         return null;
     }
 
-    public abstract void create(View view);
+    public abstract void create(View view, Bundle savedInstanceState);
 
     @Override
     public void onUpdate() {

@@ -3,6 +3,8 @@ package com.prodev.simple.fragments;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -32,7 +34,7 @@ public class MainFragment extends SimpleFragment {
     }
 
     @Override
-    public void create(View view) {
+    public void create(View view, Bundle savedInstanceState) {
         searchView = (EditText) findViewById(R.id.main_fragment_search);
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
