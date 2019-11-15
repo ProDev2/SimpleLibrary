@@ -286,7 +286,7 @@ public class FragmentPagerAdapter extends PagerAdapter {
         }
     }
 
-    public boolean isUpdating() {
+    public synchronized final boolean isUpdating() {
         return updating;
     }
 
