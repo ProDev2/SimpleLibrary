@@ -255,6 +255,33 @@ public class FragmentPagerAdapter extends PagerAdapter {
         add(page);
     }
 
+    public synchronized final void add(int index, @NonNull Page.FragmentCreator fragmentCreator) {
+        add(index, fragmentCreator, null);
+    }
+
+    public synchronized final void add(@NonNull Page.FragmentCreator fragmentCreator) {
+        add(fragmentCreator, null);
+    }
+
+    public synchronized final void add(int index,
+            @NonNull Page.FragmentCreator fragmentCreator,
+            @Nullable String title) {
+        if (fragmentCreator == null)
+            throw new NullPointerException("No fragment creator attached");
+
+        Page page = new Page(fragmentCreator, title);
+        add(index, page);
+    }
+
+    public synchronized final void add(@NonNull Page.FragmentCreator fragmentCreator,
+            @Nullable String title) {
+        if (fragmentCreator == null)
+            throw new NullPointerException("No fragment creator attached");
+
+        Page page = new Page(fragmentCreator, title);
+        add(page);
+    }
+
     public synchronized final void add(int index, @NonNull Page page) {
         if (page == null)
             throw new NullPointerException("No page attached");
@@ -313,8 +340,13 @@ public class FragmentPagerAdapter extends PagerAdapter {
         Page page = getPageAtOrThrow(position);
         Fragment fragment = page.getFragment();
 
-        if (fragment != null && page.isActive())
+        if (fragment != null && page.isActive()) {
+            // Fragment
+            setVisible(fragment, false);
+
+            // Return active fragment
             return fragment;
+        }
 
         // Saved State
         if (!page.isActive()) {
@@ -504,7 +536,7 @@ public class FragmentPagerAdapter extends PagerAdapter {
 
     @Nullable
     @Override
-    public synchronized final Parcelable saveState() {
+    public synchronized Parcelable saveState() {
         if (!withAdapterState)
             return null;
 
@@ -565,15 +597,18 @@ public class FragmentPagerAdapter extends PagerAdapter {
                                 throw e;
                         }
                     }
-                    pageState.putParcelable("saved_state", savedState);
+                    if (savedState != null)
+                        pageState.putParcelable("saved_state", savedState);
 
                     // Put title
                     String title = page.getTitle();
-                    pageState.putString("title", title);
+                    if (title != null)
+                        pageState.putString("title", title);
 
                     // Put args
                     Bundle args = page.hasArgs() ? page.getArgs() : null;
-                    pageState.putParcelable("args", args);
+                    if (args != null)
+                        pageState.putParcelable("args", args);
 
                     // Set saved page state
                     pageArray[pos] = pageState;
@@ -586,7 +621,7 @@ public class FragmentPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public synchronized final void restoreState(@Nullable Parcelable state,
+    public synchronized void restoreState(@Nullable Parcelable state,
             @Nullable ClassLoader loader) {
         if (!withAdapterState)
             return;
@@ -685,8 +720,15 @@ public class FragmentPagerAdapter extends PagerAdapter {
     }
 
     protected void setVisible(@NonNull Fragment fragment, boolean visible) {
-        if (fragment != null)
-            fragment.setMenuVisibility(visible);
+        try {
+            if (fragment != null)
+                fragment.setMenuVisibility(visible);
+        } catch (Exception e) {
+            if (withSecuredExecution)
+                e.printStackTrace();
+            else
+                throw e;
+        }
     }
 
     @Nullable

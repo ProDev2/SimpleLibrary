@@ -56,18 +56,21 @@ public abstract class SimpleFragment extends Fragment
         setDefVisibility(false);
     }
 
+    @NonNull
     public final AtomicBoolean getInitializedState() {
         if (stateInitialized == null)
             stateInitialized = new AtomicBoolean();
         return stateInitialized;
     }
 
+    @NonNull
     public final AtomicBoolean getNeedsUpdateState() {
         if (stateNeedsUpdate == null)
             stateNeedsUpdate = new AtomicBoolean();
         return stateNeedsUpdate;
     }
 
+    @NonNull
     public final AtomicBoolean getVisibleState() {
         if (stateVisibility == null)
             stateVisibility = new AtomicBoolean();
