@@ -76,4 +76,94 @@
 
     </declare-styleable>
 
+    <declare-styleable name="CircularImageView">
+
+        <!-- Flags -->
+        <attr name="iv_flags" format="flags">
+
+            <!--
+                Mask:
+                Offset   Translation   Rotation   Dash   Style
+                1111_____1111__________111________11_____111__
+            -->
+
+            <!-- Style flags (3 bytes) -->
+            <flag name="square" value="1" />
+            <flag name="rounded" value="3" />
+            <flag name="round" value="7" />
+
+            <!-- Dash flags (2 bytes) -->
+            <flag name="no_dashes" value="8" />
+            <flag name="with_dashes" value="24" />
+
+            <!-- Rotation flags (3 bytes) -->
+            <flag name="no_rotation" value="32" />
+            <flag name="image_rotation" value="96" />
+            <flag name="dash_rotation" value="160" />
+
+            <!-- Translation flags (4 bytes) -->
+            <flag name="no_translation" value="256" />
+            <flag name="image_translation" value="768" />
+            <flag name="crop_translation" value="1280" />
+            <flag name="dash_translation" value="2304" />
+
+            <!-- Offset flags (4 bytes) -->
+            <flag name="no_offset" value="4096" />
+            <flag name="image_offset" value="12288" />
+            <flag name="crop_offset" value="20480" />
+            <flag name="dash_offset" value="36864" />
+
+        </attr>
+
+        <!-- Variables (attributes) -->
+        <attr name="iv_imageOffset" format="dimension" />
+        <attr name="iv_cropOffset" format="dimension" />
+        <attr name="iv_dashOffset" format="dimension" />
+
+        <attr name="iv_translationSection" format="float" />
+
+        <attr name="iv_imageTranslation" format="dimension" />
+        <attr name="iv_cropTranslation" format="dimension" />
+        <attr name="iv_dashTranslation" format="dimension" />
+
+        <attr name="iv_imageTranslationRotation" format="float" />
+        <attr name="iv_cropTranslationRotation" format="float" />
+        <attr name="iv_dashTranslationRotation" format="float" />
+
+        <attr name="iv_imageRotation" format="float" />
+        <attr name="iv_dashRotation" format="float" />
+
+        <attr name="iv_imageColor" format="color" />
+        <attr name="iv_imageCrop" format="float" />
+
+        <attr name="iv_showDashes" format="boolean" />
+        <attr name="iv_dashVisibility" format="float" />
+
+        <attr name="iv_dashStartAngle" format="float" />
+        <attr name="iv_dashSweepAngle" format="float" />
+
+        <attr name="iv_reverseDashes" format="boolean" />
+
+        <attr name="iv_dashCount" format="integer" />
+        <attr name="iv_dashSpacingAngle" format="float" />
+        <attr name="iv_dashColor" format="color" />
+        <attr name="iv_dashStrokeWidth" format="dimension" />
+
+        <attr name="iv_distributeDashesEvenly" format="boolean" />
+
+        <attr name="iv_dashShadowRadius" format="dimension" />
+        <attr name="iv_dashShadowColor" format="color" />
+
+        <!-- Variables -->
+        <attr name="iv_extraDashes" format="float" />
+
+        <attr name="iv_imageTranslationRotationVelocity" format="float" />
+        <attr name="iv_cropTranslationRotationVelocity" format="float" />
+        <attr name="iv_dashTranslationRotationVelocity" format="float" />
+
+        <attr name="iv_imageRotationVelocity" format="float" />
+        <attr name="iv_dashRotationVelocity" format="float" />
+
+    </declare-styleable>
+
 </resources>
