@@ -70,6 +70,8 @@ public abstract class ListLoader<K, V, E> {
 
     private OnLoadingListener<K, V, E> onLoadingListener;
 
+    private boolean accessible;
+
     public ListLoader() {
         this((IMap<K, E>) null);
     }
@@ -121,6 +123,17 @@ public abstract class ListLoader<K, V, E> {
         this.onLoadingListener = onLoadingListener;
     }
 
+    public final boolean isAccessible() {
+        return accessible ||
+                (task != null && task.isAccessible());
+    }
+
+    public final void setAccessible(boolean accessible) {
+        this.accessible = accessible;
+        if (task != null)
+            task.setAccessible(accessible);
+    }
+
     public final boolean canExecute(final long lockDelay, final boolean lockIfRunning) {
         return execute(null, lockDelay, lockIfRunning);
     }
@@ -129,19 +142,19 @@ public abstract class ListLoader<K, V, E> {
         final Runnable executionRunnable = new Runnable() {
             @Override
             public void run() {
-                lastExecutionRunning = true;
-
                 try {
+                    lastExecutionRunning = true;
+
                     runnable.run();
                 } catch (Exception e) {
                     Logger.w(TAG, "Failed to execute runnable", e);
+                } finally {
+                    lastExecutionRunning = false;
                 }
-
-                lastExecutionRunning = false;
             }
         };
 
-        long time = 0;
+        long time;
         try {
             time = System.currentTimeMillis();
         } catch (Exception e) {
@@ -372,6 +385,7 @@ public abstract class ListLoader<K, V, E> {
             }
 
             task = new Task(flags, key, value, list, comparator, onLoadingListener);
+            task.setAccessible(accessible);
             try {
                 task.start();
             } catch (Exception e) {
@@ -432,21 +446,23 @@ public abstract class ListLoader<K, V, E> {
         return released;
     }
 
-    public final void throwIfInvalidThread() {
+    public final void throwIfNoLoader() {
         if (task == null)
             throw new IllegalStateException("No current loader");
+    }
+
+    public final void throwIfInvalidThread() {
+        throwIfNoLoader();
         task.throwIfInvalidThread();
     }
 
     public final void throwIfNotLoading() {
-        if (task == null)
-            throw new IllegalStateException("No current loader");
+        throwIfNoLoader();
         task.throwIfNotLoading();
     }
 
     public final void throwIfNotLoaderThread() {
-        if (task == null)
-            throw new IllegalStateException("No current loader");
+        throwIfNoLoader();
         task.throwIfNotLoaderThread();
     }
 
@@ -538,37 +554,51 @@ public abstract class ListLoader<K, V, E> {
     protected abstract boolean onLoad(Task task, int flags, K key, V value, ListInterface<E> listInterface) throws Exception;
 
     protected final Task getTask() {
-        throwIfNotLoaderThread();
+        if (!accessible)
+            throwIfNotLoaderThread();
 
         return task;
     }
 
     protected final ListInterface<E> getListInterface() {
-        throwIfNotLoaderThread();
+        if (!accessible)
+            throwIfNotLoaderThread();
 
         return task.getListInterface();
     }
 
     protected final boolean publish() {
-        throwIfInvalidThread();
+        if (!accessible)
+            throwIfInvalidThread();
+        else
+            throwIfNoLoader();
 
         return task.publish();
     }
 
     protected final boolean publish(long lockDelay) {
-        throwIfInvalidThread();
+        if (!accessible)
+            throwIfInvalidThread();
+        else
+            throwIfNoLoader();
 
         return task.publish(lockDelay);
     }
 
     protected final boolean publish(long lockDelay, boolean lockIfRunning) {
-        throwIfInvalidThread();
+        if (!accessible)
+            throwIfInvalidThread();
+        else
+            throwIfNoLoader();
 
         return task.publish(lockDelay, lockIfRunning);
     }
 
     protected final boolean publish(long lockDelay, boolean lockIfRunning, boolean copyList) {
-        throwIfInvalidThread();
+        if (!accessible)
+            throwIfInvalidThread();
+        else
+            throwIfNoLoader();
 
         return task.publish(lockDelay, lockIfRunning, copyList);
     }
@@ -590,6 +620,8 @@ public abstract class ListLoader<K, V, E> {
         private final ListInterface<E> listInterface;
 
         private OnLoadingListener<K, V, E> onLoadingListener;
+
+        private boolean accessible;
 
         private Task(int flags, K key, V value, List<E> srcList) {
             this(flags, key, value, srcList, null);
@@ -615,11 +647,14 @@ public abstract class ListLoader<K, V, E> {
             this.listInterface = new ListInterface<E>(this.list, this.comparator) {
                 @Override
                 protected void onInvokeInterface() {
-                    throwIfInvalidThread();
+                    if (!accessible)
+                        throwIfInvalidThread();
                 }
             };
 
             this.onLoadingListener = onLoadingListener;
+
+            this.accessible = false;
         }
 
         public final int getFlags() {
@@ -656,6 +691,14 @@ public abstract class ListLoader<K, V, E> {
 
         public final void setOnLoadingListener(OnLoadingListener<K, V, E> onLoadingListener) {
             this.onLoadingListener = onLoadingListener;
+        }
+
+        public final boolean isAccessible() {
+            return accessible;
+        }
+
+        public final void setAccessible(boolean accessible) {
+            this.accessible = accessible;
         }
 
         @Override
@@ -805,7 +848,8 @@ public abstract class ListLoader<K, V, E> {
         }
 
         public final void copyToTempList() {
-            throwIfNotLoaderThread();
+            if (!accessible)
+                throwIfNotLoaderThread();
 
             if (list != null && tempList != null) {
                 synchronized (list) {
@@ -834,7 +878,8 @@ public abstract class ListLoader<K, V, E> {
         }
 
         public final boolean publish(final long lockDelay, final boolean lockIfRunning, final boolean copyList) {
-            throwIfInvalidThread();
+            if (!accessible)
+                throwIfInvalidThread();
 
             if (!canExecute(lockDelay, lockIfRunning))
                 return false;
