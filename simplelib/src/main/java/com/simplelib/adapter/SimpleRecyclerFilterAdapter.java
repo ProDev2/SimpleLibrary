@@ -155,10 +155,7 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
 
     @Override
     public int getAdapterItemPos(V value) {
-        if (filteredList.contains(value))
-            return filteredList.indexOf(value);
-        else
-            return -1;
+        return filteredList.indexOf(value);
     }
 
     @Override
@@ -199,8 +196,7 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
 
     @Override
     public void remove(V value) {
-        if (unfilteredList.contains(value))
-            unfilteredList.remove(value);
+        unfilteredList.remove(value);
         update();
     }
 
@@ -289,8 +285,10 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
         try {
             if (pos >= 0 && pos < unfilteredList.size()) {
                 V value = unfilteredList.get(pos);
-                if (filteredList.contains(value))
-                    super.scrollToPosition(filteredList.indexOf(value), animate);
+
+                int scrollPos;
+                if ((scrollPos = filteredList.indexOf(value)) >= 0 && scrollPos < filteredList.size())
+                    super.scrollToPosition(scrollPos, animate);
             }
         } catch (Exception e) {
         }
@@ -337,65 +335,67 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     }
 
     private void addItemToList(V item) {
-        if (!filteredList.contains(item)) {
-            V insertAfter = null;
+        V insertAfter = null;
 
-            boolean found = false;
-            for (V checkItem : unfilteredList) {
-                if (!found && filteredList.contains(checkItem) && !item.equals(checkItem))
-                    insertAfter = checkItem;
-                else if (!found && item.equals(checkItem))
-                    found = true;
-            }
+        for (V checkItem : unfilteredList) {
+            boolean equalItem = item.equals(checkItem);
+            if (!equalItem && filteredList.contains(checkItem))
+                insertAfter = checkItem;
+            else if (equalItem)
+                break;
+        }
 
-            try {
-                if (insertAfter == null && filteredList.size() <= 0)
-                    super.add(item);
-                else if (insertAfter == null && filteredList.size() > 0)
-                    super.add(0, item);
-                else if (insertAfter != null && filteredList.contains(insertAfter)) {
-                    int index = filteredList.indexOf(insertAfter) + 1;
+        try {
+            if (insertAfter == null && filteredList.size() <= 0)
+                super.add(item);
+            else if (insertAfter == null && filteredList.size() > 0)
+                super.add(0, item);
+            else if (insertAfter != null) {
+                int insertAfterPos = filteredList.indexOf(insertAfter);
+
+                if (insertAfterPos >= 0) {
+                    int index = insertAfterPos + 1;
                     if (index < filteredList.size())
                         super.add(index, item);
                     else
                         super.add(item);
                 }
-            } catch (Exception e) {
-                super.add(item);
             }
+        } catch (Exception e) {
+            super.add(item);
         }
     }
 
     private void removeItemFromList(V item) {
         try {
-            if (filteredList.contains(item))
-                super.remove(item);
-        } catch (Exception e) {
             super.remove(item);
+        } catch (Exception e) {
         }
     }
 
     private void moveItemInList(V item) {
-        if (filteredList.contains(item)) {
-            V insertAfter = null;
+        V insertAfter = null;
 
-            boolean found = false;
-            for (V checkItem : unfilteredList) {
-                if (!found && filteredList.contains(checkItem) && !item.equals(checkItem))
-                    insertAfter = checkItem;
-                else if (!found && item.equals(checkItem))
-                    found = true;
-            }
+        for (V checkItem : unfilteredList) {
+            boolean equalItem = item.equals(checkItem);
+            if (!equalItem && filteredList.contains(checkItem))
+                insertAfter = checkItem;
+            else if (equalItem)
+                break;
+        }
 
-            try {
-                if (insertAfter == null)
-                    super.move(filteredList.indexOf(item), 0);
-                else if (insertAfter != null && filteredList.contains(insertAfter)) {
-                    int index = filteredList.indexOf(insertAfter) + 1;
+        try {
+            if (insertAfter == null)
+                super.move(filteredList.indexOf(item), 0);
+            else if (insertAfter != null) {
+                int insertAfterPos = filteredList.indexOf(insertAfter);
+
+                if (insertAfterPos >= 0 && insertAfterPos < filteredList.size()) {
+                    int index = insertAfterPos + 1;
                     super.move(filteredList.indexOf(item), index);
                 }
-            } catch (Exception e) {
             }
+        } catch (Exception e) {
         }
     }
 

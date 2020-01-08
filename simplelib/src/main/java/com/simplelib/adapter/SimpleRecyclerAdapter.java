@@ -173,9 +173,9 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
 
     public void remove(V value) {
         try {
-            if (list.contains(value)) {
-                int pos = list.indexOf(value);
+            int pos = list.indexOf(value);
 
+            if (pos >= 0 && pos < list.size()) {
                 list.remove(pos);
                 notifyItemRemoved(pos);
             }
@@ -259,11 +259,15 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
 
     public void scrollToPosition(V item, boolean animate) {
         try {
-            if (recyclerView != null && list.contains(item)) {
-                if (animate)
-                    recyclerView.smoothScrollToPosition(list.indexOf(item));
-                else
-                    recyclerView.scrollToPosition(list.indexOf(item));
+            if (recyclerView != null) {
+                int pos = list.indexOf(item);
+
+                if (pos >= 0 && pos < list.size()) {
+                    if (animate)
+                        recyclerView.smoothScrollToPosition(pos);
+                    else
+                        recyclerView.scrollToPosition(pos);
+                }
             }
         } catch (Exception e) {
         }
@@ -377,8 +381,8 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
     protected abstract void bindHolder(@NonNull ViewHolder holder, V value, @Nullable E element, int pos);
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private View view;
-        private HashMap<Integer, View> viewList;
+        private final View view;
+        private final HashMap<Integer, View> viewList;
 
         public ViewHolder(View view) {
             super(view);
@@ -395,10 +399,9 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
 
         public void addView(int id) {
             try {
-                if (view.findViewById(id) != null && !viewList.containsKey(id)) {
-                    View item = view.findViewById(id);
-                    viewList.put(id, item);
-                }
+                View v;
+                if ((v = view.findViewById(id)) != null && !viewList.containsKey(id))
+                    viewList.put(id, v);
             } catch (Exception e) {
             }
         }
@@ -424,12 +427,8 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 return viewList.get(id);
             else {
                 addView(id);
-
-                if (viewList.containsKey(id))
-                    return viewList.get(id);
+                return viewList.get(id);
             }
-
-            return null;
         }
 
         public View getItemView() {
