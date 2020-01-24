@@ -20,6 +20,8 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 
+import com.simplelib.R;
+
 public class WaveProgressView extends View implements Runnable {
     //Constants
     private static final int DEFAULT_FPS = 30;
@@ -428,7 +430,7 @@ public class WaveProgressView extends View implements Runnable {
     private int fetchColorPrimary() {
         try {
             TypedValue typedValue = new TypedValue();
-            TypedArray typedArray = getContext().obtainStyledAttributes(typedValue.data, new int[] {com.google.android.material.R.attr.colorPrimary});
+            TypedArray typedArray = getContext().obtainStyledAttributes(typedValue.data, new int[] {R.attr.colorPrimary});
 
             int color = typedArray.getColor(0, 0);
             typedArray.recycle();
