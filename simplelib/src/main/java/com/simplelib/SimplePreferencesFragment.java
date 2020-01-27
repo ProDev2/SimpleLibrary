@@ -49,8 +49,7 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
     public SimplePreferencesFragment(int preferencesId) {
         this.preferencesId = preferencesId;
 
-        if (overrideActivityDefaults || getActivity() == null)
-            resetToolbar();
+        resetToolbar();
 
         setInitialized(false);
         setNeedsUpdate(true);
@@ -60,21 +59,21 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
     @NonNull
     public final AtomicBoolean getInitializedState() {
         if (stateInitialized == null)
-            stateInitialized = new AtomicBoolean();
+            stateInitialized = new AtomicBoolean(false);
         return stateInitialized;
     }
 
     @NonNull
     public final AtomicBoolean getNeedsUpdateState() {
         if (stateNeedsUpdate == null)
-            stateNeedsUpdate = new AtomicBoolean();
+            stateNeedsUpdate = new AtomicBoolean(false);
         return stateNeedsUpdate;
     }
 
     @NonNull
     public final AtomicBoolean getVisibleState() {
         if (stateVisibility == null)
-            stateVisibility = new AtomicBoolean();
+            stateVisibility = new AtomicBoolean(false);
         return stateVisibility;
     }
 
@@ -99,7 +98,10 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         View view = super.onCreateView(inflater, container, savedInstanceState);
         this.contentView = view;
 
-        resetToolbar();
+        onRestoreInstanceState(savedInstanceState);
+
+        if (getVisibility() && (overrideActivityDefaults || getActivity() == null))
+            resetToolbar();
 
         create(view, savedInstanceState);
 
@@ -109,6 +111,41 @@ public abstract class SimplePreferencesFragment extends PreferenceFragmentCompat
         }
 
         return view;
+    }
+
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null)
+            return;
+
+        overrideActivityDefaults = savedInstanceState.getBoolean("overrideActivityDefaults", overrideActivityDefaults);
+
+        title = savedInstanceState.getString("title", title);
+        subtitle = savedInstanceState.getString("subtitle", subtitle);
+
+        backButton = savedInstanceState.getBoolean("backButton", backButton);
+
+        menuId = savedInstanceState.getInt("menuId", menuId);
+
+        willResumeOnlyCurrentFragment = savedInstanceState.getBoolean("willResumeOnlyCurrentFragment", willResumeOnlyCurrentFragment);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (outState == null)
+            return;
+
+        outState.putBoolean("overrideActivityDefaults", overrideActivityDefaults);
+
+        outState.putString("title", title);
+        outState.putString("subtitle", subtitle);
+
+        outState.putBoolean("backButton", backButton);
+
+        outState.putInt("menuId", menuId);
+
+        outState.putBoolean("willResumeOnlyCurrentFragment", willResumeOnlyCurrentFragment);
     }
 
     public View getContentView() {

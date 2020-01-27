@@ -59,21 +59,21 @@ public abstract class SimpleFragment extends Fragment
     @NonNull
     public final AtomicBoolean getInitializedState() {
         if (stateInitialized == null)
-            stateInitialized = new AtomicBoolean();
+            stateInitialized = new AtomicBoolean(false);
         return stateInitialized;
     }
 
     @NonNull
     public final AtomicBoolean getNeedsUpdateState() {
         if (stateNeedsUpdate == null)
-            stateNeedsUpdate = new AtomicBoolean();
+            stateNeedsUpdate = new AtomicBoolean(false);
         return stateNeedsUpdate;
     }
 
     @NonNull
     public final AtomicBoolean getVisibleState() {
         if (stateVisibility == null)
-            stateVisibility = new AtomicBoolean();
+            stateVisibility = new AtomicBoolean(false);
         return stateVisibility;
     }
 
@@ -92,7 +92,7 @@ public abstract class SimpleFragment extends Fragment
 
         onRestoreInstanceState(savedInstanceState);
 
-        if (overrideActivityDefaults || getActivity() == null)
+        if (getVisibility() && (overrideActivityDefaults || getActivity() == null))
             resetToolbar();
 
         create(view, savedInstanceState);
@@ -114,6 +114,8 @@ public abstract class SimpleFragment extends Fragment
         title = savedInstanceState.getString("title", title);
         subtitle = savedInstanceState.getString("subtitle", subtitle);
 
+        backButton = savedInstanceState.getBoolean("backButton", backButton);
+
         menuId = savedInstanceState.getInt("menuId", menuId);
 
         willResumeOnlyCurrentFragment = savedInstanceState.getBoolean("willResumeOnlyCurrentFragment", willResumeOnlyCurrentFragment);
@@ -130,6 +132,8 @@ public abstract class SimpleFragment extends Fragment
 
         outState.putString("title", title);
         outState.putString("subtitle", subtitle);
+
+        outState.putBoolean("backButton", backButton);
 
         outState.putInt("menuId", menuId);
 
