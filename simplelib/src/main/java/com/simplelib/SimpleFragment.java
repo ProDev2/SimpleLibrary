@@ -92,7 +92,7 @@ public abstract class SimpleFragment extends Fragment
 
         onRestoreInstanceState(savedInstanceState);
 
-        if (getVisibility() && (overrideActivityDefaults || getActivity() == null))
+        if (overrideActivityDefaults || getActivity() == null)
             resetToolbar();
 
         create(view, savedInstanceState);
@@ -362,13 +362,13 @@ public abstract class SimpleFragment extends Fragment
     }
 
     public void enableOptionsMenu(int menu) {
-        if (getActivity() != null)
+        if (getVisibility() && getActivity() != null)
             this.setHasOptionsMenu(true);
         this.menuId = menu;
     }
 
     public void disableOptionsMenu() {
-        if (getActivity() != null)
+        if (getVisibility() && getActivity() != null)
             this.setHasOptionsMenu(false);
         this.menuId = -1;
     }
