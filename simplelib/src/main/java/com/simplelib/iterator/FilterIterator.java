@@ -133,14 +133,14 @@ public abstract class FilterIterator<E> implements Iterator<E> {
         }
 
         @Override
-        public int getCount() {
+        protected int getCount() {
             return elements != null
                     ? elements.length
                     : 0;
         }
 
         @Override
-        public E get(int pos) {
+        protected E get(int pos) {
             if (elements == null)
                 throw new IllegalStateException("No elements");
 
@@ -170,14 +170,14 @@ public abstract class FilterIterator<E> implements Iterator<E> {
         }
 
         @Override
-        public int getCount() {
+        protected int getCount() {
             return elements != null
                     ? elements.size()
                     : 0;
         }
 
         @Override
-        public E get(int pos) {
+        protected E get(int pos) {
             if (elements == null)
                 throw new IllegalStateException("No elements");
 
