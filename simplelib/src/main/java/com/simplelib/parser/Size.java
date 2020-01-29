@@ -99,7 +99,7 @@ public final class Size {
     }
 
     public static final int set(int value, int size) {
-        int filteredValue = (value & (MASK_2 | ~MASK_ALL));
+        int filteredValue = (value & ~(MASK_2 | ~MASK_ALL));
 
         int flag = 0x0;
         if (size < 0) {
