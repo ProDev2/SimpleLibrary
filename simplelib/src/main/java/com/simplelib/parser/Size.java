@@ -1,5 +1,6 @@
 package com.simplelib.parser;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -9,6 +10,10 @@ import androidx.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@SuppressWarnings({"FinalStaticMethod",
+        "unused",
+        "PointlessArithmeticExpression",
+        "WeakerAccess"})
 public final class Size {
     // Shifting
     private static final int SHIFT_1 = 29;
@@ -63,6 +68,7 @@ public final class Size {
         return (value & MASK_1) == (type & MASK_1);
     }
 
+    @SuppressLint("WrongConstant")
     @Type
     public static final int getType(int value) {
         return (value & MASK_1);
@@ -90,6 +96,7 @@ public final class Size {
         return (value | MASK_2);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static final int get(int value) {
         boolean isNegative = (value & MASK_2) == MASK_2;
         int size = (value & ~MASK_ALL);
@@ -132,6 +139,7 @@ public final class Size {
         return convert(type, (float) size);
     }
 
+    @SuppressWarnings("DuplicateBranchesInSwitch")
     public static final float convert(@Type int type, float size) {
         final int unit;
         switch (type & MASK_ALL) {
@@ -174,11 +182,11 @@ public final class Size {
     }
 
     // Private constructor
-    private Size() {
-    }
+    private Size() {}
 
+    @SuppressWarnings({"WeakerAccess", "DefaultAnnotationParam"})
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
+    @IntDef(flag = false, value = {
             UNDEFINED,
             UNIT,
             UNIT_DP,

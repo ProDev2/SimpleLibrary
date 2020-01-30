@@ -2,6 +2,7 @@ package com.simplelib.iterator;
 
 import java.util.Iterator;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class FilterIterator<E> implements Iterator<E> {
     protected int posNext = -1;
     protected int posLast = -1;
@@ -105,12 +106,14 @@ public abstract class FilterIterator<E> implements Iterator<E> {
     protected abstract int getCount();
     protected abstract E get(int pos);
 
+    @SuppressWarnings("unused")
     protected boolean remove(int pos) {
         return false;
     }
 
     protected abstract boolean include(int pos, E element);
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static abstract class ArrayIterator<E> extends FilterIterator<E> {
         protected E[] elements;
 
@@ -148,6 +151,7 @@ public abstract class FilterIterator<E> implements Iterator<E> {
         }
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static abstract class ListIterator<E> extends FilterIterator<E> {
         protected java.util.List<E> elements;
 
