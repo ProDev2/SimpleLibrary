@@ -78,6 +78,11 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
     }
 
     public void attach() {
+        // Apply current view insets to adapter
+        WinInsets currentInsets = getAppliedWindowInsets(view);
+        if (currentInsets != null)
+            applyInsets(view, currentInsets, false);
+
         // Attach adapter to view
         boolean alreadyAttached = false;
         Object currentTag;
@@ -100,11 +105,6 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
 
         if (alreadyAttached)
             throw new IllegalStateException("Insets adapter is already defined");
-
-        // Apply current insets to adapter
-        WinInsets currentInsets = getAppliedWindowInsets(view);
-        if (currentInsets != null)
-            apply(currentInsets, false);
     }
 
     public void detach() {
@@ -120,6 +120,11 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
         currentTag = view.getTag(VIEW_TAG_KEY);
         if (currentTag == this)
             view.setTag(VIEW_TAG_KEY, null);
+
+        // Apply current adapter insets to view
+        WinInsets currentInsets = getAppliedInsets();
+        if (currentInsets != null)
+            applyInsets(view, currentInsets, false);
     }
 
     public static WinInsets getAppliedWindowInsets(@NonNull View view) {
@@ -139,6 +144,7 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
             return ((WinInsets) listTag);
         else if (listTag instanceof WinInsetsAdapter)
             return ((WinInsetsAdapter) listTag).getAppliedInsets();
+
         return null;
     }
 
@@ -159,6 +165,7 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
             return ((WinInsets) listTag);
         else if (listTag instanceof WinInsetsAdapter)
             return ((WinInsetsAdapter) listTag).getInnerInsets();
+
         return null;
     }
 
@@ -176,6 +183,7 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
         Object listTag = view.getTag(VIEW_TAG_KEY);
         if (listTag instanceof WinInsetsAdapter)
             return ((WinInsetsAdapter) listTag);
+
         return null;
     }
 
