@@ -14,7 +14,7 @@ import com.simplelib.insets.InsetsAdapter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
-    public static final boolean USE_VIEW_TAG = false;
+    public static boolean USE_VIEW_TAG = false;
 
     protected static final int VIEW_TAG_KEY = 167448252;
 
@@ -78,10 +78,8 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
     }
 
     public void attach() {
-        // Apply current view insets to adapter
+        // Get current insets
         WinInsets currentInsets = getAppliedWindowInsets(view);
-        if (currentInsets != null)
-            applyInsets(view, currentInsets, false);
 
         // Attach adapter to view
         boolean alreadyAttached = false;
@@ -94,20 +92,30 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
             else if (currentTag instanceof WinInsetsAdapter &&
                     currentTag != this)
                 alreadyAttached = true;
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag == null)
+                view.setTag(VIEW_TAG_KEY, this);
+            else if (currentTag instanceof WinInsetsAdapter &&
+                    currentTag != this)
+                alreadyAttached = true;
         }
-
-        currentTag = view.getTag(VIEW_TAG_KEY);
-        if (currentTag == null)
-            view.setTag(VIEW_TAG_KEY, this);
-        else if (currentTag instanceof WinInsetsAdapter &&
-                currentTag != this)
-            alreadyAttached = true;
 
         if (alreadyAttached)
             throw new IllegalStateException("Insets adapter is already defined");
+
+        if (currentTag == this)
+            return;
+
+        // Apply current view insets to adapter
+        if (currentInsets != null)
+            applyInsets(view, currentInsets, false);
     }
 
     public void detach() {
+        // Get current insets
+        WinInsets currentInsets = getAppliedWindowInsets(view);
+
         // Detach adapter from view
         Object currentTag;
 
@@ -115,14 +123,16 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
             currentTag = view.getTag();
             if (currentTag == this)
                 view.setTag(null);
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag == this)
+                view.setTag(VIEW_TAG_KEY, null);
         }
 
-        currentTag = view.getTag(VIEW_TAG_KEY);
-        if (currentTag == this)
-            view.setTag(VIEW_TAG_KEY, null);
+        if (currentTag != this)
+            return;
 
         // Apply current adapter insets to view
-        WinInsets currentInsets = getAppliedInsets();
         if (currentInsets != null)
             applyInsets(view, currentInsets, false);
     }
@@ -131,19 +141,21 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
         if (view == null)
             throw new NullPointerException("No view attached");
 
-        if (USE_VIEW_TAG) {
-            Object tag = view.getTag();
-            if (tag instanceof WinInsets)
-                return ((WinInsets) tag);
-            else if (tag instanceof WinInsetsAdapter)
-                return ((WinInsetsAdapter) tag).getAppliedInsets();
-        }
+        Object currentTag;
 
-        Object listTag = view.getTag(VIEW_TAG_KEY);
-        if (listTag instanceof WinInsets)
-            return ((WinInsets) listTag);
-        else if (listTag instanceof WinInsetsAdapter)
-            return ((WinInsetsAdapter) listTag).getAppliedInsets();
+        if (USE_VIEW_TAG) {
+            currentTag = view.getTag();
+            if (currentTag instanceof WinInsets)
+                return ((WinInsets) currentTag);
+            else if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag).getAppliedInsets();
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag instanceof WinInsets)
+                return ((WinInsets) currentTag);
+            else if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag).getAppliedInsets();
+        }
 
         return null;
     }
@@ -152,19 +164,21 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
         if (view == null)
             throw new NullPointerException("No view attached");
 
-        if (USE_VIEW_TAG) {
-            Object tag = view.getTag();
-            if (tag instanceof WinInsets)
-                return ((WinInsets) tag);
-            else if (tag instanceof WinInsetsAdapter)
-                return ((WinInsetsAdapter) tag).getInnerInsets();
-        }
+        Object currentTag;
 
-        Object listTag = view.getTag(VIEW_TAG_KEY);
-        if (listTag instanceof WinInsets)
-            return ((WinInsets) listTag);
-        else if (listTag instanceof WinInsetsAdapter)
-            return ((WinInsetsAdapter) listTag).getInnerInsets();
+        if (USE_VIEW_TAG) {
+            currentTag = view.getTag();
+            if (currentTag instanceof WinInsets)
+                return ((WinInsets) currentTag);
+            else if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag).getInnerInsets();
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag instanceof WinInsets)
+                return ((WinInsets) currentTag);
+            else if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag).getInnerInsets();
+        }
 
         return null;
     }
@@ -174,15 +188,17 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
         if (view == null)
             throw new NullPointerException("No view attached");
 
-        if (USE_VIEW_TAG) {
-            Object tag = view.getTag();
-            if (tag instanceof WinInsetsAdapter)
-                return ((WinInsetsAdapter) tag);
-        }
+        Object currentTag;
 
-        Object listTag = view.getTag(VIEW_TAG_KEY);
-        if (listTag instanceof WinInsetsAdapter)
-            return ((WinInsetsAdapter) listTag);
+        if (USE_VIEW_TAG) {
+            currentTag = view.getTag();
+            if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag);
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag instanceof WinInsetsAdapter)
+                return ((WinInsetsAdapter) currentTag);
+        }
 
         return null;
     }
@@ -277,24 +293,24 @@ public abstract class WinInsetsAdapter extends InsetsAdapter<WinInsets> {
                 view.setTag(insets);
                 innerInsets = insets;
             }
-        }
-
-        currentTag = view.getTag(VIEW_TAG_KEY);
-        if (currentTag instanceof WinInsetsAdapter)
-            innerInsets = ((WinInsetsAdapter) currentTag).apply(insets, require, changed);
-        else {
-            if (changed != null &&
-                    require ||
-                    currentTag == null ||
-                    !(currentTag instanceof WinInsets) ||
-                    !((WinInsets) currentTag).equalInsets(insets)) {
-                synchronized (changed) {
-                    changed.set(true);
+        } else {
+            currentTag = view.getTag(VIEW_TAG_KEY);
+            if (currentTag instanceof WinInsetsAdapter)
+                innerInsets = ((WinInsetsAdapter) currentTag).apply(insets, require, changed);
+            else {
+                if (changed != null &&
+                        require ||
+                        currentTag == null ||
+                        !(currentTag instanceof WinInsets) ||
+                        !((WinInsets) currentTag).equalInsets(insets)) {
+                    synchronized (changed) {
+                        changed.set(true);
+                    }
                 }
-            }
 
-            view.setTag(VIEW_TAG_KEY, insets);
-            innerInsets = insets;
+                view.setTag(VIEW_TAG_KEY, insets);
+                innerInsets = insets;
+            }
         }
 
         if (innerInsets != null && innerInsets.isConsumed())
