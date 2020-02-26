@@ -35,17 +35,19 @@ public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
 
         try {
             Page page = getPageAtOrThrow(position);
-            Fragment fragment = page.getFragment();
+            if (page.isCreated()) {
+                Fragment fragment = page.getFragment();
 
-            if (fragment instanceof NameableAdapter) {
-                String name = ((NameableAdapter) fragment).getName();
-                if (name != null && name.length() > 0)
-                    return name;
-            }
-            if (fragment instanceof SimpleFragment) {
-                String name = ((SimpleFragment) fragment).getTitle();
-                if (name != null && name.length() > 0)
-                    return name;
+                if (fragment instanceof NameableAdapter) {
+                    String name = ((NameableAdapter) fragment).getName();
+                    if (name != null && name.length() > 0)
+                        return name;
+                }
+                if (fragment instanceof SimpleFragment) {
+                    String name = ((SimpleFragment) fragment).getTitle();
+                    if (name != null && name.length() > 0)
+                        return name;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
