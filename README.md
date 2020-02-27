@@ -146,7 +146,7 @@ android {
 
 Add the dependency (**for AndroidX**):
 ```
-implementation 'com.github.ProDev2:SimpleLibrary:18.0'
+implementation 'com.github.ProDev2:SimpleLibrary:18.1'
 ```
 
 Alternatively add the last version without AndroidX instead:
