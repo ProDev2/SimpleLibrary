@@ -31,12 +31,13 @@ public class ImageLoaderTools {
     public static Bitmap loadInReqSize(Context context, Uri uri, int reqWidth, int reqHeight) {
         if (context == null || uri == null) return null;
 
+        InputStream stream = null;
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             if (reqWidth >= 0 && reqHeight >= 0) {
                 options.inJustDecodeBounds = true;
 
-                InputStream stream = context.getContentResolver().openInputStream(uri);
+                stream = context.getContentResolver().openInputStream(uri);
                 BitmapFactory.decodeStream(stream, null, options);
 
                 options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -44,11 +45,16 @@ public class ImageLoaderTools {
                 options.inJustDecodeBounds = false;
             }
 
-            InputStream stream = context.getContentResolver().openInputStream(uri);
+            if (stream != null)
+                SessionTools.closeWithoutFail(stream);
+
+            stream = context.getContentResolver().openInputStream(uri);
             return BitmapFactory.decodeStream(stream, null, options);
         } catch (OutOfMemoryError e) {
             System.gc();
         } catch (Exception e) {
+        } finally {
+            SessionTools.closeWithoutFail(stream);
         }
         return null;
     }
@@ -56,12 +62,13 @@ public class ImageLoaderTools {
     public static Bitmap loadInReqSize(StreamFetcher fetcher, int reqWidth, int reqHeight) {
         if (fetcher == null) return null;
 
+        InputStream stream = null;
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();
             if (reqWidth >= 0 && reqHeight >= 0) {
                 options.inJustDecodeBounds = true;
 
-                InputStream stream = openInputStream(fetcher);
+                stream = openInputStream(fetcher);
                 if (stream == null) return null;
 
                 BitmapFactory.decodeStream(stream, null, options);
@@ -70,13 +77,18 @@ public class ImageLoaderTools {
                 options.inJustDecodeBounds = false;
             }
 
-            InputStream stream = openInputStream(fetcher);
+            if (stream != null)
+                SessionTools.closeWithoutFail(stream);
+
+            stream = openInputStream(fetcher);
             if (stream == null) return null;
 
             return BitmapFactory.decodeStream(stream, null, options);
         } catch (OutOfMemoryError e) {
             System.gc();
         } catch (Exception e) {
+        } finally {
+            SessionTools.closeWithoutFail(stream);
         }
         return null;
     }
@@ -98,6 +110,8 @@ public class ImageLoaderTools {
         } catch (OutOfMemoryError e) {
             System.gc();
         } catch (Exception e) {
+        } finally {
+            SessionTools.closeWithoutFail(stream);
         }
         return null;
     }

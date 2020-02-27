@@ -68,6 +68,8 @@ public class ImageTools {
                 return options.outWidth != -1 && options.outHeight != -1;
             }
         } catch (Exception e) {
+        } finally {
+            SessionTools.closeWithoutFail(in);
         }
         return false;
     }
