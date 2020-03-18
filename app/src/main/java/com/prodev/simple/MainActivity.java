@@ -3,6 +3,7 @@ package com.prodev.simple;
 import android.os.Bundle;
 
 import com.prodev.simple.fragments.MainFragment;
+import com.prodev.simple.fragments.TreeFragment;
 import com.simplelib.SimpleActivity;
 
 public class MainActivity extends SimpleActivity {
@@ -14,6 +15,7 @@ public class MainActivity extends SimpleActivity {
 
         setToolbar(R.id.main_toolbar);
 
-        switchTo(R.id.main_frame_layout, new MainFragment(), "main");
+        //switchTo(R.id.main_frame_layout, new MainFragment(), "main");
+        switchTo(R.id.main_frame_layout, new TreeFragment(), "tree");
     }
 }

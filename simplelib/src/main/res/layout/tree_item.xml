@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/tree_item_height"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/tree_item_side_padding"
+    android:paddingLeft="@dimen/tree_item_side_padding"
+    android:paddingEnd="@dimen/tree_item_side_padding"
+    android:paddingRight="@dimen/tree_item_side_padding">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/tree_item_icon"
+        android:layout_width="@dimen/tree_item_icon"
+        android:layout_height="@dimen/tree_item_height"
+        android:layout_gravity="center_vertical"
+        android:paddingStart="0dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="@dimen/tree_item_icon_padding"
+        android:paddingEnd="@dimen/tree_item_icon_padding_right"
+        android:paddingRight="@dimen/tree_item_icon_padding_right"
+        android:paddingBottom="@dimen/tree_item_icon_padding"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/tree_item_sub_icon"
+        android:layout_width="@dimen/tree_item_sub_icon"
+        android:layout_height="@dimen/tree_item_sub_icon"
+        android:layout_gravity="center_vertical"
+        android:scaleType="centerInside"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintBottom_toBottomOf="@+id/tree_item_icon"
+        app:layout_constraintEnd_toEndOf="@+id/tree_item_icon"
+        app:layout_constraintStart_toStartOf="@+id/tree_item_icon"
+        app:layout_constraintTop_toTopOf="@+id/tree_item_icon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tree_item_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:singleLine="true"
+        android:textDirection="anyRtl"
+        android:textSize="@dimen/tree_item_text"
+        app:layout_constraintBottom_toTopOf="@id/tree_item_subText"
+        app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
+        app:layout_constraintStart_toEndOf="@id/tree_item_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tree_item_subText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:gravity="center_vertical|start"
+        android:lines="1"
+        android:singleLine="true"
+        android:textDirection="anyRtl"
+        android:textSize="@dimen/tree_item_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
+        app:layout_constraintStart_toEndOf="@id/tree_item_icon"
+        app:layout_constraintTop_toBottomOf="@id/tree_item_text" />
+
+    <LinearLayout
+        android:id="@+id/tree_item_arrow_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:paddingStart="@dimen/tree_item_arrow_padding_left"
+        android:paddingLeft="@dimen/tree_item_arrow_padding_left"
+        android:paddingEnd="0dp"
+        android:paddingRight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/tree_item_arrow"
+            android:layout_width="16dp"
+            android:layout_height="16dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
