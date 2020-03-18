@@ -53,7 +53,8 @@
         app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
         app:layout_constraintStart_toEndOf="@id/tree_item_icon"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:ignore="UnusedAttribute" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tree_item_subText"
@@ -68,7 +69,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
         app:layout_constraintStart_toEndOf="@id/tree_item_icon"
-        app:layout_constraintTop_toBottomOf="@id/tree_item_text" />
+        app:layout_constraintTop_toBottomOf="@id/tree_item_text"
+        tools:ignore="UnusedAttribute" />
 
     <LinearLayout
         android:id="@+id/tree_item_arrow_container"
@@ -86,7 +88,8 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/tree_item_arrow"
             android:layout_width="16dp"
-            android:layout_height="16dp" />
+            android:layout_height="16dp"
+            android:scaleType="centerInside" />
 
     </LinearLayout>
 

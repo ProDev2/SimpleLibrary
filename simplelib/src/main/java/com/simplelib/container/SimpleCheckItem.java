@@ -9,7 +9,8 @@ public class SimpleCheckItem extends SimpleItem implements Selectable {
     protected CheckListener checkListener;
     protected CheckListener backedCheckListener;
 
-    protected boolean checked;
+    protected boolean checkable = true;
+    protected boolean checked = false;
 
     public SimpleCheckItem() {
     }
@@ -99,6 +100,16 @@ public class SimpleCheckItem extends SimpleItem implements Selectable {
         return this;
     }
 
+    public boolean isCheckable() {
+        return checkable;
+    }
+
+    public void setCheckable(boolean checkable) {
+        if (!checkable)
+            setChecked(false, false);
+        this.checkable = checkable;
+    }
+
     public boolean isChecked() {
         return checked;
     }
@@ -145,13 +156,18 @@ public class SimpleCheckItem extends SimpleItem implements Selectable {
     }
 
     @Override
+    public boolean isSelectable() {
+        return isCheckable();
+    }
+
+    @Override
     public boolean isSelected() {
         return isChecked();
     }
 
     @Override
-    public void setSelected(boolean selected) {
-        setChecked(selected, true);
+    public boolean setSelected(boolean selected) {
+        return setChecked(selected, true);
     }
 
     public static final SimpleItem setBackedCheckListener(SimpleItem item, CheckListener backedCheckListener) {

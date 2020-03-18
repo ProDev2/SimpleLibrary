@@ -1,7 +1,15 @@
 package com.simplelib.interfaces;
 
 public interface Selectable {
+    default boolean isSelectable() {
+        return true;
+    }
+
     boolean isSelected();
 
-    void setSelected(boolean selected);
+    boolean setSelected(boolean selected);
+
+    default boolean toggleSelection() {
+        return setSelected(!isSelected());
+    }
 }

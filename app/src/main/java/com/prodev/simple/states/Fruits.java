@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.simplelib.adapter.SimpleRecyclerAdapter;
+import com.simplelib.container.SimpleCheckItem;
 import com.simplelib.container.SimpleItem;
 import com.simplelib.struct.Tree;
 
@@ -45,7 +46,8 @@ public enum Fruits implements Tree.ItemCreator<String> {
     @NonNull
     @Override
     public Tree.Item create(@Nullable String value) {
-        final SimpleItem item = new SimpleItem();
+        final SimpleCheckItem item = new SimpleCheckItem();
+        item.setCheckable(level > 1);
         item.setText(text);
         item.setSubText(subtext);
 

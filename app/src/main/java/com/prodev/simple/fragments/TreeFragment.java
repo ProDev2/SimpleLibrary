@@ -79,6 +79,8 @@ public class TreeFragment extends SimpleFragment {
 
         treeAdapter.setFilter(filter, false);
 
+        //treeAdapter.setShowRoot(true, false);
+
         recyclerView.setAdapter(treeAdapter);
 
         // Create tree

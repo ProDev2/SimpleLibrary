@@ -40,14 +40,14 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
     };
 
     public TreeAdapter() {
-        setShowRoot(false);
+        setShowRoot(false, false);
         setTree(null, false);
 
         setup();
     }
 
     public TreeAdapter(@Nullable Tree tree, boolean showRoot) {
-        setShowRoot(showRoot);
+        setShowRoot(showRoot, false);
         setTree(tree, false);
 
         setup();
@@ -80,10 +80,14 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
     }
 
     public synchronized void setShowRoot(boolean showRoot) {
+        setShowRoot(showRoot, true);
+    }
+
+    public synchronized void setShowRoot(boolean showRoot, boolean update) {
         boolean changed = this.showRoot != showRoot;
         this.showRoot = showRoot;
 
-        if (changed)
+        if (changed && update)
             super.reload();
     }
 
@@ -150,8 +154,8 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
     protected final void bindHolder(@NonNull ViewHolder holder, Tree.Item item, @Nullable E element, int pos) {
         final int treeLevel = item != null ? Math.max(showRoot ? item.getLevel() : item.getLevel() - 1, 0) : 0;
 
-        final boolean expandable = item instanceof Tree.ItemGroup && ((Tree.ItemGroup) item).getChildCount() > 0;
-        final boolean expanded = expandable && ((Tree.ItemGroup) item).isExpanded();
+        final boolean expandable = isExpandable(item);
+        final boolean expanded = isExpanded(item, expandable);
 
         final int viewType = holder.getItemViewType();
 
@@ -171,6 +175,14 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
 
         final View treeView = ((ViewGroup) view).getChildAt(0);
         bindTreeView(treeView, viewType, item, treeLevel, expandable, expanded, element, pos);
+    }
+
+    protected final boolean isExpandable(Tree.Item item) {
+        return item instanceof Tree.ItemGroup && ((Tree.ItemGroup) item).getChildCount() > 0;
+    }
+
+    protected final boolean isExpanded(Tree.Item item, boolean expandable) {
+        return expandable && ((Tree.ItemGroup) item).isExpanded();
     }
 
     @IntRange(from = 0)
