@@ -15,11 +15,11 @@ public class SimpleItem implements Item {
     protected String id;
     protected Object arg;
 
-    protected final @NonNull ImageHolder image = ImageHolder.create();
-    protected final @NonNull ImageHolder subImage = ImageHolder.create();
+    public final @NonNull ImageHolder image = ImageHolder.create();
+    public final @NonNull ImageHolder subImage = ImageHolder.create();
 
-    protected final @NonNull TextHolder text = TextHolder.create();
-    protected final @NonNull TextHolder subText = TextHolder.create();
+    public final @NonNull TextHolder text = TextHolder.create();
+    public final @NonNull TextHolder subText = TextHolder.create();
 
     public SimpleItem() {
     }
@@ -209,13 +209,6 @@ public class SimpleItem implements Item {
     }
 
     public void notifyListener() {
-    }
-
-    public boolean load(Runnable onFinishLoadingListener) {
-        return true;
-    }
-
-    public void unload() {
     }
 
     public static class Inflater {

@@ -18,8 +18,8 @@
         android:paddingStart="0dp"
         android:paddingLeft="0dp"
         android:paddingTop="@dimen/tree_item_icon_padding"
-        android:paddingEnd="@dimen/tree_item_icon_padding_right"
-        android:paddingRight="@dimen/tree_item_icon_padding_right"
+        android:paddingEnd="@dimen/tree_item_icon_padding_end"
+        android:paddingRight="@dimen/tree_item_icon_padding_end"
         android:paddingBottom="@dimen/tree_item_icon_padding"
         android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,7 +49,7 @@
         android:singleLine="true"
         android:textDirection="anyRtl"
         android:textSize="@dimen/tree_item_text"
-        app:layout_constraintBottom_toTopOf="@id/tree_item_subText"
+        app:layout_constraintBottom_toTopOf="@id/tree_item_sub_text"
         app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
         app:layout_constraintStart_toEndOf="@id/tree_item_icon"
         app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +57,7 @@
         tools:ignore="UnusedAttribute" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tree_item_subText"
+        android:id="@+id/tree_item_sub_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
@@ -65,7 +65,7 @@
         android:lines="1"
         android:singleLine="true"
         android:textDirection="anyRtl"
-        android:textSize="@dimen/tree_item_description"
+        android:textSize="@dimen/tree_item_sub_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tree_item_arrow_container"
         app:layout_constraintStart_toEndOf="@id/tree_item_icon"
@@ -77,8 +77,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:paddingStart="@dimen/tree_item_arrow_padding_left"
-        android:paddingLeft="@dimen/tree_item_arrow_padding_left"
+        android:paddingStart="@dimen/tree_item_arrow_padding_start"
+        android:paddingLeft="@dimen/tree_item_arrow_padding_start"
         android:paddingEnd="0dp"
         android:paddingRight="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -87,8 +87,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/tree_item_arrow"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="@dimen/tree_item_arrow_padding_size"
+            android:layout_height="@dimen/tree_item_arrow_padding_size"
             android:scaleType="centerInside" />
 
     </LinearLayout>

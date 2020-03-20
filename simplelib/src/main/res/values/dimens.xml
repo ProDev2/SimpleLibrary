@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Material dimensions -->
+    <dimen name="material_background_corner_radius">4dp</dimen>
+    <dimen name="material_background_padding_top_bottom">4dp</dimen>
+    <dimen name="material_background_padding_start_end">4dp</dimen>
+
     <!-- Definition for the tree item -->
     <dimen name="tree_item_height">48dp</dimen>
     <dimen name="tree_item_side_padding">16dp</dimen>
     <dimen name="tree_item_icon">56dp</dimen>
     <dimen name="tree_item_sub_icon">26dp</dimen>
     <dimen name="tree_item_icon_padding">12dp</dimen>
-    <dimen name="tree_item_icon_padding_right">32dp</dimen>
+    <dimen name="tree_item_icon_padding_end">32dp</dimen>
     <dimen name="tree_item_text">14sp</dimen>
-    <dimen name="tree_item_description">14sp</dimen>
-    <dimen name="tree_item_arrow_padding_left">8dp</dimen>
+    <dimen name="tree_item_sub_text">14sp</dimen>
+    <dimen name="tree_item_arrow_padding_start">8dp</dimen>
+    <dimen name="tree_item_arrow_padding_size">22dp</dimen>
 
 </resources>

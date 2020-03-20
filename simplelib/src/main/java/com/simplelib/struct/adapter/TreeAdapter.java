@@ -1,5 +1,6 @@
 package com.simplelib.struct.adapter;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -127,7 +128,11 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
     @NonNull
     @Override
     protected final View createHolder(@NonNull ViewGroup parent, int viewType) {
-        final FrameLayout layout = new FrameLayout(parent.getContext());
+        Context context = parent.getContext();
+        if (context == null)
+            context = getContext();
+
+        final FrameLayout layout = new FrameLayout(context);
         final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT

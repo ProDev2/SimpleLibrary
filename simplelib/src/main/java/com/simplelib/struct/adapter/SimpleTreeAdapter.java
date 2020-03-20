@@ -1,24 +1,33 @@
 package com.simplelib.struct.adapter;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 
 import com.simplelib.R;
+import com.simplelib.holder.ColorHolder;
 import com.simplelib.holder.ImageHolder;
 import com.simplelib.holder.TextHolder;
 import com.simplelib.interfaces.Item;
 import com.simplelib.interfaces.Selectable;
 import com.simplelib.struct.Tree;
 import com.simplelib.tools.Tools;
+import com.simplelib.tools.UIUtils;
 
 public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
+    private static final @ColorInt int DEFAULT_SELECTED_COLOR = 0x1F2196F3;
+    private static final @ColorInt int DEFAULT_PRESSED_COLOR = 0x1F2196F3;
+    private static final @AttrRes int DEFAULT_PRESSED_COLOR_RES = R.attr.colorControlHighlight;
+
     @IntRange(from = 0)
     public int levelOffset = Tools.dpToPx(20);
 
@@ -31,6 +40,12 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
     public final @NonNull ImageHolder defaultSubImage = ImageHolder.create();
     public final @NonNull TextHolder defaultText = TextHolder.create();
     public final @NonNull TextHolder defaultSubText = TextHolder.create();
+
+    public final @NonNull ColorHolder textColor = ColorHolder.create();
+    public final @NonNull ColorHolder subTextColor = ColorHolder.create();
+
+    public final @NonNull ColorHolder selectedColor = ColorHolder.create();
+    public final @NonNull ColorHolder pressedColor = ColorHolder.create();
 
     public boolean alwaysSelectable = false;
 
@@ -132,6 +147,11 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
         TextHolder.applyToOrHide(textHolder, holder.textView);
         TextHolder.applyToOrHide(subTextHolder, holder.subTextView);
 
+        ColorHolder.applyTo(textColor, holder.textView);
+        ColorHolder.applyTo(subTextColor, holder.subTextView);
+
+        ImageHolder.applyTo(arrow, holder.arrowView);
+
         if (holder.arrowView != null) {
             try {
                 holder.arrowView.clearAnimation();
@@ -144,7 +164,10 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
             }
         }
 
-        ImageHolder.applyTo(arrow, holder.arrowView);
+        // Bind background
+        bindBackground(view,
+                item,
+                element);
 
         // Bind listeners
         bindListener(view,
@@ -152,6 +175,12 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
                 holder,
                 item,
                 element);
+    }
+
+    protected void bindBackground(final @NonNull View view,
+                                  final Tree.Item item,
+                                  final @Nullable E element) {
+        applySelectableBackground(view, false);
     }
 
     private void bindListener(final @NonNull View view,
@@ -211,7 +240,7 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
                 onClickListener.onClick(item, element);
         });
 
-        view.setOnLongClickListener((View.OnLongClickListener) v -> {
+        view.setOnLongClickListener(v -> {
             if (onClickListener != null)
                 return onClickListener.onLongClick(item, element);
             return true;
@@ -219,12 +248,37 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
         });
     }
 
-    private final boolean isSelectable(E element) {
+    protected final boolean isSelectable(E element) {
         return element instanceof Selectable && ((Selectable) element).isSelectable();
     }
 
-    private final boolean isSelected(E element, boolean selectable) {
+    protected final boolean isSelected(E element, boolean selectable) {
         return selectable && ((Selectable) element).isSelected();
+    }
+
+    protected final void applySelectableBackground(final @NonNull View view,
+                                                   final boolean legacyStyle) {
+        Context context = view.getContext();
+        if (context == null)
+            context = getContext();
+
+        int animTime = -1;
+        try {
+            animTime = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
+        } catch (Exception ignored) {
+        } catch (Throwable tr) {
+            tr.printStackTrace();
+        }
+
+        int selectedColor = this.selectedColor.getColor(context, DEFAULT_SELECTED_COLOR);
+        int pressedColor = this.pressedColor.getColor(context, DEFAULT_PRESSED_COLOR_RES, DEFAULT_PRESSED_COLOR);
+
+        try {
+            UIUtils.applyEffect(context, view, selectedColor, pressedColor, animTime, null, legacyStyle);
+        } catch (Exception ignored) {
+        } catch (Throwable tr) {
+            tr.printStackTrace();
+        }
     }
 
     public interface OnClickListener<E extends Item> {
@@ -248,7 +302,7 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
             this.iconView = itemView.findViewById(R.id.tree_item_icon);
             this.subIconView = itemView.findViewById(R.id.tree_item_sub_icon);
             this.textView = itemView.findViewById(R.id.tree_item_text);
-            this.subTextView = itemView.findViewById(R.id.tree_item_subText);
+            this.subTextView = itemView.findViewById(R.id.tree_item_sub_text);
 
             this.arrowView = itemView.findViewById(R.id.tree_item_arrow);
         }

@@ -3,6 +3,7 @@ package com.prodev.simple.states;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.prodev.simple.R;
 import com.simplelib.adapter.SimpleRecyclerAdapter;
 import com.simplelib.container.SimpleCheckItem;
 import com.simplelib.container.SimpleItem;
@@ -12,11 +13,11 @@ public enum Fruits implements Tree.ItemCreator<String> {
     C1(1, "Category 1"),
         TEST(2, "Test"),
     C2(1, "Category 2"),
-    C3(1, "Category 3"),
+    C3(1, "Category 3", "Fruits"),
         APPLE(2, "Apple"),
         BANANA(2, "Banana"),
-            GOOD(3, "Good"),
-            BAD(3, "Bad"),
+            GOOD(3, "Good", "Selectable"),
+            BAD(3, "Bad", "Selectable"),
     C4(1, "Category 4"),
     C5(1, "Category 5");
 
@@ -50,6 +51,8 @@ public enum Fruits implements Tree.ItemCreator<String> {
         item.setCheckable(level > 1);
         item.setText(text);
         item.setSubText(subtext);
+
+        item.image.iconRes = R.mipmap.ic_launcher_round;
 
         return new FruitItem(item);
     }

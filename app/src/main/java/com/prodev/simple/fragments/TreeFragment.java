@@ -15,6 +15,7 @@ import com.prodev.simple.states.Fruits;
 import com.simplelib.SimpleFragment;
 import com.simplelib.container.SimpleFilter;
 import com.simplelib.container.SimpleItem;
+import com.simplelib.decoration.DividerTreeItemDecoration;
 import com.simplelib.struct.Tree;
 import com.simplelib.struct.adapter.SimpleTreeAdapter;
 
@@ -82,6 +83,21 @@ public class TreeFragment extends SimpleFragment {
         //treeAdapter.setShowRoot(true, false);
 
         recyclerView.setAdapter(treeAdapter);
+
+        // Add decoration
+        try {
+            while (recyclerView.getItemDecorationCount() > 0)
+                recyclerView.removeItemDecorationAt(0);
+        } catch (Exception e) {
+        }
+
+        DividerTreeItemDecoration treeItemDecoration = new DividerTreeItemDecoration(getActivity(), DividerTreeItemDecoration.VERTICAL);
+        treeItemDecoration.setVerticalInsets(20, 20);
+        treeItemDecoration.setShowAfter(false);
+        treeItemDecoration.setShowForFirst(false);
+        treeItemDecoration.setShowForLast(true);
+        treeItemDecoration.setShowForLevels(new int[] {1});
+        recyclerView.addItemDecoration(treeItemDecoration);
 
         // Create tree
         final Tree tree = Tree.with("", Fruits.class);

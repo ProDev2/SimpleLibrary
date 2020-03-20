@@ -8,6 +8,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.Build;
+
 import androidx.annotation.RequiresApi;
 
 import java.util.Arrays;
@@ -17,9 +18,7 @@ public class RippleTools {
         if (drawable == null) return false;
         if (isShapeDrawable(drawable))
             return true;
-        if (isStateListDrawable(drawable))
-            return true;
-        return false;
+        return isStateListDrawable(drawable);
     }
 
     public static boolean isShapeDrawable(Drawable drawable) {
@@ -34,7 +33,7 @@ public class RippleTools {
     public static boolean isStateListDrawable(Drawable drawable) {
         if (drawable == null) return false;
         return drawable instanceof StateListDrawable &&
-                ((StateListDrawable) drawable).getState() != null;
+                drawable.getState() != null;
     }
 
     public static Drawable getAdaptiveRippleDrawable(float rippleRadii, int normalColor, int pressedColor) {
@@ -61,13 +60,13 @@ public class RippleTools {
     public static StateListDrawable getStateListDrawable(
             int normalColor, int pressedColor) {
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_pressed},
+        states.addState(new int[] {android.R.attr.state_pressed},
                 new ColorDrawable(pressedColor));
-        states.addState(new int[]{android.R.attr.state_focused},
+        states.addState(new int[] {android.R.attr.state_focused},
                 new ColorDrawable(pressedColor));
-        states.addState(new int[]{android.R.attr.state_activated},
+        states.addState(new int[] {android.R.attr.state_activated},
                 new ColorDrawable(pressedColor));
-        states.addState(new int[]{},
+        states.addState(new int[] {},
                 new ColorDrawable(normalColor));
         return states;
     }

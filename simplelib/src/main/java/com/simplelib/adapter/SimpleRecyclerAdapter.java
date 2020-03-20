@@ -302,7 +302,11 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
     }
 
     public LayoutInflater getLayoutInflaterFrom(ViewGroup parent) {
-        return LayoutInflater.from(parent.getContext());
+        Context context = parent.getContext();
+        if (context == null)
+            context = getContext();
+
+        return LayoutInflater.from(context);
     }
 
     public View inflateLayout(ViewGroup parent, int layoutId) {

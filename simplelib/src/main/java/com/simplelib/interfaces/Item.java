@@ -1,20 +1,28 @@
 package com.simplelib.interfaces;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.simplelib.holder.ImageHolder;
 import com.simplelib.holder.TextHolder;
 
 public interface Item {
-    @NonNull
-    ImageHolder getImage();
+    @Nullable
+    default ImageHolder getImage() {
+        return null;
+    }
 
-    @NonNull
-    ImageHolder getSubImage();
+    @Nullable
+    default ImageHolder getSubImage() {
+        return null;
+    }
 
-    @NonNull
-    TextHolder getText();
+    @Nullable
+    default TextHolder getText() {
+        return null;
+    }
 
-    @NonNull
-    TextHolder getSubText();
+    @Nullable
+    default TextHolder getSubText() {
+        return null;
+    }
 }
