@@ -40,7 +40,7 @@ public enum Fruits implements Tree.ItemCreator<String> {
     }
 
     @Override
-    public int getLevel() {
+    public int getLevel(@Nullable String value) {
         return level;
     }
 
