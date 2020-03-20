@@ -156,12 +156,13 @@ public final class TextHolder {
     @Nullable
     public String getText(Context context, String defText) {
         String result = null;
-        if (text != null) {
+        if (result == null && text != null) {
             try {
                 result = text instanceof String ? (String) text : text.toString();
             } catch (Exception e) {
             }
-        } else if (textRes != null && context != null) {
+        }
+        if (result == null && textRes != null && context != null) {
             try {
                 result = context.getString(textRes);
             } catch (Exception e) {

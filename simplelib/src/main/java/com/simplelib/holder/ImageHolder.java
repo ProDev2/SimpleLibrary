@@ -1,8 +1,10 @@
 package com.simplelib.holder;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.View;
@@ -225,8 +227,6 @@ public final class ImageHolder {
     }
 
     /**
-     * this only handles Drawables
-     *
      * @param context
      * @return
      */
@@ -234,16 +234,47 @@ public final class ImageHolder {
     public Drawable getIcon(Context context) {
         Drawable icon = this.icon;
 
-        if (iconRes != null && context != null) {
+        if (icon == null && iconRes != null && context != null) {
             try {
                 icon = ContextCompat.getDrawable(context, iconRes);
             } catch (Exception e) {
+            } catch (OutOfMemoryError err) {
+                err.printStackTrace();
+                return null;
+            } catch (Throwable tr) {
+                tr.printStackTrace();
             }
-        } else if (uri != null && context != null) {
+        }
+        if (icon == null && bitmap != null) {
+            try {
+                Resources resources = context != null ? context.getResources() : null;
+                if (resources != null) {
+                    icon = this.icon = new BitmapDrawable(resources, bitmap);
+                } else {
+                    //noinspection deprecation
+                    icon = this.icon = new BitmapDrawable(bitmap);
+                }
+
+                if (icon != null && this.icon != null)
+                    bitmap = null;
+            } catch (Exception e) {
+            } catch (OutOfMemoryError err) {
+                err.printStackTrace();
+                return null;
+            } catch (Throwable tr) {
+                tr.printStackTrace();
+            }
+        }
+        if (icon == null && uri != null && context != null) {
             try {
                 InputStream inputStream = context.getContentResolver().openInputStream(uri);
                 icon = Drawable.createFromStream(inputStream, uri.toString());
             } catch (Exception e) {
+            } catch (OutOfMemoryError err) {
+                err.printStackTrace();
+                return null;
+            } catch (Throwable tr) {
+                tr.printStackTrace();
             }
         }
 
