@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public final class ImageHolder {
@@ -23,6 +22,11 @@ public final class ImageHolder {
     @NonNull
     public static ImageHolder create() {
         return new ImageHolder();
+    }
+
+    @NonNull
+    public static ImageHolder of(ImageHolder src) {
+        return new ImageHolder(src);
     }
 
     @NonNull
@@ -51,14 +55,19 @@ public final class ImageHolder {
     }
 
     // Holder
-    public Uri uri;
-    public Drawable icon;
-    public Bitmap bitmap;
+    public @Nullable Uri uri;
+    public @Nullable Drawable icon;
+    public @Nullable Bitmap bitmap;
     public @Nullable @DrawableRes Integer iconRes;
 
     public final @NonNull ColorHolder tint = ColorHolder.create();
 
     public ImageHolder() {
+    }
+
+    public ImageHolder(ImageHolder src) {
+        if (src != null)
+            src.applyTo(this);
     }
 
     public ImageHolder(String url) {
@@ -79,6 +88,18 @@ public final class ImageHolder {
 
     public ImageHolder(@DrawableRes int iconRes) {
         this.iconRes = iconRes;
+    }
+
+    public void applyTo(ImageHolder target) {
+        if (target == null)
+            return;
+
+        target.uri = uri;
+        target.icon = icon;
+        target.bitmap = bitmap;
+        target.iconRes = iconRes;
+
+        tint.applyTo(target.tint);
     }
 
     public boolean hasImage() {
@@ -115,31 +136,35 @@ public final class ImageHolder {
     }
 
     @NonNull
-    public ImageHolder setUrl(String url) {
-        this.uri = Uri.parse(url);
+    public ImageHolder setUrl(@Nullable String url) {
+        try {
+            this.uri = url != null ? Uri.parse(url) : null;
+        } catch (Exception e) {
+            this.uri = null;
+        }
         return this;
     }
 
     @NonNull
-    public ImageHolder setUri(Uri uri) {
+    public ImageHolder setUri(@Nullable Uri uri) {
         this.uri = uri;
         return this;
     }
 
     @NonNull
-    public ImageHolder setIcon(Drawable icon) {
+    public ImageHolder setIcon(@Nullable Drawable icon) {
         this.icon = icon;
         return this;
     }
 
     @NonNull
-    public ImageHolder setBitmap(Bitmap bitmap) {
+    public ImageHolder setBitmap(@Nullable Bitmap bitmap) {
         setBitmap(bitmap, true);
         return this;
     }
 
     @NonNull
-    public ImageHolder setBitmap(Bitmap bitmap, boolean recycle) {
+    public ImageHolder setBitmap(@Nullable Bitmap bitmap, boolean recycle) {
         if (recycle && this.bitmap != null && this.bitmap != bitmap) {
             try {
                 this.bitmap.recycle();
@@ -198,28 +223,28 @@ public final class ImageHolder {
     /**
      * this only handles Drawables
      *
-     * @param ctx
+     * @param context
      * @return
      */
     @Nullable
-    public Drawable getIcon(Context ctx) {
+    public Drawable getIcon(Context context) {
         Drawable icon = this.icon;
 
-        if (iconRes != null && ctx != null) {
+        if (iconRes != null && context != null) {
             try {
-                icon = ContextCompat.getDrawable(ctx, iconRes);
+                icon = ContextCompat.getDrawable(context, iconRes);
             } catch (Exception e) {
             }
-        } else if (uri != null && ctx != null) {
+        } else if (uri != null && context != null) {
             try {
-                InputStream inputStream = ctx.getContentResolver().openInputStream(uri);
+                InputStream inputStream = context.getContentResolver().openInputStream(uri);
                 icon = Drawable.createFromStream(inputStream, uri.toString());
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
             }
         }
 
         Integer color;
-        if (icon != null && tint != null && (color = tint.getColor(ctx)) != null) {
+        if (icon != null && tint != null && (color = tint.getColor(context)) != null) {
             icon = icon.mutate();
             icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         }
@@ -257,6 +282,17 @@ public final class ImageHolder {
             imageView.clearColorFilter();
         }
         return true;
+    }
+
+    /**
+     * a small static helper which catches nulls for us
+     *
+     * @param imageHolder
+     * @param context
+     * @return
+     */
+    public static Drawable getIcon(ImageHolder imageHolder, Context context) {
+        return imageHolder != null ? imageHolder.getIcon(context) : null;
     }
 
     /**
@@ -302,17 +338,6 @@ public final class ImageHolder {
                 imageView.setVisibility(View.GONE);
             }
         }
-    }
-
-    /**
-     * a small static helper which catches nulls for us
-     *
-     * @param imageHolder
-     * @param ctx
-     * @return
-     */
-    public static Drawable getIcon(ImageHolder imageHolder, Context ctx) {
-        return imageHolder != null ? imageHolder.getIcon(ctx) : null;
     }
 
     /**

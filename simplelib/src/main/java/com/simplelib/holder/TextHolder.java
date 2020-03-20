@@ -16,6 +16,16 @@ public final class TextHolder {
     }
 
     @NonNull
+    public static TextHolder of(TextHolder src) {
+        return new TextHolder(src);
+    }
+
+    @NonNull
+    public static TextHolder of(TextHolder prefix, TextHolder src, TextHolder suffix) {
+        return new TextHolder(prefix, src, suffix);
+    }
+
+    @NonNull
     public static TextHolder withText(CharSequence text) {
         return new TextHolder(text);
     }
@@ -31,10 +41,27 @@ public final class TextHolder {
     }
 
     // Holder
-    public CharSequence text;
+    public @Nullable CharSequence text;
     public @Nullable @StringRes Integer textRes;
 
+    public @Nullable TextHolder prefix;
+    public @Nullable TextHolder suffix;
+
     public TextHolder() {
+    }
+
+    public TextHolder(TextHolder src) {
+        if (src != null)
+            src.applyTo(this);
+    }
+
+    public TextHolder(TextHolder prefix, TextHolder src, TextHolder suffix) {
+        if (prefix != null)
+            this.prefix = TextHolder.of(prefix);
+        if (src != null)
+            src.applyTo(this);
+        if (suffix != null)
+            this.suffix = TextHolder.of(suffix);
     }
 
     public TextHolder(CharSequence text) {
@@ -49,47 +76,116 @@ public final class TextHolder {
         this.textRes = textRes;
     }
 
+    public void applyTo(TextHolder target) {
+        if (target == null)
+            return;
+
+        target.text = text;
+        target.textRes = textRes;
+
+        target.prefix = prefix != null ? TextHolder.of(prefix) : null;
+        target.suffix = suffix != null ? TextHolder.of(suffix) : null;
+    }
+
     public boolean hasText() {
         return this.text != null ||
-                this.textRes != null;
+                this.textRes != null ||
+                (this.prefix != null && this.prefix != this && this.prefix.hasText()) ||
+                (this.suffix != null && this.suffix != this && this.suffix.hasText());
     }
 
     @NonNull
     public TextHolder clear() {
         this.text = null;
         this.textRes = null;
+
+        if (this.prefix != null) this.prefix.clear();
+        if (this.suffix != null) this.suffix.clear();
+        this.prefix = null;
+        this.suffix = null;
         return this;
     }
 
     @NonNull
-    public TextHolder setText(CharSequence text) {
+    public TextHolder setText(@Nullable CharSequence text) {
         this.text = text;
         return this;
     }
 
     @NonNull
-    public TextHolder setTextRes(int textRes) {
+    public TextHolder setTextRes(@Nullable Integer textRes) {
         this.textRes = textRes;
         return this;
     }
 
+    @NonNull
+    public TextHolder getPrefix() {
+        if (prefix == null)
+            prefix = TextHolder.create();
+        return prefix;
+    }
+
+    @NonNull
+    public TextHolder setPrefix(@Nullable TextHolder prefix) {
+        if (prefix == this)
+            prefix = TextHolder.of(prefix);
+        this.prefix = prefix;
+        return this;
+    }
+
+    @NonNull
+    public TextHolder getSuffix() {
+        if (suffix == null)
+            suffix = TextHolder.create();
+        return suffix;
+    }
+
+    @NonNull
+    public TextHolder setSuffix(@Nullable TextHolder suffix) {
+        if (suffix == this)
+            suffix = TextHolder.of(suffix);
+        this.suffix = suffix;
+        return this;
+    }
+
     @Nullable
-    public String getText(Context ctx) {
+    public String getText(Context context) {
+        return getText(context, null);
+    }
+
+    @Nullable
+    public String getText(Context context, String defText) {
+        String result = null;
         if (text != null) {
-            return text instanceof String ? (String) text : text.toString();
-        } else if (textRes != null && ctx != null) {
             try {
-                return ctx.getString(textRes);
+                result = text instanceof String ? (String) text : text.toString();
+            } catch (Exception e) {
+            }
+        } else if (textRes != null && context != null) {
+            try {
+                result = context.getString(textRes);
             } catch (Exception e) {
             }
         }
-        return null;
+        if (result == null)
+            result = defText;
+
+        String pre = prefix != null && prefix != this ? prefix.getText(context) : null;
+        String suf = suffix != null && suffix != this ? suffix.getText(context) : null;
+        if (result != null || pre != null || suf != null) {
+            return (pre != null ? pre : "") +
+                    (result != null ? result : "") +
+                    (suf != null ? suf : "");
+        } else {
+            return null;
+        }
     }
 
     public void applyTo(TextView textView) {
         if (textView == null)
             return;
 
+        String text = getText(textView.getContext());
         if (text != null) {
             textView.setText(text);
         } else if (textRes != null) {
@@ -103,6 +199,7 @@ public final class TextHolder {
         if (textView == null)
             return false;
 
+        String text = getText(textView.getContext());
         if (text != null) {
             textView.setText(text);
             textView.setVisibility(View.VISIBLE);
@@ -128,10 +225,19 @@ public final class TextHolder {
         }
     }
 
+    @Nullable
+    public static String getText(TextHolder text, Context context) {
+        return text != null ? text.getText(context) : null;
+    }
+
+    @Nullable
+    public static String getText(TextHolder text, Context context, String defText) {
+        return text != null ? text.getText(context, defText) : defText;
+    }
+
     public static void applyTo(TextHolder text, TextView textView) {
-        if (text != null && textView != null) {
+        if (text != null && textView != null)
             text.applyTo(textView);
-        }
     }
 
     public static boolean applyToOrHide(TextHolder text, TextView textView) {

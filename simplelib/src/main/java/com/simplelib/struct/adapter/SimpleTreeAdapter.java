@@ -150,7 +150,7 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
         ColorHolder.applyTo(textColor, holder.textView);
         ColorHolder.applyTo(subTextColor, holder.subTextView);
 
-        ImageHolder.applyTo(arrow, holder.arrowView);
+        ImageHolder.applyToOrSetGone(arrow, holder.arrowView);
 
         if (holder.arrowView != null) {
             try {

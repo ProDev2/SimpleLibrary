@@ -24,6 +24,11 @@ public final class ColorHolder {
     }
 
     @NonNull
+    public static ColorHolder of(ColorHolder src) {
+        return new ColorHolder(src);
+    }
+
+    @NonNull
     public static ColorHolder withColor(@ColorInt int color) {
         final ColorHolder colorHolder = new ColorHolder();
         colorHolder.color = color;
@@ -42,6 +47,19 @@ public final class ColorHolder {
     public @Nullable @ColorRes Integer colorRes;
 
     public ColorHolder() {
+    }
+
+    public ColorHolder(ColorHolder src) {
+        if (src != null)
+            src.applyTo(this);
+    }
+
+    public void applyTo(ColorHolder target) {
+        if (target == null)
+            return;
+
+        target.color = color;
+        target.colorRes = colorRes;
     }
 
     public boolean hasColor() {
@@ -66,37 +84,37 @@ public final class ColorHolder {
     /**
      * a small helper to get the color from the colorHolder
      *
-     * @param ctx
+     * @param context
      * @return
      */
-    public int getColorInt(Context ctx) {
-        final Integer color = getColor(ctx);
+    public int getColorInt(Context context) {
+        final Integer color = getColor(context);
         return color != null ? color : 0;
     }
 
     /**
      * a small helper to get the color from the colorHolder
      *
-     * @param ctx
+     * @param context
      * @param defColor
      * @return
      */
-    public int getColor(Context ctx, @ColorInt int defColor) {
-        final Integer color = getColor(ctx);
+    public int getColor(Context context, @ColorInt int defColor) {
+        final Integer color = getColor(context);
         return color != null ? color : defColor;
     }
 
     /**
      * a small helper to get the color from the colorHolder
      *
-     * @param ctx
+     * @param context
      * @return
      */
     @Nullable
-    public Integer getColor(Context ctx) {
-        if (color == null && colorRes != null && ctx != null) {
+    public Integer getColor(Context context) {
+        if (color == null && colorRes != null && context != null) {
             try {
-                color = ContextCompat.getColor(ctx, colorRes);
+                color = ContextCompat.getColor(context, colorRes);
             } catch (Exception e) {
             }
         }
@@ -106,15 +124,15 @@ public final class ColorHolder {
     /**
      * a small helper to get the color from the colorHolder
      *
-     * @param ctx
+     * @param context
      * @param attr
      * @param defColor
      * @return
      */
-    public int getColor(Context ctx, @AttrRes int attr, @ColorInt int defColor) {
-        final Integer color = getColor(ctx);
+    public int getColor(Context context, @AttrRes int attr, @ColorInt int defColor) {
+        final Integer color = getColor(context);
         try {
-            return color != null ? color : UIUtils.getColor(ctx, attr, defColor);
+            return color != null ? color : UIUtils.getColor(context, attr, defColor);
         } catch (Exception e) {
             return defColor;
         } catch (Throwable tr) {
@@ -127,14 +145,14 @@ public final class ColorHolder {
     /**
      * set the textColor of the ColorHolder to an drawable
      *
-     * @param ctx
+     * @param context
      * @param drawable
      */
-    public void applyTo(Context ctx, GradientDrawable drawable) {
+    public void applyTo(Context context, GradientDrawable drawable) {
         if (drawable == null)
             return;
 
-        final Integer color = getColor(ctx);
+        final Integer color = getColor(context);
         if (color != null) {
             drawable.setColor(color);
         }
@@ -194,34 +212,34 @@ public final class ColorHolder {
      * a small static helper class to get the color from the colorHolder
      *
      * @param colorHolder
-     * @param ctx
+     * @param context
      * @return
      */
-    public static int getColorInt(ColorHolder colorHolder, Context ctx) {
-        return colorHolder != null ? colorHolder.getColorInt(ctx) : 0;
+    public static int getColorInt(ColorHolder colorHolder, Context context) {
+        return colorHolder != null ? colorHolder.getColorInt(context) : 0;
     }
 
     /**
      * a small static helper class to get the color from the colorHolder
      *
      * @param colorHolder
-     * @param ctx
+     * @param context
      * @return
      */
-    public static int getColor(ColorHolder colorHolder, Context ctx, @ColorInt int defColor) {
-        return colorHolder != null ? colorHolder.getColor(ctx, defColor) : defColor;
+    public static int getColor(ColorHolder colorHolder, Context context, @ColorInt int defColor) {
+        return colorHolder != null ? colorHolder.getColor(context, defColor) : defColor;
     }
 
     /**
      * a small static helper class to get the color from the colorHolder
      *
      * @param colorHolder
-     * @param ctx
+     * @param context
      * @return
      */
     @Nullable
-    public static Integer getColor(ColorHolder colorHolder, Context ctx) {
-        return colorHolder != null ? colorHolder.getColor(ctx) : null;
+    public static Integer getColor(ColorHolder colorHolder, Context context) {
+        return colorHolder != null ? colorHolder.getColor(context) : null;
     }
 
     /**
@@ -255,12 +273,12 @@ public final class ColorHolder {
      * a small static helper to set the color to a GradientDrawable null save
      *
      * @param colorHolder
-     * @param ctx
+     * @param context
      * @param gradientDrawable
      */
-    public static void applyToOrTransparent(ColorHolder colorHolder, Context ctx, GradientDrawable gradientDrawable) {
+    public static void applyToOrTransparent(ColorHolder colorHolder, Context context, GradientDrawable gradientDrawable) {
         if (colorHolder != null && gradientDrawable != null) {
-            colorHolder.applyTo(ctx, gradientDrawable);
+            colorHolder.applyTo(context, gradientDrawable);
         } else if (gradientDrawable != null) {
             gradientDrawable.setColor(Color.TRANSPARENT);
         }
