@@ -70,23 +70,27 @@ public final class ImageHolder {
             src.applyTo(this);
     }
 
-    public ImageHolder(String url) {
-        this.uri = Uri.parse(url);
+    public ImageHolder(@Nullable String url) {
+        try {
+            this.uri = url != null ? Uri.parse(url) : null;
+        } catch (Exception e) {
+            this.uri = null;
+        }
     }
 
-    public ImageHolder(Uri uri) {
+    public ImageHolder(@Nullable Uri uri) {
         this.uri = uri;
     }
 
-    public ImageHolder(Drawable icon) {
+    public ImageHolder(@Nullable Drawable icon) {
         this.icon = icon;
     }
 
-    public ImageHolder(Bitmap bitmap) {
+    public ImageHolder(@Nullable Bitmap bitmap) {
         this.bitmap = bitmap;
     }
 
-    public ImageHolder(@DrawableRes int iconRes) {
+    public ImageHolder(@Nullable @DrawableRes Integer iconRes) {
         this.iconRes = iconRes;
     }
 

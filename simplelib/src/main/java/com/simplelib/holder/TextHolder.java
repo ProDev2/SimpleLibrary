@@ -64,15 +64,15 @@ public final class TextHolder {
             this.suffix = TextHolder.of(suffix);
     }
 
-    public TextHolder(CharSequence text) {
+    public TextHolder(@Nullable CharSequence text) {
         this.text = text;
     }
 
-    public TextHolder(String text) {
+    public TextHolder(@Nullable String text) {
         this.text = text;
     }
 
-    public TextHolder(@StringRes int textRes) {
+    public TextHolder(@Nullable @StringRes Integer textRes) {
         this.textRes = textRes;
     }
 
