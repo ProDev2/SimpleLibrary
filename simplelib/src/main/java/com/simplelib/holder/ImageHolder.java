@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.simplelib.tools.SessionTools;
+
 import java.io.InputStream;
 
 public final class ImageHolder {
@@ -234,17 +236,6 @@ public final class ImageHolder {
     public Drawable getIcon(Context context) {
         Drawable icon = this.icon;
 
-        if (icon == null && iconRes != null && context != null) {
-            try {
-                icon = ContextCompat.getDrawable(context, iconRes);
-            } catch (Exception e) {
-            } catch (OutOfMemoryError err) {
-                err.printStackTrace();
-                return null;
-            } catch (Throwable tr) {
-                tr.printStackTrace();
-            }
-        }
         if (icon == null && bitmap != null) {
             try {
                 Resources resources = context != null ? context.getResources() : null;
@@ -260,19 +251,32 @@ public final class ImageHolder {
             } catch (Exception e) {
             } catch (OutOfMemoryError err) {
                 err.printStackTrace();
-                return null;
             } catch (Throwable tr) {
                 tr.printStackTrace();
             }
         }
         if (icon == null && uri != null && context != null) {
+            InputStream inputStream = null;
             try {
-                InputStream inputStream = context.getContentResolver().openInputStream(uri);
-                icon = Drawable.createFromStream(inputStream, uri.toString());
+                inputStream = context.getContentResolver().openInputStream(uri);
+                if (inputStream != null) {
+                    icon = this.icon = Drawable.createFromStream(inputStream, uri.toString());
+                }
             } catch (Exception e) {
             } catch (OutOfMemoryError err) {
                 err.printStackTrace();
-                return null;
+            } catch (Throwable tr) {
+                tr.printStackTrace();
+            } finally {
+                SessionTools.closeWithoutFail(inputStream);
+            }
+        }
+        if (icon == null && iconRes != null && context != null) {
+            try {
+                icon = ContextCompat.getDrawable(context, iconRes);
+            } catch (Exception e) {
+            } catch (OutOfMemoryError err) {
+                err.printStackTrace();
             } catch (Throwable tr) {
                 tr.printStackTrace();
             }
