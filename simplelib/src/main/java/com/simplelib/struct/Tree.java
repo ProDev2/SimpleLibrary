@@ -30,8 +30,8 @@ public final class Tree {
                 if (curGroup == null || (curGroupLevel = curGroup.getLevel()) < 0)
                     throw new IllegalStateException("Something went wrong");
 
-                int level = itemCreator.getLevel(value);
-                if (level == -1)
+                Integer level = itemCreator.getLevel(value);
+                if (level == null)
                     continue;
                 if (level <= 0 || level > curGroupLevel + 1)
                     throw new IllegalStateException("Item cannot be placed at level " + level);
@@ -66,8 +66,9 @@ public final class Tree {
 
     // Tree initialization adapter
     public interface ItemCreator<V> {
-        @IntRange(from = -1)
-        int getLevel(@Nullable V value);
+        @Nullable
+        @IntRange(from = 1)
+        Integer getLevel(@Nullable V value);
 
         @NonNull
         Item create(@Nullable V value);
