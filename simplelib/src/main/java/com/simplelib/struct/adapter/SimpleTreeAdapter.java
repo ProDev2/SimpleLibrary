@@ -108,7 +108,7 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
     @Override
     protected View createTreeView(@NonNull ViewGroup parent,
                                   int viewType) {
-        return inflateLayout(parent, R.layout.tree_item);
+        return inflateLayout(parent, R.layout.simple_tree_item);
     }
 
     @Override
