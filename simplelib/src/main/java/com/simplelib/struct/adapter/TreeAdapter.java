@@ -251,15 +251,15 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
         }
     }
 
-    private void addChildItemsToList(@NonNull Tree.ItemGroup group, @NonNull List<Tree.Item> list) {
-        synchronized (group) {
-            int childCount = group.getChildCount();
+    private void addChildItemsToList(@NonNull Tree.ItemManager itemManager, @NonNull List<Tree.Item> list) {
+        synchronized (itemManager) {
+            int childCount = itemManager.getChildCount();
             for (int pos = 0; pos < childCount; pos++) {
-                Tree.Item child = group.getChildAt(pos);
+                Tree.Item child = itemManager.getChildAt(pos);
                 list.add(child);
 
-                if (child instanceof Tree.ItemGroup)
-                    addChildItemsToList((Tree.ItemGroup) child, list);
+                if (child instanceof Tree.ItemManager)
+                    addChildItemsToList((Tree.ItemManager) child, list);
             }
         }
     }

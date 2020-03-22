@@ -516,26 +516,34 @@ public final class Tree {
         private Helper() {
         }
 
-        public static void expandAllLevels(@Nullable final Tree tree) {
-            expandAllLevels(tree != null ? tree.getRoot() : null);
+        public static boolean setAllLevelsExpanded(@Nullable final Tree tree, boolean expanded) {
+            return setAllLevelsExpanded(tree != null ? tree.getRoot() : null, expanded);
         }
 
-        public static void expandAllLevels(@Nullable final Item item) {
+        public static boolean setAllLevelsExpanded(@Nullable final Item item, boolean expanded) {
             if (item == null)
-                return;
-            if (!(item instanceof ItemGroup))
-                return;
+                return true;
 
-            final ItemGroup group = (ItemGroup) item;
-            group.setExpanded(true);
+            boolean applied = true;
 
-            synchronized (group) {
-                int childCount = group.getChildCount();
-                for (int pos = 0; pos < childCount; pos++) {
-                    Item childItem = group.getChildAt(pos);
-                    expandAllLevels(childItem);
+            if (item instanceof ItemGroup) {
+                final ItemGroup group = (ItemGroup) item;
+                final boolean changeNeeded = group.isExpanded() != expanded;
+                applied = !changeNeeded || group.setExpanded(expanded);
+            }
+
+            if (item instanceof ItemManager) {
+                final ItemManager itemManager = (ItemManager) item;
+                synchronized (itemManager) {
+                    int childCount = itemManager.getChildCount();
+                    for (int pos = 0; pos < childCount; pos++) {
+                        Item childItem = itemManager.getChildAt(pos);
+                        applied &= setAllLevelsExpanded(childItem, expanded);
+                    }
                 }
             }
+
+            return applied;
         }
     }
 }

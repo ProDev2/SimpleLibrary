@@ -101,7 +101,7 @@ public class TreeFragment extends SimpleFragment {
 
         // Create tree
         final Tree tree = Tree.with("", Fruits.class);
-        Tree.Helper.expandAllLevels(tree);
+        Tree.Helper.setAllLevelsExpanded(tree, true);
         treeAdapter.setTree(tree, true);
     }
 }
