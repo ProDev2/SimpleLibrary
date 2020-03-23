@@ -58,6 +58,8 @@ public abstract class ListLoader<K, V, E> {
     public static final long NO_EXECUTION_DELAY = -1;
 
     // ListLoader
+    private final Object lock = new Object();
+
     private IMap<K, E> map;
 
     private Looper looper;
@@ -320,130 +322,140 @@ public abstract class ListLoader<K, V, E> {
         return (v & c) == c;
     }
 
-    public final synchronized boolean isStarted() {
-        if (task == null)
-            return false;
+    public final boolean isStarted() {
+        synchronized (lock) {
+            if (task == null)
+                return false;
 
-        return task.isStarted();
+            return task.isStarted();
+        }
     }
 
-    public final synchronized boolean isLoading() {
-        if (task == null)
-            return false;
+    public final boolean isLoading() {
+        synchronized (lock) {
+            if (task == null)
+                return false;
 
-        return task.isLoading();
+            return task.isLoading();
+        }
     }
 
-    public final synchronized Task load(K key, V value, int flags) {
+    public final Task load(K key, V value, int flags) {
         return load(key, value, flags, null, null);
     }
 
-    public final synchronized Task load(K key, V value, int flags, OnLoadingListener<K, V, E> onLoadingListener) {
+    public final Task load(K key, V value, int flags, OnLoadingListener<K, V, E> onLoadingListener) {
         return load(key, value, flags, null, onLoadingListener);
     }
 
-    public final synchronized Task load(K key, V value, int flags, Comparator<E> comparator) {
+    public final Task load(K key, V value, int flags, Comparator<E> comparator) {
         return load(key, value, flags, comparator, null);
     }
 
-    public final synchronized Task load(K key, V value, int flags, Comparator<E> comparator, OnLoadingListener<K, V, E> onLoadingListener) {
-        boolean loading = true;
-        try {
-            flags = onModifyFlags(flags);
-
-            key = onModifyKey(key);
-            value = onModifyValue(value);
-
-            comparator = onModifyComparator(comparator);
-
-            if (loading && !has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(flags, key, value))
-                loading = false;
-            if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(flags, key, value))
-                loading = false;
-        } catch (Exception e) {
-            Logger.w(TAG, "Failed to prepare for loading", e);
-            loading = false;
-        }
-
-        if (loading) {
-            release();
-            task = null;
-
+    public final Task load(K key, V value, int flags, Comparator<E> comparator, OnLoadingListener<K, V, E> onLoadingListener) {
+        synchronized (lock) {
+            boolean loading = true;
             try {
-                onPrepareLoading(flags, key, value);
+                flags = onModifyFlags(flags);
+
+                key = onModifyKey(key);
+                value = onModifyValue(value);
+
+                comparator = onModifyComparator(comparator);
+
+                if (loading && !has(flags, FLAG_SKIP_KEY_CHECK) && !isKeyLoadable(flags, key, value))
+                    loading = false;
+                if (loading && !has(flags, FLAG_SKIP_VALUE_CHECK) && !isValueLoadable(flags, key, value))
+                    loading = false;
             } catch (Exception e) {
-                Logger.w(TAG, "Failed to prepare loading", e);
+                Logger.w(TAG, "Failed to prepare for loading", e);
+                loading = false;
             }
 
-            boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
-            List<E> list = getList(key, createListIfNeeded);
-
-            try {
-                list = onPrepareList(flags, key, value, list);
-            } catch (Exception e) {
-                Logger.w(TAG, "Failed to prepare list", e);
-            }
-
-            task = new Task(flags, key, value, list, comparator, onLoadingListener);
-            task.setAccessible(accessible);
-            try {
-                task.start();
-            } catch (Exception e) {
-                Logger.w(TAG, "Failed start the background loading task", e);
-
+            if (loading) {
                 release();
                 task = null;
 
-                loading = false;
+                try {
+                    onPrepareLoading(flags, key, value);
+                } catch (Exception e) {
+                    Logger.w(TAG, "Failed to prepare loading", e);
+                }
+
+                boolean createListIfNeeded = !has(flags, FLAG_DO_NOT_STORE);
+                List<E> list = getList(key, createListIfNeeded);
+
+                try {
+                    list = onPrepareList(flags, key, value, list);
+                } catch (Exception e) {
+                    Logger.w(TAG, "Failed to prepare list", e);
+                }
+
+                task = new Task(flags, key, value, list, comparator, onLoadingListener);
+                task.setAccessible(accessible);
+                try {
+                    task.start();
+                } catch (Exception e) {
+                    Logger.w(TAG, "Failed start the background loading task", e);
+
+                    release();
+                    task = null;
+
+                    loading = false;
+                }
             }
-        }
 
-        try {
-            if (onLoadingListener != null)
-                onLoadingListener.onListLoadingStarted(loading, flags, key, value);
-        } catch (Exception e) {
-            Logger.w(TAG, "Failed to handle the list loading", e);
-        }
-
-        try {
-            ListLoader.this.onListLoadingStarted(loading, flags, key, value);
-        } catch (Exception e) {
-            Logger.w(TAG, "Failed to handle the list loading", e);
-        }
-
-        return loading ? task : null;
-    }
-
-    public final synchronized boolean cancel() {
-        if (task == null)
-            return false;
-
-        boolean canceled = false;
-        if (task.isLoading()) {
             try {
-                task.cancel();
-                canceled = true;
+                if (onLoadingListener != null)
+                    onLoadingListener.onListLoadingStarted(loading, flags, key, value);
             } catch (Exception e) {
-                Logger.wtf(TAG, "Failed to cancel the current loader", e);
+                Logger.w(TAG, "Failed to handle the list loading", e);
             }
-        }
 
-        return canceled;
+            try {
+                ListLoader.this.onListLoadingStarted(loading, flags, key, value);
+            } catch (Exception e) {
+                Logger.w(TAG, "Failed to handle the list loading", e);
+            }
+
+            return loading ? task : null;
+        }
     }
 
-    public final synchronized boolean release() {
-        if (task == null)
-            return false;
+    public final boolean cancel() {
+        synchronized (lock) {
+            if (task == null)
+                return false;
 
-        boolean released = false;
-        try {
-            released = cancel();
-        } catch (Exception e) {
-            Logger.w(TAG, "Failed to release the current loader", e);
+            boolean canceled = false;
+            if (task.isLoading()) {
+                try {
+                    task.cancel();
+                    canceled = true;
+                } catch (Exception e) {
+                    Logger.wtf(TAG, "Failed to cancel the current loader", e);
+                }
+            }
+
+            return canceled;
         }
-        task = null;
+    }
 
-        return released;
+    public final boolean release() {
+        synchronized (lock) {
+            if (task == null)
+                return false;
+
+            boolean released = false;
+            try {
+                released = cancel();
+            } catch (Exception e) {
+                Logger.w(TAG, "Failed to release the current loader", e);
+            }
+            task = null;
+
+            return released;
+        }
     }
 
     public final void throwIfNoLoader() {
