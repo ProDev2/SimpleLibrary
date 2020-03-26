@@ -121,6 +121,8 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
 
         recyclerView = (RecyclerView) findViewById(0);
         recyclerView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        recyclerView.setVerticalScrollBarEnabled(false);
+        recyclerView.setHorizontalScrollBarEnabled(false);
 
         manager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(manager);
@@ -140,6 +142,10 @@ public class SimpleBubbleMenuPopup extends SimplePopup {
         if (filter != null)
             adapter.setFilter(filter, false);
         recyclerView.setAdapter(adapter);
+    }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
     }
 
     @Override
