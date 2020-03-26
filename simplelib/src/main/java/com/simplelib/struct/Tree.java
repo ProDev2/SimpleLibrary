@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public final class Tree {
     // Static variables
@@ -516,11 +517,11 @@ public final class Tree {
         private Helper() {
         }
 
-        public static boolean setAllLevelsExpanded(@Nullable final Tree tree, boolean expanded) {
+        public static boolean setAllLevelsExpanded(@Nullable Tree tree, boolean expanded) {
             return setAllLevelsExpanded(tree != null ? tree.getRoot() : null, expanded);
         }
 
-        public static boolean setAllLevelsExpanded(@Nullable final Item item, boolean expanded) {
+        public static boolean setAllLevelsExpanded(@Nullable Item item, boolean expanded) {
             if (item == null)
                 return true;
 
@@ -540,6 +541,34 @@ public final class Tree {
                         Item childItem = itemManager.getChildAt(pos);
                         applied &= setAllLevelsExpanded(childItem, expanded);
                     }
+                }
+            }
+
+            return applied;
+        }
+
+        public static boolean setLevelExpanded(@Nullable Item item, boolean expanded) {
+            if (item == null)
+                return true;
+
+            final Stack<Item> itemStack = new Stack<>();
+            while (item != null) {
+                itemStack.push(item);
+
+                if (item.isRoot())
+                    break;
+                item = item.getParent();
+            }
+
+            boolean applied = true;
+
+            while (applied && !itemStack.isEmpty()) {
+                item = itemStack.pop();
+
+                if (item instanceof ItemGroup) {
+                    final ItemGroup group = (ItemGroup) item;
+                    final boolean changeNeeded = group.isExpanded() != expanded;
+                    applied = !changeNeeded || group.setExpanded(expanded);
                 }
             }
 
