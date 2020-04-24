@@ -60,6 +60,10 @@ public class ScrollHelper extends GestureHelper implements Runnable {
         maxScrollY = -1;
     }
 
+    public boolean isScrolling() {
+        return canScroll;
+    }
+
     public ScrollHelper setScrollAdapter(ScrollAdapter adapter) {
         this.adapter = adapter;
         return this;
