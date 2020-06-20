@@ -32,11 +32,11 @@ public final class ID {
         return registerPool(poolId, 0, 0);
     }
 
-    public static Pool<Object> registerPool(String poolId, int min, int max) {
+    public static Pool<Object> registerPool(String poolId, int offset, int count) {
         if (poolId == null)
             return null;
 
-        Pool<Object> pool = new Pool<>(min, max);
+        Pool<Object> pool = new Pool<>(offset, count);
         return registerPool(poolId, pool);
     }
 
@@ -44,11 +44,11 @@ public final class ID {
         return registerPool(poolId, poolCls, 0, 0);
     }
 
-    public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls, int min, int max) {
+    public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls, int offset, int count) {
         if (poolId == null || poolCls == null)
             return null;
 
-        Pool<E> pool = new Pool<>(min, max);
+        Pool<E> pool = new Pool<>(offset, count);
         return registerPool(poolId, pool);
     }
 
@@ -266,9 +266,9 @@ public final class ID {
             this(0, 0);
         }
 
-        public Pool(int idOffset, int idCount) {
-            mOff = Math.max(idOffset, 0);
-            mLen = Math.max(idCount, 0);
+        public Pool(int offset, int count) {
+            mOff = Math.max(offset, 0);
+            mLen = Math.max(count, 0);
 
             mList = new ArrayList<>();
             mCursor = 0;
