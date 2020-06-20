@@ -5,18 +5,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
+@SuppressWarnings({
+        "unused",
+        "SynchronizationOnLocalVariableOrMethodParameter"
+})
 public final class ID {
-    private static Map<String, Pool> poolMap;
+    private static Map<String, Pool<?>> poolMap;
 
-    private static Map<String, Pool> getPoolMap() {
+    private static Map<String, Pool<?>> getPoolMap() {
         if (poolMap == null)
             poolMap = new HashMap<>();
         return poolMap;
     }
 
     public static void unregisterAllPools() {
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return;
         synchronized (poolMap) {
             poolMap.clear();
@@ -24,7 +29,7 @@ public final class ID {
     }
 
     public static Pool<Object> registerPool(String poolId) {
-        return registerPool(poolId, -1, -1);
+        return registerPool(poolId, 0, 0);
     }
 
     public static Pool<Object> registerPool(String poolId, int min, int max) {
@@ -36,7 +41,7 @@ public final class ID {
     }
 
     public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls) {
-        return registerPool(poolId, poolCls, -1, -1);
+        return registerPool(poolId, poolCls, 0, 0);
     }
 
     public static <E> Pool<E> registerPool(String poolId, Class<E> poolCls, int min, int max) {
@@ -51,7 +56,7 @@ public final class ID {
         if (poolId == null || pool == null)
             return null;
 
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return null;
         synchronized (poolMap) {
             poolMap.put(poolId, pool);
@@ -64,10 +69,15 @@ public final class ID {
         if (poolId == null)
             return null;
 
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return null;
         synchronized (poolMap) {
-            return poolMap.remove(poolId);
+            try {
+                return (Pool<E>) poolMap.remove(poolId);
+            } catch (Throwable tr) {
+                tr.printStackTrace();
+            }
+            return null;
         }
     }
 
@@ -75,7 +85,7 @@ public final class ID {
         if (poolId == null)
             return false;
 
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return false;
         synchronized (poolMap) {
             return poolMap.containsKey(poolId);
@@ -87,7 +97,7 @@ public final class ID {
         if (poolId == null || poolCls == null)
             return null;
 
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return null;
         synchronized (poolMap) {
             try {
@@ -104,16 +114,20 @@ public final class ID {
         if (poolId == null)
             return null;
 
-        Map<String, Pool> poolMap = getPoolMap();
+        Map<String, Pool<?>> poolMap = getPoolMap();
         if (poolMap == null) return null;
         synchronized (poolMap) {
-            return poolMap.get(poolId);
+            try {
+                return (Pool<E>) poolMap.get(poolId);
+            } catch (Throwable tr) {
+                tr.printStackTrace();
+            }
+            return null;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E> Pool.IdIterator<E> getIdIterator(String poolId) {
-        Pool pool = null;
+    public static Pool.IdIterator getIdIterator(String poolId) {
+        Pool<?> pool = null;
         try {
             pool = getPool(poolId);
         } catch (Throwable tr) {
@@ -124,9 +138,8 @@ public final class ID {
         return pool.getIdIterator();
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> Pool.EntryIterator<E> getEntryIterator(String poolId) {
-        Pool pool = null;
+        Pool<E> pool = null;
         try {
             pool = getPool(poolId);
         } catch (Throwable tr) {
@@ -138,7 +151,7 @@ public final class ID {
     }
 
     public static void clear(String poolId) {
-        Pool pool = null;
+        Pool<?> pool = null;
         try {
             pool = getPool(poolId);
         } catch (Throwable tr) {
@@ -150,7 +163,7 @@ public final class ID {
     }
 
     public static boolean has(String poolId, int id) {
-        Pool pool = null;
+        Pool<?> pool = null;
         try {
             pool = getPool(poolId);
         } catch (Throwable tr) {
@@ -161,7 +174,6 @@ public final class ID {
         return pool.hasId(id);
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> E get(String poolId, int id) {
         Pool<E> pool = null;
         try {
@@ -174,7 +186,18 @@ public final class ID {
         return pool.get(id);
     }
 
-    @SuppressWarnings("unchecked")
+    public static <E> boolean set(String poolId, int id, E arg) {
+        Pool<E> pool = null;
+        try {
+            pool = getPool(poolId);
+        } catch (Throwable tr) {
+            tr.printStackTrace();
+        }
+        if (pool == null)
+            return false;
+        return pool.set(id, arg);
+    }
+
     public static <E> E remove(String poolId, int id) {
         Pool<E> pool = null;
         try {
@@ -195,7 +218,6 @@ public final class ID {
         return next(poolId, arg, null);
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> int next(String poolId, E arg, Pool.Entry.Listener<E> listener) {
         Pool<E> pool = null;
         try {
@@ -209,7 +231,7 @@ public final class ID {
     }
 
     public static boolean invoke(String poolId, int id) {
-        Pool pool = null;
+        Pool<?> pool = null;
         try {
             pool = getPool(poolId);
         } catch (Throwable tr) {
@@ -220,7 +242,6 @@ public final class ID {
         return pool.invoke(id);
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> E removeAndInvoke(String poolId, int id) {
         Pool<E> pool = null;
         try {
@@ -234,34 +255,34 @@ public final class ID {
     }
 
     public static final class Pool<E> implements Iterable<Integer> {
-        private final int min, max;
+        public static final int NO_ID = -1;
 
-        private final List<Entry<E>> list;
-        private int cursor, lastCursor;
+        private final int mOff, mLen;
+
+        private final List<Entry<E>> mList;
+        private int mCursor, mLastCursor;
 
         public Pool() {
-            this(-1, -1);
+            this(0, 0);
         }
 
-        public Pool(int min, int max) {
-            if (min < 0) min = -1;
-            if (max < 0) max = -1;
-            if (max < min && max >= 0) max = min;
+        public Pool(int idOffset, int idCount) {
+            mOff = Math.max(idOffset, 0);
+            mLen = Math.max(idCount, 0);
 
-            this.min = min;
-            this.max = max;
-
-            this.list = new ArrayList<>();
-            this.cursor = 0;
-            this.lastCursor = 0;
+            mList = new ArrayList<>();
+            mCursor = 0;
+            mLastCursor = -1;
         }
 
-        public synchronized int getMin() {
-            return min;
+        public final int getMin() {
+            return mOff;
         }
 
-        public synchronized int getMax() {
-            return max;
+        public final int getMax() {
+            return mLen > 0
+                   ? mOff + mLen - 1
+                   : Math.max(mOff, Integer.MAX_VALUE);
         }
 
         @Override
@@ -269,69 +290,74 @@ public final class ID {
             return getIdIterator();
         }
 
-        public synchronized IdIterator<E> getIdIterator() {
-            return new IdIterator<E>(this);
+        public synchronized IdIterator getIdIterator() {
+            return new IdIterator(this);
         }
 
         public synchronized EntryIterator<E> getEntryIterator() {
             return new EntryIterator<>(this);
         }
 
-        public synchronized int calculateFirstId() {
-            int minId = Math.max(min, 0);
-            int maxId = Math.max(max < 0 ? lastCursor : Math.min(lastCursor, max), minId);
-
-            int id = Math.min(minId, maxId);
-            Entry<E> entry;
-
-            while (((entry = getEntry(id)) == null ||
-                    entry.isEmpty()) &&
-                    id >= minId &&
-                    id <= maxId)
-                id++;
-
-            if (entry != null &&
-                    !entry.isEmpty() &&
-                    hasId(id) &&
-                    id >= minId &&
-                    id <= maxId)
-                return id;
-
-            return -1;
+        public synchronized int findId() {
+            return findId(NO_ID);
         }
 
-        public synchronized int calculateLastId() {
-            int minId = Math.max(min, 0);
-            int maxId = Math.max(max < 0 ? lastCursor : Math.min(lastCursor, max), minId);
+        public synchronized int findId(int beginId) {
+            int len = mList.size();
+            mLastCursor = Math.min(mLastCursor, len - 1);
 
-            int id = Math.max(minId, maxId);
+            int max = mLen <= 0
+                      ? mLastCursor
+                      : Math.min(mLastCursor, mLen - 1);
+
+            int pos = Math.max(beginId - mOff, 0);
             Entry<E> entry;
+            while (pos <= max &&
+                    ((entry = mList.get(pos)) == null ||
+                            entry.isEmpty()))
+                pos++;
 
-            while (((entry = getEntry(id)) == null ||
-                    entry.isEmpty()) &&
-                    id >= minId &&
-                    id <= maxId)
-                id--;
+            return pos <= max
+                   ? pos + mOff
+                   : NO_ID;
+        }
 
-            if (entry != null &&
-                    !entry.isEmpty() &&
-                    hasId(id) &&
-                    id >= minId &&
-                    id <= maxId)
-                return id;
+        public synchronized int findLastId() {
+            return findLastId(NO_ID);
+        }
 
-            return -1;
+        public synchronized int findLastId(int beginId) {
+            int len = mList.size();
+            mLastCursor = Math.min(mLastCursor, len - 1);
+
+            int pos = mLen <= 0
+                      ? mLastCursor
+                      : Math.min(mLastCursor, mLen - 1);
+
+            int beginPos = beginId - mOff;
+            if (beginPos >= 0)
+                pos = Math.min(pos, beginPos);
+
+            Entry<E> entry;
+            while (pos >= 0 &&
+                    ((entry = mList.get(pos)) == null ||
+                            entry.isEmpty()))
+                pos--;
+
+            return pos >= 0
+                   ? pos + mOff
+                   : NO_ID;
         }
 
         public synchronized void clear() {
-            this.list.clear();
-            this.cursor = 0;
-            this.lastCursor = 0;
+            mList.clear();
+            mCursor = 0;
+            mLastCursor = -1;
         }
 
         public synchronized boolean hasId(int id) {
             Entry<E> entry = getEntry(id);
-            return entry != null;
+            return entry != null && !entry.isEmpty();
         }
 
         public synchronized E get(int id) {
@@ -340,10 +366,19 @@ public final class ID {
         }
 
         public synchronized Entry<E> getEntry(int id) {
-            int pos = id - Math.max(min, 0);
-            if (pos < 0 || pos >= list.size())
+            int pos = id - mOff;
+            if (pos < 0 || pos >= mList.size())
                 return null;
-            return list.get(pos);
+            return mList.get(pos);
+        }
+
+        public synchronized boolean set(int id, E arg) {
+            Entry<E> entry = getEntry(id);
+            if (entry == null || entry.isEmpty())
+                return false;
+
+            entry.setArg(arg);
+            return true;
         }
 
         public synchronized E remove(int id) {
@@ -352,23 +387,23 @@ public final class ID {
         }
 
         public synchronized Entry<E> removeEntry(int id) {
-            int pos = id - Math.max(min, 0);
-            if (pos < 0 || pos >= list.size())
+            int pos = id - mOff;
+            int len;
+            if (pos < 0 || pos >= (len = mList.size()))
                 return null;
 
-            Entry<E> removedEntry = list.set(pos, null);
+            Entry<E> removedEntry = mList.set(pos, null);
 
-            cursor = Math.max(Math.max(min, 0), Math.min(cursor, id));
-            for (Entry<E> entry;
-                 ((entry = getEntry(lastCursor)) == null ||
-                         entry.isEmpty()) &&
-                         lastCursor >= Math.max(min, 0) &&
-                         (max < 0 || lastCursor <= max);
-                 lastCursor--) {
-                int lastPos = lastCursor - Math.max(min, 0);
-                if (lastPos >= 0 && lastPos < list.size())
-                    list.remove(lastPos);
-            }
+            mCursor = Math.max(Math.min(mCursor, pos), 0);
+            mLastCursor = Math.min(mLastCursor, len - 1);
+
+            Entry<E> entry;
+            while (mLastCursor >= 0 &&
+                    ((entry = mList.get(mLastCursor)) == null ||
+                            entry.isEmpty() ||
+                            (mLen > 0 &&
+                                    mLastCursor >= mLen)))
+                mList.remove(mLastCursor--);
 
             return removedEntry;
         }
@@ -382,47 +417,42 @@ public final class ID {
         }
 
         public synchronized int next(E arg, Entry.Listener<E> listener) {
-            int id = Math.max(Math.max(min, 0), cursor);
-            for (Entry<E> entry;
-                 (entry = getEntry(id)) != null &&
-                         !entry.isEmpty() &&
-                         (max < 0 || id <= max);
-                 id++);
+            mCursor = Math.max(mCursor, 0);
 
-            cursor = id + 1;
-            for (Entry<E> entry;
-                 (entry = getEntry(cursor)) != null &&
-                         !entry.isEmpty() &&
-                         (max < 0 || cursor <= max);
-                 cursor++);
+            int len = mList.size();
+            Entry<E> entry;
+            while (mCursor < len &&
+                    (entry = mList.get(mCursor)) != null &&
+                    !entry.isEmpty() &&
+                    (mLen <= 0 ||
+                            mCursor < mLen))
+                mCursor++;
 
-            if ((min < 0 || id >= min) && (max < 0 || id <= max)) {
-                lastCursor = Math.max(lastCursor, id);
+            if (mLen <= 0 || mCursor < mLen) {
+                mLastCursor = Math.max(mLastCursor, mCursor);
 
-                int pos = id - Math.max(min, 0);
+                Entry<E> nextEntry = new Entry<>();
+                nextEntry.setEmpty(false);
+                nextEntry.setArg(arg);
+                nextEntry.setListener(listener);
 
-                if (pos >= 0 && pos <= list.size()) {
-                    Entry<E> newEntry = new Entry<>();
-                    newEntry.setEmpty(false);
-                    newEntry.setArg(arg);
-                    newEntry.setListener(listener);
-                    list.add(pos, newEntry);
+                if (mCursor >= len)
+                    mList.add(mCursor, nextEntry);
+                else
+                    mList.set(mCursor, nextEntry);
 
-                    return id;
-                } else {
-                    return -1;
-                }
+                return mCursor + mOff;
             } else {
-                return -1;
+                return NO_ID;
             }
         }
 
         public synchronized boolean invoke(int id) {
-            int pos = id - Math.max(min, 0);
-            if (pos < 0 || pos >= list.size())
+            int pos = id - mOff;
+            if (pos < 0 || pos >= mList.size())
                 return false;
 
-            Entry<E> entry = list.get(id);
+            Entry<E> entry = mList.get(id);
             if (entry == null || entry.isEmpty())
                 return false;
             return entry.invoke(id);
@@ -495,104 +525,68 @@ public final class ID {
             }
         }
 
-        public static class PoolIterator<E> {
-            public static final int NO_ID = -1;
+        public static class PoolIterator {
+            public static final int NO_ID = Pool.NO_ID;
 
-            protected final Pool<E> pool;
+            protected final Pool<?> mPool;
 
-            private int cursor;
-            private boolean hasNext;
+            private int mCursor;
+            private boolean mHasNext;
 
-            public PoolIterator(Pool<E> pool) {
+            public PoolIterator(Pool<?> pool) {
                 if (pool == null)
                     throw new NullPointerException("No pool attached");
 
-                this.pool = pool;
+                mPool = pool;
 
                 reset();
             }
 
             public synchronized final void reset() {
-                this.cursor = NO_ID;
-                this.hasNext = false;
+                mCursor = NO_ID;
+                mHasNext = false;
             }
 
             public synchronized final void skip() {
-                synchronized (pool) {
-                    int minId = Math.max(pool.getMin(), 0);
+                synchronized (mPool) {
+                    int minId = mPool.getMin();
 
-                    int nextCursor;
-                    if (cursor != NO_ID &&
-                            cursor >= minId) {
-                        int currentId = Math.max(Math.max(pool.getMin(), 0), cursor);
-                        nextCursor = findValidId(currentId + 1);
+                    int mNextCursor;
+                    if (mCursor != NO_ID && mCursor >= minId) {
+                        mNextCursor = mPool.findId(mCursor + 1);
                     } else {
-                        nextCursor = findValidId(minId);
+                        mNextCursor = mPool.findId(minId);
                     }
 
-                    if (nextCursor != NO_ID &&
-                            nextCursor >= minId) {
-                        hasNext = true;
-                        cursor = nextCursor;
+                    if (mNextCursor != NO_ID) {
+                        mCursor = mNextCursor;
+                        mHasNext = true;
                     } else {
-                        hasNext = false;
+                        mHasNext = false;
                     }
                 }
             }
 
-            public synchronized final int findValidId(int cursor) {
-                synchronized (pool) {
-                    int minId = pool.calculateFirstId();
-                    int maxId = pool.calculateLastId();
-
-                    int id = Math.max(minId, cursor);
-                    Entry<E> entry;
-
-                    while (((entry = pool.getEntry(id)) == null ||
-                            entry.isEmpty()) &&
-                            id >= minId &&
-                            id <= maxId)
-                        id++;
-
-                    if (entry != null &&
-                            !entry.isEmpty() &&
-                            pool.hasId(id) &&
-                            id >= minId &&
-                            id <= maxId)
-                        return id;
-
-                    return NO_ID;
-                }
-            }
-
+            @SuppressWarnings("BooleanMethodIsAlwaysInverted")
             public synchronized final boolean hasNextId() {
-                synchronized (pool) {
-                    if (cursor == NO_ID || !hasNext)
-                        skip();
-                    return hasNext;
-                }
+                if (mCursor == NO_ID || !mHasNext)
+                    skip();
+                return mHasNext;
             }
 
             public synchronized final int nextId() {
-                synchronized (pool) {
-                    if (cursor == NO_ID || !hasNext)
-                        skip();
-
-                    int minId = Math.max(pool.getMin(), 0);
-                    int id = cursor >= minId ? cursor : NO_ID;
-
-                    if (id != NO_ID && hasNext) {
-                        skip();
-                        return id;
-                    }
-
+                if (mCursor == NO_ID || !mHasNext)
+                    skip();
+                if (mCursor == NO_ID || !mHasNext)
                     return NO_ID;
-                }
+
+                mHasNext = false;
+                return mCursor;
             }
         }
 
-        public static final class IdIterator<E> extends PoolIterator<E> implements Iterator<Integer> {
-            public IdIterator(Pool<E> pool) {
+        public static final class IdIterator extends PoolIterator implements Iterator<Integer> {
+            public IdIterator(Pool<?> pool) {
                 super(pool);
             }
 
@@ -603,11 +597,15 @@ public final class ID {
 
             @Override
             public Integer next() {
-                return super.nextId();
+                int id = super.nextId();
+                if (id == NO_ID)
+                    throw new NoSuchElementException();
+                return id;
             }
         }
 
-        public static final class EntryIterator<E> extends PoolIterator<E> implements Iterator<Entry<E>> {
+        @SuppressWarnings("unchecked")
+        public static final class EntryIterator<E> extends PoolIterator implements Iterator<Entry<E>> {
             public EntryIterator(Pool<E> pool) {
                 super(pool);
             }
@@ -620,7 +618,9 @@ public final class ID {
             @Override
             public Entry<E> next() {
                 int id = super.nextId();
-                return pool.getEntry(id);
+                if (id == NO_ID)
+                    throw new NoSuchElementException();
+                return (Entry<E>) mPool.getEntry(id);
             }
         }
     }
