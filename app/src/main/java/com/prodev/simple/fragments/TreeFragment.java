@@ -64,7 +64,7 @@ public class TreeFragment extends SimpleFragment {
                 String searchText = searchView.getText().toString().toLowerCase();
 
                 if (searchText != null && searchText.length() > 0)
-                    return data.getText().getText(getActivity()).toLowerCase().contains(searchText);
+                    return data.getText().getTextAsString(getActivity()).toLowerCase().contains(searchText);
                 else
                     return true;
             }

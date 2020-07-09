@@ -21,6 +21,7 @@ import com.simplelib.tools.SessionTools;
 
 import java.io.InputStream;
 
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public final class ImageHolder {
     // Initialization
     @NonNull
@@ -69,6 +70,7 @@ public final class ImageHolder {
     public ImageHolder() {
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
     public ImageHolder(ImageHolder src) {
         if (src != null)
             src.applyTo(this);

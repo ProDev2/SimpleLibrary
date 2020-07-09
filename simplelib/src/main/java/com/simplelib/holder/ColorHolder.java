@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.simplelib.tools.UIUtils;
 
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public final class ColorHolder {
     // Initialization
     @NonNull
@@ -49,6 +50,7 @@ public final class ColorHolder {
     public ColorHolder() {
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
     public ColorHolder(ColorHolder src) {
         if (src != null)
             src.applyTo(this);
