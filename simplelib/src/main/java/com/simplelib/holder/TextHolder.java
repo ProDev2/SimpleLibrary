@@ -28,8 +28,8 @@ public final class TextHolder {
     }
 
     @NonNull
-    public static TextHolder of(TextHolder prefix, TextHolder src, TextHolder suffix) {
-        return new TextHolder(prefix, src, suffix);
+    public static TextHolder wrap(TextHolder src) {
+        return new TextHolder().setSrc(src);
     }
 
     @NonNull
@@ -53,6 +53,8 @@ public final class TextHolder {
 
     public @Nullable Object span;
 
+    public @Nullable TextHolder src;
+
     public @Nullable TextHolder prefix;
     public @Nullable TextHolder suffix;
 
@@ -63,15 +65,6 @@ public final class TextHolder {
     public TextHolder(TextHolder src) {
         if (src != null)
             src.applyTo(this);
-    }
-
-    public TextHolder(TextHolder prefix, TextHolder src, TextHolder suffix) {
-        if (src != null)
-            src.applyTo(this);
-        if (prefix != null)
-            this.prefix = TextHolder.of(prefix);
-        if (suffix != null)
-            this.suffix = TextHolder.of(suffix);
     }
 
     public TextHolder(@Nullable CharSequence text) {
@@ -95,6 +88,8 @@ public final class TextHolder {
 
         target.span = span;
 
+        target.src = src != null ? TextHolder.of(src) : null;
+
         target.prefix = prefix != null ? TextHolder.of(prefix) : null;
         target.suffix = suffix != null ? TextHolder.of(suffix) : null;
     }
@@ -102,8 +97,18 @@ public final class TextHolder {
     public boolean hasText() {
         return this.text != null ||
                 this.textRes != null ||
+                (this.src != null && this.src != this && this.src.hasText()) ||
                 (this.prefix != null && this.prefix != this && this.prefix.hasText()) ||
                 (this.suffix != null && this.suffix != this && this.suffix.hasText());
+    }
+
+    @NonNull
+    public TextHolder clearText() {
+        this.text = null;
+        this.textRes = null;
+
+        this.span = null;
+        return this;
     }
 
     @NonNull
@@ -113,8 +118,8 @@ public final class TextHolder {
 
         this.span = null;
 
-        if (this.prefix != null) this.prefix.clear();
-        if (this.suffix != null) this.suffix.clear();
+        this.src = null;
+
         this.prefix = null;
         this.suffix = null;
         return this;
@@ -135,6 +140,21 @@ public final class TextHolder {
     @NonNull
     public TextHolder setSpan(@Nullable Object span) {
         this.span = span;
+        return this;
+    }
+
+    @NonNull
+    public TextHolder getSrc() {
+        if (src == null)
+            src = TextHolder.create();
+        return src;
+    }
+
+    @NonNull
+    public TextHolder setSrc(@Nullable TextHolder src) {
+        if (src == this)
+            src = TextHolder.of(src);
+        this.src = src;
         return this;
     }
 
@@ -188,6 +208,8 @@ public final class TextHolder {
             } catch (Throwable ignored) {
             }
         }
+        if (result == null && src != null && src != this)
+            result = src.getTextAsString(context, null);
         if (result == null)
             result = defText;
 
@@ -257,6 +279,8 @@ public final class TextHolder {
             }
         }
 
+        if (result == null && src != null && src != this)
+            result = src.getText(context, null);
         if (result == null)
             result = defText;
 
@@ -311,17 +335,6 @@ public final class TextHolder {
         } else {
             textView.setVisibility(View.GONE);
             return false;
-        }
-    }
-
-    @Override
-    public String toString() {
-        if (text != null) {
-            return text.toString();
-        } else if (textRes != null) {
-            return "StringRes:" + textRes;
-        } else {
-            return "";
         }
     }
 
