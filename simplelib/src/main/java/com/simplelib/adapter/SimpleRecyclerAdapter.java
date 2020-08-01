@@ -401,7 +401,7 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         private final View mView;
         private final Map<Integer, View> mViewMap;
 
-        private Map<Integer, Object> mArgMap;
+        private Map<String, Object> mArgMap;
 
         public ViewHolder(@NonNull View view) {
             super(view);
@@ -465,23 +465,23 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         }
 
         @NonNull
-        public Map<Integer, Object> getArgMap() {
-            Map<Integer, Object> argMap;
+        public Map<String, Object> getArgMap() {
+            Map<String, Object> argMap;
             if ((argMap = mArgMap) == null)
                 mArgMap = argMap = new HashMap<>(3);
             return argMap;
         }
 
         @NonNull
-        public Map<Integer, Object> removeArgs() {
-            Map<Integer, Object> argMap = getArgMap();
+        public Map<String, Object> removeArgs() {
+            Map<String, Object> argMap = getArgMap();
             mArgMap = null;
             return argMap;
         }
 
         @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
         public void clearArgs() {
-            Map<Integer, Object> argMap = getArgMap();
+            Map<String, Object> argMap = getArgMap();
             synchronized (argMap) {
                 argMap.clear();
             }
@@ -491,16 +491,16 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 "unchecked",
                 "SynchronizationOnLocalVariableOrMethodParameter"
         })
-        public <T, V> T putArg(int id, V arg) {
-            Map<Integer, Object> argMap = getArgMap();
+        public <T, V> T putArg(String id, V arg) {
+            Map<String, Object> argMap = getArgMap();
             synchronized (argMap) {
                 return (T) argMap.put(id, arg);
             }
         }
 
         @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-        public boolean hasArg(int id) {
-            Map<Integer, Object> argMap = getArgMap();
+        public boolean hasArg(String id) {
+            Map<String, Object> argMap = getArgMap();
             synchronized (argMap) {
                 return argMap.containsKey(id);
             }
@@ -510,8 +510,8 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 "unchecked",
                 "SynchronizationOnLocalVariableOrMethodParameter"
         })
-        public <T> T getArg(int id) {
-            Map<Integer, Object> argMap = getArgMap();
+        public <T> T getArg(String id) {
+            Map<String, Object> argMap = getArgMap();
             synchronized (argMap) {
                 return (T) argMap.get(id);
             }
@@ -521,8 +521,8 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 "unchecked",
                 "SynchronizationOnLocalVariableOrMethodParameter"
         })
-        public <T> T removeArg(int id) {
-            Map<Integer, Object> argMap = getArgMap();
+        public <T> T removeArg(String id) {
+            Map<String, Object> argMap = getArgMap();
             synchronized (argMap) {
                 return (T) argMap.remove(id);
             }
