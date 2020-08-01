@@ -127,7 +127,7 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
 
     @NonNull
     @Override
-    protected final View createHolder(@NonNull ViewGroup parent, int viewType) {
+    protected final View createView(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         if (context == null)
             context = getContext();
@@ -156,7 +156,7 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
     }
 
     @Override
-    protected final void bindHolder(@NonNull ViewHolder holder, Tree.Item item, @Nullable E element, int pos) {
+    protected final void bindView(@NonNull ViewHolder holder, Tree.Item item, @Nullable E element, int pos) {
         final int treeLevel = item != null ? Math.max(showRoot ? item.getLevel() : item.getLevel() - 1, 0) : 0;
 
         final boolean expandable = isExpandable(item);

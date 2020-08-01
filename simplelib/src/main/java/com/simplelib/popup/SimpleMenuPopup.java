@@ -210,7 +210,7 @@ public class SimpleMenuPopup extends SimplePopup {
         @NonNull
         @SuppressLint("ResourceType")
         @Override
-        public View createHolder(@NonNull ViewGroup parent, int viewType) {
+        public View createView(@NonNull ViewGroup parent, int viewType) {
             int margins = MathTools.dpToPx(LAYOUT_MARGINS);
 
             int distance = itemDistance > 0 ? (MathTools.dpToPx(itemDistance) / 2) : 0;
@@ -255,8 +255,9 @@ public class SimpleMenuPopup extends SimplePopup {
             return layout;
         }
 
+        @SuppressLint("ResourceType")
         @Override
-        protected void bindHolder(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, @Nullable final Void element, final int pos) {
+        protected void bindView(@NonNull final ViewHolder holder, final SimpleMenuItem menuItem, @Nullable final Void element, final int pos) {
             LinearLayout layout = (LinearLayout) holder.findViewById(0);
             ImageView imageView = (ImageView) holder.findViewById(1);
             TextView textView = (TextView) holder.findViewById(2);

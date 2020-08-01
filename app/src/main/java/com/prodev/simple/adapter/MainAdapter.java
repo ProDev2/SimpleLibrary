@@ -23,12 +23,12 @@ public class MainAdapter extends SimpleRecyclerFilterAdapter<String, Item> {
 
     @NonNull
     @Override
-    protected View createHolder(@NonNull ViewGroup parent, int viewType) {
+    protected View createView(@NonNull ViewGroup parent, int viewType) {
         return inflateLayout(parent, R.layout.main_item);
     }
 
     @Override
-    protected void bindHolder(@NonNull ViewHolder holder, String value, @Nullable Item element, int pos) {
+    protected void bindView(@NonNull ViewHolder holder, String value, @Nullable Item element, int pos) {
         if (element == null)
             return;
 

@@ -2,6 +2,7 @@ package com.simplelib.adapter;
 
 import android.content.Context;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<SimpleRecyclerAdapter.ViewHolder> {
     private Context context;
@@ -323,15 +325,21 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         }
     }
 
+    @NonNull
     @Override
-    public @NonNull ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = createHolder(parent, viewType);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = createView(parent, viewType);
+        if (itemView == null)
+            throw new NullPointerException("ItemView may not be null");
 
         this.context = itemView.getContext();
 
-        ViewHolder holder = new ViewHolder(itemView);
+        ViewHolder holder = createViewHolder(itemView);
+        if (holder == null)
+            holder = new ViewHolder(itemView);
+
         try {
-            bindViews(holder);
+            preBindView(holder);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -360,7 +368,7 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
                 }
             }
 
-            bindHolder((ViewHolder) holder, value, element, position);
+            bindView((ViewHolder) holder, value, element, position);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -377,40 +385,53 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         return 0;
     }
 
-    protected void bindViews(@NonNull ViewHolder holder) {
+    protected abstract @NonNull View createView(@NonNull ViewGroup parent, int viewType);
+
+    @Nullable
+    protected ViewHolder createViewHolder(@NonNull View itemView) {
+        return null;
     }
 
-    protected abstract @NonNull View createHolder(@NonNull ViewGroup parent, int viewType);
+    protected void preBindView(@NonNull ViewHolder holder) {
+    }
 
-    protected abstract void bindHolder(@NonNull ViewHolder holder, V value, @Nullable E element, int pos);
+    protected abstract void bindView(@NonNull ViewHolder holder, V value, @Nullable E element, int pos);
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        private final View view;
-        private final HashMap<Integer, View> viewList;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final View mView;
+        private final Map<Integer, View> mViewMap;
 
-        public ViewHolder(View view) {
+        private Map<Integer, Object> mArgMap;
+
+        public ViewHolder(@NonNull View view) {
             super(view);
 
-            this.view = view;
-            this.viewList = new HashMap<>();
+            this.mView = view;
+            this.mViewMap = new HashMap<>();
         }
 
-        public void addViews(int... ids) {
+        public void addViews(@IdRes int... ids) {
             for (int id : ids) {
                 addView(id);
             }
         }
 
-        public void addView(int id) {
+        public View addView(@IdRes int id) {
+            View v = null;
             try {
-                View v;
-                if ((v = view.findViewById(id)) != null && !viewList.containsKey(id))
-                    viewList.put(id, v);
-            } catch (Exception e) {
+                synchronized (mViewMap) {
+                    if ((v = mViewMap.get(id)) == null && (v = mView.findViewById(id)) != null)
+                        mViewMap.put(id, v);
+                }
+            } catch (Exception ignored) {
             }
+            return v;
         }
 
         public void addViews(View... views) {
+            if (views == null)
+                return;
+
             for (View view : views) {
                 addView(view);
             }
@@ -421,22 +442,90 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         }
 
         public void addView(int id, View view) {
-            if (!viewList.containsKey(id)) {
-                viewList.put(id, view);
+            if (view != null) {
+                synchronized (mViewMap) {
+                    mViewMap.put(id, view);
+                }
             }
         }
 
-        public View findViewById(int id) {
-            if (viewList.containsKey(id))
-                return viewList.get(id);
-            else {
-                addView(id);
-                return viewList.get(id);
+        @SuppressWarnings("unchecked")
+        public <T extends View> T findViewById(@IdRes int id) {
+            synchronized (mViewMap) {
+                T view = (T) mViewMap.get(id);
+                if (view != null || mViewMap.containsKey(id))
+                    return view;
             }
+            return (T) addView(id);
         }
 
+        @NonNull
         public View getItemView() {
             return itemView;
+        }
+
+        @NonNull
+        public Map<Integer, Object> getArgMap() {
+            Map<Integer, Object> argMap;
+            if ((argMap = mArgMap) == null)
+                mArgMap = argMap = new HashMap<>(3);
+            return argMap;
+        }
+
+        @NonNull
+        public Map<Integer, Object> removeArgs() {
+            Map<Integer, Object> argMap = getArgMap();
+            mArgMap = null;
+            return argMap;
+        }
+
+        @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+        public void clearArgs() {
+            Map<Integer, Object> argMap = getArgMap();
+            synchronized (argMap) {
+                argMap.clear();
+            }
+        }
+
+        @SuppressWarnings({
+                "unchecked",
+                "SynchronizationOnLocalVariableOrMethodParameter"
+        })
+        public <T, V> T putArg(int id, V arg) {
+            Map<Integer, Object> argMap = getArgMap();
+            synchronized (argMap) {
+                return (T) argMap.put(id, arg);
+            }
+        }
+
+        @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+        public boolean hasArg(int id) {
+            Map<Integer, Object> argMap = getArgMap();
+            synchronized (argMap) {
+                return argMap.containsKey(id);
+            }
+        }
+
+        @SuppressWarnings({
+                "unchecked",
+                "SynchronizationOnLocalVariableOrMethodParameter"
+        })
+        public <T> T getArg(int id) {
+            Map<Integer, Object> argMap = getArgMap();
+            synchronized (argMap) {
+                return (T) argMap.get(id);
+            }
+        }
+
+        @SuppressWarnings({
+                "unchecked",
+                "SynchronizationOnLocalVariableOrMethodParameter"
+        })
+        public <T> T removeArg(int id) {
+            Map<Integer, Object> argMap = getArgMap();
+            synchronized (argMap) {
+                return (T) argMap.remove(id);
+            }
         }
     }
 
