@@ -10,6 +10,9 @@
 
     <declare-styleable name="BoundConstraintLayout">
 
+        <attr name="bcl_use_suggested_min" format="boolean" />
+        <attr name="bcl_force_min" format="boolean" />
+
         <attr name="bcl_minWidth" format="dimension" />
         <attr name="bcl_minHeight" format="dimension" />
 
@@ -61,6 +64,9 @@
     </declare-styleable>
 
     <declare-styleable name="BoundRelativeLayout">
+
+        <attr name="brl_use_suggested_min" format="boolean" />
+        <attr name="brl_force_min" format="boolean" />
 
         <attr name="brl_minWidth" format="dimension" />
         <attr name="brl_minHeight" format="dimension" />

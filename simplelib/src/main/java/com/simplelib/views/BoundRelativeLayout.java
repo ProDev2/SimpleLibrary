@@ -20,6 +20,9 @@ public class BoundRelativeLayout extends RelativeLayout {
     public static final int MODE_WRAP = 1;
     public static final int MODE_MATCH = 2;
 
+    private boolean useSuggestedMin;
+    private boolean forceMin;
+
     private int minWidth, minHeight;
     private int maxWidth, maxHeight;
 
@@ -48,6 +51,9 @@ public class BoundRelativeLayout extends RelativeLayout {
 
     private void initialize(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         //Use defaults
+        useSuggestedMin = false;
+        forceMin = false;
+
         minWidth = UNDEFINED_SIZE;
         minHeight = UNDEFINED_SIZE;
 
@@ -60,6 +66,9 @@ public class BoundRelativeLayout extends RelativeLayout {
         //Fetch styled attributes
         if (attrs != null) {
             TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.BoundRelativeLayout, defStyleAttr, defStyleRes);
+
+            useSuggestedMin = array.getBoolean(R.styleable.BoundRelativeLayout_brl_use_suggested_min, useSuggestedMin);
+            forceMin = array.getBoolean(R.styleable.BoundRelativeLayout_brl_force_min, forceMin);
 
             minWidth = array.getDimensionPixelSize(R.styleable.BoundRelativeLayout_brl_minWidth, minWidth);
             minHeight = array.getDimensionPixelSize(R.styleable.BoundRelativeLayout_brl_minHeight, minHeight);
@@ -89,6 +98,16 @@ public class BoundRelativeLayout extends RelativeLayout {
     public void setMode(int widthMode, int heightMode) {
         this.widthMode = widthMode;
         this.heightMode = heightMode;
+        requestLayout();
+    }
+
+    public void setUseSuggestedMin(boolean useSuggestedMin) {
+        this.useSuggestedMin = useSuggestedMin;
+        requestLayout();
+    }
+
+    public void setForceMin(boolean forceMin) {
+        this.forceMin = forceMin;
         requestLayout();
     }
 
@@ -137,13 +156,19 @@ public class BoundRelativeLayout extends RelativeLayout {
     @Override
     protected int getSuggestedMinimumWidth() {
         int suggestedMinimumWidth = super.getSuggestedMinimumWidth();
-        return Math.max(minWidth, suggestedMinimumWidth);
+        if (minWidth != UNDEFINED_SIZE)
+            return Math.max(minWidth, suggestedMinimumWidth);
+        else
+            return suggestedMinimumWidth;
     }
 
     @Override
     protected int getSuggestedMinimumHeight() {
         int suggestedMinimumHeight = super.getSuggestedMinimumHeight();
-        return Math.max(minHeight, suggestedMinimumHeight);
+        if (minHeight != UNDEFINED_SIZE)
+            return Math.max(minHeight, suggestedMinimumHeight);
+        else
+            return suggestedMinimumHeight;
     }
 
     @Override
@@ -159,18 +184,42 @@ public class BoundRelativeLayout extends RelativeLayout {
         int measuredWidth = getMeasuredWidth();
         int measuredHeight = getMeasuredHeight();
 
-        measuredWidth = Math.max(measuredWidth, getSuggestedMinimumWidth());
-        measuredHeight = Math.max(measuredHeight, getSuggestedMinimumHeight());
+        int minWidth = useSuggestedMin ? getSuggestedMinimumWidth() : this.minWidth;
+        int minHeight = useSuggestedMin ? getSuggestedMinimumHeight() : this.minHeight;
 
-        if (this.minWidth != UNDEFINED_SIZE)
-            measuredWidth = Math.max(measuredWidth, this.minWidth);
-        if (this.minHeight != UNDEFINED_SIZE)
-            measuredHeight = Math.max(measuredHeight, this.minHeight);
+        if (useSuggestedMin && minWidth <= 0) minWidth = UNDEFINED_SIZE;
+        if (useSuggestedMin && minHeight <= 0) minHeight = UNDEFINED_SIZE;
 
-        //Set measured dimension
-        setMeasuredDimension(
-                resolveSizeAndState(measuredWidth, widthMeasureSpec, 0),
-                resolveSizeAndState(measuredHeight, heightMeasureSpec, 0)
-        );
+        //Update measureSpecs if needed
+        boolean remeasure = false;
+        if (minWidth != UNDEFINED_SIZE && measuredWidth < minWidth) {
+            widthMeasureSpec = getMeasureSpec(widthMeasureSpec, MODE_MATCH, minWidth);
+            remeasure = true;
+        }
+        if (minHeight != UNDEFINED_SIZE && measuredHeight < minHeight) {
+            heightMeasureSpec = getMeasureSpec(heightMeasureSpec, MODE_MATCH, minHeight);
+            remeasure = true;
+        }
+
+        //Remeasure layout if needed
+        if (remeasure) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+            measuredWidth = getMeasuredWidth();
+            measuredHeight = getMeasuredHeight();
+        }
+
+        if (forceMin) {
+            if (minWidth != UNDEFINED_SIZE)
+                measuredWidth = Math.max(measuredWidth, minWidth);
+            if (minHeight != UNDEFINED_SIZE)
+                measuredHeight = Math.max(measuredHeight, minHeight);
+
+            //Set measured dimension
+            setMeasuredDimension(
+                    resolveSizeAndState(measuredWidth, widthMeasureSpec, 0),
+                    resolveSizeAndState(measuredHeight, heightMeasureSpec, 0)
+            );
+        }
     }
 }
