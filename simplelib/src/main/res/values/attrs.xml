@@ -8,6 +8,32 @@
 
     </declare-styleable>
 
+    <declare-styleable name="BoundConstraintLayout">
+
+        <attr name="bcl_minWidth" format="dimension" />
+        <attr name="bcl_minHeight" format="dimension" />
+
+        <attr name="bcl_maxWidth" format="dimension" />
+        <attr name="bcl_maxHeight" format="dimension" />
+
+        <attr name="bcl_widthMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+        <attr name="bcl_heightMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+    </declare-styleable>
+
     <declare-styleable name="BoundLayout">
 
         <attr name="bl_minWidth" format="dimension" />
