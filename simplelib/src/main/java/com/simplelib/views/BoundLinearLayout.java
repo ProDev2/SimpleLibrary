@@ -4,24 +4,23 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.widget.LinearLayout;
 
 import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.simplelib.R;
 
-public class BoundConstraintLayout extends ConstraintLayout {
+public class BoundLinearLayout extends LinearLayout {
     public static final int UNDEFINED_SIZE = -1;
 
     public static final int MODE_NONE = 0;
     public static final int MODE_WRAP = 1;
     public static final int MODE_MATCH = 2;
 
-    private boolean useSuggestedMin;
     private boolean forceMin;
 
     private int minWidth, minHeight;
@@ -29,30 +28,29 @@ public class BoundConstraintLayout extends ConstraintLayout {
 
     private int widthMode, heightMode;
 
-    public BoundConstraintLayout(@NonNull Context context) {
+    public BoundLinearLayout(@NonNull Context context) {
         super(context);
         initialize(null, 0, 0);
     }
 
-    public BoundConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public BoundLinearLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initialize(attrs, 0, 0);
     }
 
-    public BoundConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
+    public BoundLinearLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initialize(attrs, defStyleAttr, 0);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public BoundConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
-        super(context, attrs, defStyleAttr);
+    public BoundLinearLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         initialize(attrs, defStyleAttr, defStyleRes);
     }
 
     private void initialize(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         //Use defaults
-        useSuggestedMin = false;
         forceMin = false;
 
         minWidth = UNDEFINED_SIZE;
@@ -66,19 +64,18 @@ public class BoundConstraintLayout extends ConstraintLayout {
 
         //Fetch styled attributes
         if (attrs != null) {
-            TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.BoundConstraintLayout, defStyleAttr, defStyleRes);
+            TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.BoundLinearLayout, defStyleAttr, defStyleRes);
 
-            useSuggestedMin = array.getBoolean(R.styleable.BoundConstraintLayout_bcl_use_suggested_min, useSuggestedMin);
-            forceMin = array.getBoolean(R.styleable.BoundConstraintLayout_bcl_force_min, forceMin);
+            forceMin = array.getBoolean(R.styleable.BoundLinearLayout_bll_force_min, forceMin);
 
-            minWidth = array.getDimensionPixelSize(R.styleable.BoundConstraintLayout_bcl_minWidth, minWidth);
-            minHeight = array.getDimensionPixelSize(R.styleable.BoundConstraintLayout_bcl_minHeight, minHeight);
+            minWidth = array.getDimensionPixelSize(R.styleable.BoundLinearLayout_bll_minWidth, minWidth);
+            minHeight = array.getDimensionPixelSize(R.styleable.BoundLinearLayout_bll_minHeight, minHeight);
 
-            maxWidth = array.getDimensionPixelSize(R.styleable.BoundConstraintLayout_bcl_maxWidth, maxWidth);
-            maxHeight = array.getDimensionPixelSize(R.styleable.BoundConstraintLayout_bcl_maxHeight, maxHeight);
+            maxWidth = array.getDimensionPixelSize(R.styleable.BoundLinearLayout_bll_maxWidth, maxWidth);
+            maxHeight = array.getDimensionPixelSize(R.styleable.BoundLinearLayout_bll_maxHeight, maxHeight);
 
-            widthMode = array.getInt(R.styleable.BoundConstraintLayout_bcl_widthMode, widthMode);
-            heightMode = array.getInt(R.styleable.BoundConstraintLayout_bcl_heightMode, heightMode);
+            widthMode = array.getInt(R.styleable.BoundLinearLayout_bll_widthMode, widthMode);
+            heightMode = array.getInt(R.styleable.BoundLinearLayout_bll_heightMode, heightMode);
 
             array.recycle();
         }
@@ -99,11 +96,6 @@ public class BoundConstraintLayout extends ConstraintLayout {
     public void setMode(int widthMode, int heightMode) {
         this.widthMode = widthMode;
         this.heightMode = heightMode;
-        requestLayout();
-    }
-
-    public void setUseSuggestedMin(boolean useSuggestedMin) {
-        this.useSuggestedMin = useSuggestedMin;
         requestLayout();
     }
 
@@ -143,11 +135,8 @@ public class BoundConstraintLayout extends ConstraintLayout {
         int measuredWidth = getMeasuredWidth();
         int measuredHeight = getMeasuredHeight();
 
-        int minWidth = useSuggestedMin ? getSuggestedMinimumWidth() : this.minWidth;
-        int minHeight = useSuggestedMin ? getSuggestedMinimumHeight() : this.minHeight;
-
-        if (useSuggestedMin && minWidth <= 0) minWidth = UNDEFINED_SIZE;
-        if (useSuggestedMin && minHeight <= 0) minHeight = UNDEFINED_SIZE;
+        int minWidth = this.minWidth;
+        int minHeight = this.minHeight;
 
         minWidth = getMinSpecSize(widthMeasureSpec, minWidth);
         minHeight = getMinSpecSize(heightMeasureSpec, minHeight);

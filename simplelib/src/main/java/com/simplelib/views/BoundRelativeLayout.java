@@ -20,7 +20,6 @@ public class BoundRelativeLayout extends RelativeLayout {
     public static final int MODE_WRAP = 1;
     public static final int MODE_MATCH = 2;
 
-    private boolean useSuggestedMin;
     private boolean forceMin;
 
     private int minWidth, minHeight;
@@ -51,7 +50,6 @@ public class BoundRelativeLayout extends RelativeLayout {
 
     private void initialize(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         //Use defaults
-        useSuggestedMin = false;
         forceMin = false;
 
         minWidth = UNDEFINED_SIZE;
@@ -67,7 +65,6 @@ public class BoundRelativeLayout extends RelativeLayout {
         if (attrs != null) {
             TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.BoundRelativeLayout, defStyleAttr, defStyleRes);
 
-            useSuggestedMin = array.getBoolean(R.styleable.BoundRelativeLayout_brl_use_suggested_min, useSuggestedMin);
             forceMin = array.getBoolean(R.styleable.BoundRelativeLayout_brl_force_min, forceMin);
 
             minWidth = array.getDimensionPixelSize(R.styleable.BoundRelativeLayout_brl_minWidth, minWidth);
@@ -101,56 +98,9 @@ public class BoundRelativeLayout extends RelativeLayout {
         requestLayout();
     }
 
-    public void setUseSuggestedMin(boolean useSuggestedMin) {
-        this.useSuggestedMin = useSuggestedMin;
-        requestLayout();
-    }
-
     public void setForceMin(boolean forceMin) {
         this.forceMin = forceMin;
         requestLayout();
-    }
-
-    private int getMeasureSpec(int measureSpec, int mode, int maxSize) {
-        final int specMode = MeasureSpec.getMode(measureSpec);
-        final int specSize = MeasureSpec.getSize(measureSpec);
-
-        final boolean noBoundary = maxSize == UNDEFINED_SIZE;
-
-        final int resultSize;
-        final int resultMode;
-
-        switch (specMode) {
-            default:
-            case MeasureSpec.EXACTLY:
-            case MeasureSpec.AT_MOST:
-                resultSize = noBoundary ? specSize : Math.min(specSize, maxSize);
-
-                if (mode == MODE_MATCH) {
-                    resultMode = MeasureSpec.EXACTLY;
-                } else if (mode == MODE_WRAP) {
-                    resultMode = MeasureSpec.AT_MOST;
-                } else {
-                    resultMode = specMode;
-                }
-                break;
-
-            case MeasureSpec.UNSPECIFIED:
-                resultSize = noBoundary ? specSize : (specSize > 0 ? Math.min(specSize, maxSize) : maxSize);
-
-                if (noBoundary) {
-                    resultMode = MeasureSpec.UNSPECIFIED;
-                } else if (mode == MODE_MATCH) {
-                    resultMode = MeasureSpec.EXACTLY;
-                } else if (mode == MODE_WRAP) {
-                    resultMode = MeasureSpec.AT_MOST;
-                } else {
-                    resultMode = MeasureSpec.AT_MOST;
-                }
-                break;
-        }
-
-        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
     }
 
     @Override
@@ -184,11 +134,11 @@ public class BoundRelativeLayout extends RelativeLayout {
         int measuredWidth = getMeasuredWidth();
         int measuredHeight = getMeasuredHeight();
 
-        int minWidth = useSuggestedMin ? getSuggestedMinimumWidth() : this.minWidth;
-        int minHeight = useSuggestedMin ? getSuggestedMinimumHeight() : this.minHeight;
+        int minWidth = this.minWidth;
+        int minHeight = this.minHeight;
 
-        if (useSuggestedMin && minWidth <= 0) minWidth = UNDEFINED_SIZE;
-        if (useSuggestedMin && minHeight <= 0) minHeight = UNDEFINED_SIZE;
+        minWidth = getMinSpecSize(widthMeasureSpec, minWidth);
+        minHeight = getMinSpecSize(heightMeasureSpec, minHeight);
 
         //Update measureSpecs if needed
         boolean remeasure = false;
@@ -221,5 +171,71 @@ public class BoundRelativeLayout extends RelativeLayout {
                     resolveSizeAndState(measuredHeight, heightMeasureSpec, 0)
             );
         }
+    }
+
+    private static int getMeasureSpec(int measureSpec, int mode, int size) {
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
+
+        final boolean noBoundary = size == UNDEFINED_SIZE;
+
+        final int resultSize;
+        final int resultMode;
+
+        switch (specMode) {
+            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
+                resultSize = noBoundary ? specSize : Math.min(specSize, size);
+
+                if (mode == MODE_MATCH) {
+                    resultMode = MeasureSpec.EXACTLY;
+                } else if (mode == MODE_WRAP) {
+                    resultMode = MeasureSpec.AT_MOST;
+                } else {
+                    resultMode = specMode;
+                }
+                break;
+
+            default:
+            case MeasureSpec.UNSPECIFIED:
+                resultSize = noBoundary ? specSize : size;
+
+                if (noBoundary) {
+                    resultMode = MeasureSpec.UNSPECIFIED;
+                } else if (mode == MODE_MATCH) {
+                    resultMode = MeasureSpec.EXACTLY;
+                } else if (mode == MODE_WRAP) {
+                    resultMode = MeasureSpec.AT_MOST;
+                } else {
+                    resultMode = MeasureSpec.AT_MOST;
+                }
+                break;
+        }
+
+        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
+    }
+
+    private static int getMinSpecSize(int measureSpec, int size) {
+        if (size == UNDEFINED_SIZE)
+            return UNDEFINED_SIZE;
+
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
+
+        final int resultSize;
+
+        switch (specMode) {
+            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
+                resultSize = Math.min(specSize, size);
+                break;
+
+            default:
+            case MeasureSpec.UNSPECIFIED:
+                resultSize = size;
+                break;
+        }
+
+        return resultSize;
     }
 }

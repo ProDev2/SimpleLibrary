@@ -22,6 +22,8 @@ public class BoundLayout extends ViewGroup {
     public static final int MODE_WRAP = 1;
     public static final int MODE_MATCH = 2;
 
+    private boolean forceMin;
+
     private int minWidth, minHeight;
     private int maxWidth, maxHeight;
 
@@ -50,6 +52,8 @@ public class BoundLayout extends ViewGroup {
 
     private void initialize(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         //Use defaults
+        forceMin = false;
+
         minWidth = UNDEFINED_SIZE;
         minHeight = UNDEFINED_SIZE;
 
@@ -62,6 +66,8 @@ public class BoundLayout extends ViewGroup {
         //Fetch styled attributes
         if (attrs != null) {
             TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.BoundLayout, defStyleAttr, defStyleRes);
+
+            forceMin = array.getBoolean(R.styleable.BoundRelativeLayout_brl_force_min, forceMin);
 
             minWidth = array.getDimensionPixelSize(R.styleable.BoundLayout_bl_minWidth, minWidth);
             minHeight = array.getDimensionPixelSize(R.styleable.BoundLayout_bl_minHeight, minHeight);
@@ -94,66 +100,30 @@ public class BoundLayout extends ViewGroup {
         requestLayout();
     }
 
-    private int getMeasureSpec(int measureSpec, int mode, int maxSize) {
-        final int specMode = MeasureSpec.getMode(measureSpec);
-        final int specSize = MeasureSpec.getSize(measureSpec);
-
-        final boolean noBoundary = maxSize == UNDEFINED_SIZE;
-
-        final int resultSize;
-        final int resultMode;
-
-        switch (specMode) {
-            default:
-            case MeasureSpec.EXACTLY:
-            case MeasureSpec.AT_MOST:
-                resultSize = noBoundary ? specSize : Math.min(specSize, maxSize);
-
-                if (mode == MODE_MATCH) {
-                    resultMode = MeasureSpec.EXACTLY;
-                } else if (mode == MODE_WRAP) {
-                    resultMode = MeasureSpec.AT_MOST;
-                } else {
-                    resultMode = specMode;
-                }
-                break;
-
-            case MeasureSpec.UNSPECIFIED:
-                resultSize = noBoundary ? specSize : (specSize > 0 ? Math.min(specSize, maxSize) : maxSize);
-
-                if (noBoundary) {
-                    resultMode = MeasureSpec.UNSPECIFIED;
-                } else if (mode == MODE_MATCH) {
-                    resultMode = MeasureSpec.EXACTLY;
-                } else if (mode == MODE_WRAP) {
-                    resultMode = MeasureSpec.AT_MOST;
-                } else {
-                    resultMode = MeasureSpec.AT_MOST;
-                }
-                break;
-        }
-
-        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
+    public void setForceMin(boolean forceMin) {
+        this.forceMin = forceMin;
+        requestLayout();
     }
 
     @Override
     protected int getSuggestedMinimumWidth() {
         int suggestedMinimumWidth = super.getSuggestedMinimumWidth();
-        return Math.max(minWidth, suggestedMinimumWidth);
+        if (minWidth != UNDEFINED_SIZE)
+            return Math.max(minWidth, suggestedMinimumWidth);
+        else
+            return suggestedMinimumWidth;
     }
 
     @Override
     protected int getSuggestedMinimumHeight() {
         int suggestedMinimumHeight = super.getSuggestedMinimumHeight();
-        return Math.max(minHeight, suggestedMinimumHeight);
+        if (minHeight != UNDEFINED_SIZE)
+            return Math.max(minHeight, suggestedMinimumHeight);
+        else
+            return suggestedMinimumHeight;
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        //Make measure spec
-        widthMeasureSpec = getMeasureSpec(widthMeasureSpec, this.widthMode, this.maxWidth);
-        heightMeasureSpec = getMeasureSpec(heightMeasureSpec, this.heightMode, this.maxHeight);
-
+    private void onMeasureSelf(int widthMeasureSpec, int heightMeasureSpec) {
         //Calculate constraints
         int widthConstraints = getPaddingLeft() + getPaddingRight();
         int heightConstraints = getPaddingTop() + getPaddingBottom();
@@ -180,11 +150,11 @@ public class BoundLayout extends ViewGroup {
                 height = params.height;
             }
 
-            if (params != null && params instanceof LayoutParams) {
+            if (params instanceof LayoutParams) {
                 LayoutParams lp = (LayoutParams) params;
                 marginWidth = lp.leftMargin + lp.rightMargin;
                 marginHeight = lp.topMargin + lp.bottomMargin;
-            } else if (params != null && params instanceof MarginLayoutParams) {
+            } else if (params instanceof MarginLayoutParams) {
                 MarginLayoutParams lp = (MarginLayoutParams) params;
                 marginWidth = lp.leftMargin + lp.rightMargin;
                 marginHeight = lp.topMargin + lp.bottomMargin;
@@ -233,16 +203,63 @@ public class BoundLayout extends ViewGroup {
         maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
 
-        if (this.minWidth != UNDEFINED_SIZE)
-            maxWidth = Math.max(maxWidth, this.minWidth);
-        if (this.minHeight != UNDEFINED_SIZE)
-            maxHeight = Math.max(maxHeight, this.minHeight);
-
         //Set measured dimension
         setMeasuredDimension(
                 resolveSizeAndState(maxWidth, widthMeasureSpec, 0),
                 resolveSizeAndState(maxHeight, heightMeasureSpec, 0)
         );
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //Make measure spec
+        widthMeasureSpec = getMeasureSpec(widthMeasureSpec, this.widthMode, this.maxWidth);
+        heightMeasureSpec = getMeasureSpec(heightMeasureSpec, this.heightMode, this.maxHeight);
+
+        //Measure layout
+        onMeasureSelf(widthMeasureSpec, heightMeasureSpec);
+
+        //Check against minimum height and width
+        int measuredWidth = getMeasuredWidth();
+        int measuredHeight = getMeasuredHeight();
+
+        int minWidth = this.minWidth;
+        int minHeight = this.minHeight;
+
+        minWidth = getMinSpecSize(widthMeasureSpec, minWidth);
+        minHeight = getMinSpecSize(heightMeasureSpec, minHeight);
+
+        //Update measureSpecs if needed
+        boolean remeasure = false;
+        if (minWidth != UNDEFINED_SIZE && measuredWidth < minWidth) {
+            widthMeasureSpec = getMeasureSpec(widthMeasureSpec, MODE_MATCH, minWidth);
+            remeasure = true;
+        }
+        if (minHeight != UNDEFINED_SIZE && measuredHeight < minHeight) {
+            heightMeasureSpec = getMeasureSpec(heightMeasureSpec, MODE_MATCH, minHeight);
+            remeasure = true;
+        }
+
+        //Remeasure layout if needed
+        if (remeasure) {
+            onMeasureSelf(widthMeasureSpec, heightMeasureSpec);
+
+            measuredWidth = getMeasuredWidth();
+            measuredHeight = getMeasuredHeight();
+        }
+
+        if (forceMin) {
+            if (minWidth != UNDEFINED_SIZE)
+                measuredWidth = Math.max(measuredWidth, minWidth);
+            if (minHeight != UNDEFINED_SIZE)
+                measuredHeight = Math.max(measuredHeight, minHeight);
+
+            //Set measured dimension
+            setMeasuredDimension(
+                    resolveSizeAndState(measuredWidth, widthMeasureSpec, 0),
+                    resolveSizeAndState(measuredHeight, heightMeasureSpec, 0)
+            );
+        }
     }
 
     @Override
@@ -272,13 +289,13 @@ public class BoundLayout extends ViewGroup {
             int bottomMargin = 0;
 
             ViewGroup.LayoutParams params = child.getLayoutParams();
-            if (params != null && params instanceof LayoutParams) {
+            if (params instanceof LayoutParams) {
                 LayoutParams lp = (LayoutParams) params;
                 leftMargin = lp.leftMargin;
                 topMargin = lp.topMargin;
                 rightMargin = lp.rightMargin;
                 bottomMargin = lp.bottomMargin;
-            } else if (params != null && params instanceof MarginLayoutParams) {
+            } else if (params instanceof MarginLayoutParams) {
                 MarginLayoutParams lp = (MarginLayoutParams) params;
                 leftMargin = lp.leftMargin;
                 topMargin = lp.topMargin;
@@ -328,7 +345,7 @@ public class BoundLayout extends ViewGroup {
 
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams params) {
-        return params != null && params instanceof LayoutParams;
+        return params instanceof LayoutParams;
     }
 
     @Override
@@ -342,6 +359,72 @@ public class BoundLayout extends ViewGroup {
                 return new LayoutParams((ViewGroup.LayoutParams) params);
         }
         return null;
+    }
+
+    private static int getMeasureSpec(int measureSpec, int mode, int size) {
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
+
+        final boolean noBoundary = size == UNDEFINED_SIZE;
+
+        final int resultSize;
+        final int resultMode;
+
+        switch (specMode) {
+            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
+                resultSize = noBoundary ? specSize : Math.min(specSize, size);
+
+                if (mode == MODE_MATCH) {
+                    resultMode = MeasureSpec.EXACTLY;
+                } else if (mode == MODE_WRAP) {
+                    resultMode = MeasureSpec.AT_MOST;
+                } else {
+                    resultMode = specMode;
+                }
+                break;
+
+            default:
+            case MeasureSpec.UNSPECIFIED:
+                resultSize = noBoundary ? specSize : size;
+
+                if (noBoundary) {
+                    resultMode = MeasureSpec.UNSPECIFIED;
+                } else if (mode == MODE_MATCH) {
+                    resultMode = MeasureSpec.EXACTLY;
+                } else if (mode == MODE_WRAP) {
+                    resultMode = MeasureSpec.AT_MOST;
+                } else {
+                    resultMode = MeasureSpec.AT_MOST;
+                }
+                break;
+        }
+
+        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
+    }
+
+    private static int getMinSpecSize(int measureSpec, int size) {
+        if (size == UNDEFINED_SIZE)
+            return UNDEFINED_SIZE;
+
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
+
+        final int resultSize;
+
+        switch (specMode) {
+            case MeasureSpec.EXACTLY:
+            case MeasureSpec.AT_MOST:
+                resultSize = Math.min(specSize, size);
+                break;
+
+            default:
+            case MeasureSpec.UNSPECIFIED:
+                resultSize = size;
+                break;
+        }
+
+        return resultSize;
     }
 
     public static class LayoutParams extends MarginLayoutParams {

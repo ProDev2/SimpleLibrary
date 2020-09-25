@@ -39,6 +39,8 @@
 
     <declare-styleable name="BoundLayout">
 
+        <attr name="bl_force_min" format="boolean" />
+
         <attr name="bl_minWidth" format="dimension" />
         <attr name="bl_minHeight" format="dimension" />
 
@@ -63,9 +65,36 @@
 
     </declare-styleable>
 
+    <declare-styleable name="BoundLinearLayout">
+
+        <attr name="bll_force_min" format="boolean" />
+
+        <attr name="bll_minWidth" format="dimension" />
+        <attr name="bll_minHeight" format="dimension" />
+
+        <attr name="bll_maxWidth" format="dimension" />
+        <attr name="bll_maxHeight" format="dimension" />
+
+        <attr name="bll_widthMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+        <attr name="bll_heightMode" format="enum">
+
+            <enum name="none" value="0" />
+            <enum name="wrap" value="1" />
+            <enum name="match" value="2" />
+
+        </attr>
+
+    </declare-styleable>
+
     <declare-styleable name="BoundRelativeLayout">
 
-        <attr name="brl_use_suggested_min" format="boolean" />
         <attr name="brl_force_min" format="boolean" />
 
         <attr name="brl_minWidth" format="dimension" />
