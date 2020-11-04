@@ -7,9 +7,13 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings({
+        "unused",
+        "UnusedReturnValue"
+})
 public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
     private RecyclerView recyclerView;
-    private SimpleRecyclerAdapter adapter;
+    private SimpleRecyclerAdapter<?, ?> adapter;
     private SimpleSettings settings;
 
     private ItemTouchHelper touchHelper;
@@ -22,7 +26,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
             applyTo(recyclerView);
     }
 
-    public SimpleItemTouchHelper(RecyclerView recyclerView, SimpleRecyclerAdapter adapter) {
+    public SimpleItemTouchHelper(RecyclerView recyclerView, SimpleRecyclerAdapter<?, ?> adapter) {
         this(recyclerView);
         this.adapter = adapter;
     }
@@ -31,7 +35,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         return new SimpleItemTouchHelper(recyclerView);
     }
 
-    public static SimpleItemTouchHelper apply(RecyclerView recyclerView, SimpleRecyclerAdapter adapter) {
+    public static SimpleItemTouchHelper apply(RecyclerView recyclerView, SimpleRecyclerAdapter<?, ?> adapter) {
         return new SimpleItemTouchHelper(recyclerView, adapter);
     }
 
@@ -39,7 +43,7 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         return recyclerView;
     }
 
-    public SimpleRecyclerAdapter getAdapter() {
+    public SimpleRecyclerAdapter<?, ?> getAdapter() {
         fetch();
         return adapter;
     }
@@ -66,48 +70,76 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         return makeMovementFlags(dragFlags, swipeFlags);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         fetch();
 
-        if (adapter == null) return true;
+        if (adapter == null)
+            return false;
 
-        int from = adapter.getItemPos(adapter.getAtAdapterPos(viewHolder.getAdapterPosition()));
-        int to = adapter.getItemPos(adapter.getAtAdapterPos(target.getAdapterPosition()));
+        int from = adapter.getPosAtAdapterPos(viewHolder.getAdapterPosition());
+        int to = adapter.getPosAtAdapterPos(target.getAdapterPosition());
 
-        if (from < 0 || to < 0 || from >= adapter.getListSize() || to >= adapter.getListSize()) return true;
+        if (from < 0 || to < 0 || from >= adapter.getListSize() || to >= adapter.getListSize())
+            return false;
 
         try {
-            if (adapter.getList() != null && adapter.getListSize() > 0)
-                adapter.move(from, to);
+            boolean preMoved = onPreMoveItem(viewHolder, from, to);
+            if (!preMoved) return false;
         } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
 
-        onMoveItem(from, to);
-        return true;
+        try {
+            if (adapter.getList() != null)
+                adapter.move(from, to);
+        } catch (Throwable tr) {
+            tr.printStackTrace();
+            return false;
+        }
+
+        try {
+            return onMoveItem(viewHolder, from, to);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         fetch();
 
         if (adapter == null) return;
 
-        int pos = adapter.getItemPos(adapter.getAtAdapterPos(viewHolder.getAdapterPosition()));
+        int pos = adapter.getPosAtAdapterPos(viewHolder.getAdapterPosition());
         if (pos < 0 || pos >= adapter.getListSize()) return;
 
-        onSwipeItem(pos, direction);
+        try {
+            onSwipeItem(viewHolder, pos, direction);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (settings.deleteItemOnSwipe()) {
             try {
-                if (adapter.getList() != null && adapter.getListSize() > 0)
-                    adapter.remove(pos);
+                onPreRemoveItem(viewHolder, pos, direction);
             } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            onRemoveItem(pos, direction);
+            try {
+                if (adapter.getList() != null && adapter.getListSize() > 0)
+                    adapter.remove(pos);
+            } catch (Exception ignored) {
+            }
+
+            try {
+                onRemoveItem(viewHolder, pos, direction);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -115,10 +147,10 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         try {
             if (recyclerView != null) {
                 if (recyclerView.getAdapter() instanceof SimpleRecyclerAdapter) {
-                    this.adapter = (SimpleRecyclerAdapter) recyclerView.getAdapter();
+                    this.adapter = (SimpleRecyclerAdapter<?, ?>) recyclerView.getAdapter();
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -146,12 +178,28 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
         }
     }
 
-    protected void onSwipeItem(int position, int direction) {
+    protected boolean onPreMoveItem(@NonNull RecyclerView.ViewHolder holder, int fromPos, int toPos) {
+        try {
+            holder.itemView.clearFocus();
+        } catch (Throwable ignored) {
+        }
+        return true;
     }
 
-    protected void onRemoveItem(int position, int direction) {
+    protected void onPreRemoveItem(@NonNull RecyclerView.ViewHolder holder, int position, int direction) {
+        try {
+            holder.itemView.clearFocus();
+        } catch (Throwable ignored) {
+        }
     }
 
-    protected void onMoveItem(int fromPos, int toPos) {
+    protected void onSwipeItem(@NonNull RecyclerView.ViewHolder holder, int position, int direction) {
+    }
+
+    protected void onRemoveItem(@NonNull RecyclerView.ViewHolder holder, int position, int direction) {
+    }
+
+    protected boolean onMoveItem(@NonNull RecyclerView.ViewHolder holder, int fromPos, int toPos) {
+        return true;
     }
 }

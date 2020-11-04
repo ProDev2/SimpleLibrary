@@ -159,6 +159,10 @@ public abstract class SimpleRecyclerAdapter<V, E> extends RecyclerView.Adapter<S
         return list.indexOf(value);
     }
 
+    public int getPosAtAdapterPos(int pos) {
+        return pos;
+    }
+
     public void move(int posFrom, int posTo) {
         try {
             if (posFrom >= 0 && posTo >= 0 && posFrom < list.size() && posTo < list.size() && posFrom != posTo) {

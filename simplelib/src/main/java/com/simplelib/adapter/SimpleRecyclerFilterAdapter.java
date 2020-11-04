@@ -164,6 +164,15 @@ public abstract class SimpleRecyclerFilterAdapter<V, E> extends SimpleRecyclerAd
     }
 
     @Override
+    public int getPosAtAdapterPos(int pos) {
+        if (pos >= 0 && pos < filteredList.size()) {
+            V value = filteredList.get(pos);
+            return unfilteredList.indexOf(value);
+        }
+        return -1;
+    }
+
+    @Override
     public void move(int posFrom, int posTo) {
         try {
             if (posFrom >= 0 && posTo >= 0 && posFrom < unfilteredList.size() && posTo < unfilteredList.size() && posFrom != posTo) {
