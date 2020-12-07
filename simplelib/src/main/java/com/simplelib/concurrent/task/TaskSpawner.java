@@ -66,7 +66,7 @@ public class TaskSpawner implements Closeable {
                         @Nullable Handleable postExec) {
         synchronized (mLock) {
             Task task = spawn(exec, postExec);
-            task.run();
+            task.execute();
             return task;
         }
     }

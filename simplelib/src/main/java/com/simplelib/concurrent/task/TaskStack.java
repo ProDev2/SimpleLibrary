@@ -102,7 +102,7 @@ public class TaskStack implements Closeable {
                         @Nullable Handleable postExec) {
         synchronized (mLock) {
             Task task = next(exec, postExec);
-            task.run();
+            task.execute();
             return task;
         }
     }
