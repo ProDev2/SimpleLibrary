@@ -32,6 +32,7 @@ import com.simplelib.struct.Tree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.Item, E> {
     private Tree tree;
@@ -89,7 +90,7 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
         moveTreeIntoList();
 
         if (update)
-            reload();
+            super.reload();
     }
 
     public synchronized boolean isShowRoot() {
@@ -244,6 +245,7 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
         super.update();
     }
 
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public synchronized void moveTreeIntoList() {
         List<Tree.Item> list = getList();
         if (list == null) {
@@ -261,21 +263,21 @@ public abstract class TreeAdapter<E> extends SimpleRecyclerFilterAdapter<Tree.It
             if (rootGroup == null)
                 return;
 
-            list.add(rootGroup);
+            Stack<Tree.Item> itemStack = new Stack<>();
+            itemStack.push(rootGroup);
+            while (!itemStack.isEmpty()) {
+                Tree.Item item = itemStack.pop();
+                list.add(item);
 
-            addChildItemsToList(rootGroup, list);
-        }
-    }
-
-    private void addChildItemsToList(@NonNull Tree.ItemManager itemManager, @NonNull List<Tree.Item> list) {
-        synchronized (itemManager) {
-            int childCount = itemManager.getChildCount();
-            for (int pos = 0; pos < childCount; pos++) {
-                Tree.Item child = itemManager.getChildAt(pos);
-                list.add(child);
-
-                if (child instanceof Tree.ItemManager)
-                    addChildItemsToList((Tree.ItemManager) child, list);
+                if (item instanceof Tree.ItemManager) {
+                    Tree.ItemManager itemManager = (Tree.ItemManager) item;
+                    int childCount = itemManager.getChildCount();
+                    for (int i = childCount - 1; i >= 0; i--) {
+                        Tree.Item childItem = itemManager.getChildAt(i);
+                        if (childItem == item) continue;
+                        itemStack.push(childItem);
+                    }
+                }
             }
         }
     }
