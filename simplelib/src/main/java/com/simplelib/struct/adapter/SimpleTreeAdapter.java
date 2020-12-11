@@ -63,6 +63,9 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
     public final @NonNull ColorHolder selectedColor = ColorHolder.create();
     public final @NonNull ColorHolder pressedColor = ColorHolder.create();
 
+    public boolean textIsSingleLine = true;
+    public boolean subTextIsSingleLine = true;
+
     public boolean alwaysSelectable = false;
 
     private OnClickListener<E> onClickListener;
@@ -157,6 +160,9 @@ public class SimpleTreeAdapter<E extends Item> extends TreeAdapter<E> {
             textHolder = defaultText;
             subTextHolder = defaultSubText;
         }
+
+        if (holder.textView != null) holder.textView.setSingleLine(textIsSingleLine);
+        if (holder.subTextView != null) holder.subTextView.setSingleLine(subTextIsSingleLine);
 
         ImageHolder.applyToOrSetGone(imageHolder, holder.iconView);
         ImageHolder.applyToOrSetGone(subImageHolder, holder.subIconView);
