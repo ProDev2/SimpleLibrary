@@ -99,28 +99,25 @@ public class ExecutorTaskSpawner extends TaskSpawner {
     }
 
     @NonNull
-    public static ExecutorTaskSpawner create(int maxPoolSize) {
+    public static ExecutorTaskSpawner create(int corePoolSize) {
         return with(ExecutorHelper.create(
-                maxPoolSize
+                corePoolSize
         ), false);
     }
 
     @NonNull
-    public static ExecutorTaskSpawner create(int maxPoolSize,
-                                             long keepAliveTime) {
-        return with(ExecutorHelper.create(
-                maxPoolSize,
-                keepAliveTime
-        ), false);
-    }
-
-    @NonNull
-    public static ExecutorTaskSpawner create(int corePoolSize,
-                                             int maxPoolSize,
-                                             long keepAliveTime) {
+    public static ExecutorTaskSpawner create(int corePoolSize, int queueCapacity) {
         return with(ExecutorHelper.create(
                 corePoolSize,
-                maxPoolSize,
+                queueCapacity
+        ), false);
+    }
+
+    @NonNull
+    public static ExecutorTaskSpawner create(int corePoolSize, int queueCapacity, long keepAliveTime) {
+        return with(ExecutorHelper.create(
+                corePoolSize,
+                queueCapacity,
                 keepAliveTime
         ), false);
     }

@@ -20,8 +20,8 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.simplelib.concurrent.util.ExecutorHelper;
 import com.simplelib.concurrent.task.executor.ExecutorTaskStack;
+import com.simplelib.concurrent.util.ExecutorHelper;
 import java.util.concurrent.Executor;
 
 @SuppressWarnings("unused")
@@ -94,28 +94,25 @@ public class AsyncTaskStack extends ExecutorTaskStack {
     }
 
     @NonNull
-    public static AsyncTaskStack create(int maxPoolSize) {
+    public static AsyncTaskStack create(int corePoolSize) {
         return with(ExecutorHelper.create(
-                maxPoolSize
+                corePoolSize
         ), false);
     }
 
     @NonNull
-    public static AsyncTaskStack create(int maxPoolSize,
-                                        long keepAliveTime) {
-        return with(ExecutorHelper.create(
-                maxPoolSize,
-                keepAliveTime
-        ), false);
-    }
-
-    @NonNull
-    public static AsyncTaskStack create(int corePoolSize,
-                                        int maxPoolSize,
-                                        long keepAliveTime) {
+    public static AsyncTaskStack create(int corePoolSize, int queueCapacity) {
         return with(ExecutorHelper.create(
                 corePoolSize,
-                maxPoolSize,
+                queueCapacity
+        ), false);
+    }
+
+    @NonNull
+    public static AsyncTaskStack create(int corePoolSize, int queueCapacity, long keepAliveTime) {
+        return with(ExecutorHelper.create(
+                corePoolSize,
+                queueCapacity,
                 keepAliveTime
         ), false);
     }

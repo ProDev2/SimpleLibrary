@@ -99,28 +99,25 @@ public class ExecutorTaskStack extends TaskStack {
     }
 
     @NonNull
-    public static ExecutorTaskStack create(int maxPoolSize) {
+    public static ExecutorTaskStack create(int corePoolSize) {
         return with(ExecutorHelper.create(
-                maxPoolSize
+                corePoolSize
         ), false);
     }
 
     @NonNull
-    public static ExecutorTaskStack create(int maxPoolSize,
-                                           long keepAliveTime) {
-        return with(ExecutorHelper.create(
-                maxPoolSize,
-                keepAliveTime
-        ), false);
-    }
-
-    @NonNull
-    public static ExecutorTaskStack create(int corePoolSize,
-                                           int maxPoolSize,
-                                           long keepAliveTime) {
+    public static ExecutorTaskStack create(int corePoolSize, int queueCapacity) {
         return with(ExecutorHelper.create(
                 corePoolSize,
-                maxPoolSize,
+                queueCapacity
+        ), false);
+    }
+
+    @NonNull
+    public static ExecutorTaskStack create(int corePoolSize, int queueCapacity, long keepAliveTime) {
+        return with(ExecutorHelper.create(
+                corePoolSize,
+                queueCapacity,
                 keepAliveTime
         ), false);
     }
